@@ -8,25 +8,22 @@ except ImportError:
     from distutils.core import setup
 
 
-with open('README.rst') as readme_file:
-    readme = readme_file.read()
-
-with open('HISTORY.rst') as history_file:
-    history = history_file.read().replace('.. :changelog:', '')
-
+readme = open('README.rst').read()
 requirements = [
-    # TODO: put package requirements here
+    "Jinja2",
 ]
-
 test_requirements = [
-    # TODO: put package test requirements here
+    "pytest",
+    "pytest-cov",
+    "flake8",
 ]
 
 setup(
     name='releasetasks',
     version='0.1.0',
-    description="Mozilla Release Promotion Tasks contains code to generate release-related Taskcluster graphs."",
-    long_description=readme + '\n\n' + history,
+    description="""Mozilla Release Promotion Tasks contains code to generate
+    release-related Taskcluster graphs.""",
+    long_description=readme,
     author="Rail Aliiev",
     author_email='rail@mozilla.com',
     url='https://github.com/rail/releasetasks',
@@ -37,7 +34,7 @@ setup(
                  'releasetasks'},
     include_package_data=True,
     install_requires=requirements,
-    license="BSD",
+    license="MPL",
     zip_safe=False,
     keywords='releasetasks',
     classifiers=[
@@ -53,5 +50,5 @@ setup(
         'Programming Language :: Python :: 3.4',
     ],
     test_suite='tests',
-    tests_require=test_requirements
+    tests_require=test_requirements,
 )
