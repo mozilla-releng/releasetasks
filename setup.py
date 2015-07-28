@@ -14,6 +14,7 @@ requirements = [
     "taskcluster>=0.0.16",
     "arrow",
     "requests>=2.4.3,<=2.7.0",
+    "PyYAML",
 ]
 test_requirements = [
     "pytest",
