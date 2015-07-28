@@ -1,6 +1,7 @@
 {% for platform in l10n_platforms %}
 {% for chunk in range(1, l10n_chunks+1) %}
-{% set buildername = "{}_l10n_repack_{}/{}".format(platform, chunk, l10n_chunks) %}
+# TODO: make a helper function to generate consistent builder names?
+{% set buildername = "{}_{}_{}_l10n_repack_{}/{}".format(branch, product, platform, chunk, l10n_chunks) %}
 -
     taskId: "{{ stable_slug_id(buildername) }}"
     reruns: 5

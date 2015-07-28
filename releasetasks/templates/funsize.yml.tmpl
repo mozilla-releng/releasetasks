@@ -1,0 +1,175 @@
+{% for partialVersion in partialUpdates.keys() %}
+{% set basename = "{}_{}_{}_{}_funsize".format(branch, product, platform, locale) %}
+-
+    taskId: "{{ stable_slug_id('{}_update_generator'.format(basename)) }}"
+    task:
+        created: "{{ now }}"
+        deadline: "{{ now.replace(hours=24) }}"
+        expires: "{{ never }}"
+        priority: "high"
+        metadata:
+            owner: release+funsize@mozilla.com
+            source: https://github.com/mozilla/funsize
+            name: "[funsize] Update generating task"
+            description: |
+                This task generates MAR files and publishes unsigned bits.
+
+        routes:
+            - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
+            - index.funsize.v1.{{ branch }}.revision.{{ platform }}.{{ revision }}.{{ locale }}.{{ partialVersion }}.updates
+            - index.funsize.v1.{{ branch }}.latest.{{ platform }}.{{ locale }}.{{ partialVersion }}.updates
+        extra:
+            treeherderEnv:
+                - staging
+        treeherder:
+            symbol: {{ locale }}-{{ partialVersion }}-1
+            groupSymbol: Update
+            collection:
+                opt: true
+            machine:
+                platform: {{ get_treeherder_platform(platform) }}
+            build:
+                platform: {{ get_treeherder_platform(platform) }}
+
+        workerType: "funsize-mar-generator"
+        provisionerId: "aws-provisioner-v1"
+
+        tags:
+            createdForUser: release+funsize@mozilla.com
+
+        payload:
+            image: "rail/funsize-update-generator@sha256:ee2f95d6d2c5de2d2dfc6a04d4ed4c01c0e448bc19634ae4fb94c7361877c9b7"
+        maxRunTime: 900
+        command:
+            - /runme.sh
+
+        env:
+            FROM_MAR: "{{ get_complete_mar_url(product, platform, locale, partialVersion) }}"
+            TO_MAR: "{{ get_complete_mar_artifact(platform, branch, revision) }}"
+            PLATFORM: "{{ platform }}"
+            LOCALE: "{{ locale }}"
+            SIGNING_CERT: "release"
+
+        artifacts:
+            "public/env":
+                path: /home/worker/artifacts/
+                type: directory
+                expires: "{{ never }}"
+
+-
+    taskId: "{{ stable_slug_id('{}_signing_task'.format(basename)) }}"
+    requires:
+        - "{{ stable_slug_id('{}_update_generator'.format(basename)) }}"
+    task:
+        created: "{{ now }}"
+        deadline: "{{ now.replace(hours=24) }}"
+        expires: "{{ never }}"
+        priority: "high"
+        metadata:
+            owner: release+funsize@mozilla.com
+            source: https://github.com/mozilla/funsize
+            name: "[funsize] MAR signing task"
+            description: |
+                This task signs MAR files and publishes signed bits.
+
+        routes:
+            - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
+            - index.funsize.v1.{{ branch }}.revision.{{ platform }}.{{ revision }}.{{ locale }}.{{ partialVersion }}.signing
+            - index.funsize.v1.{{ branch }}.latest.{{ platform }}.{{ locale }}.{{ partialVersion }}.signing
+        extra:
+        treeherderEnv:
+            - staging
+        treeherder:
+            symbol: {{ locale }}-{{ partialVersion }}-2
+            groupSymbol: Update
+            collection:
+                opt: true
+            machine:
+                platform: {{ get_treeherder_platform(platform) }}
+            build:
+                platform: {{ get_treeherder_platform(platform) }}
+
+        workerType: "signing-worker-v1"
+        provisionerId: "signing-provisioner-v1"
+        scopes:
+            - signing:cert:release-signing
+            - signing:format:gpg
+            - signing:format:mar
+        tags:
+            createdForUser: release+funsize@mozilla.com
+
+        payload:
+            signingManifest: "https://queue.taskcluster.net/v1/task/{{ stable_slug_id('{}_update_generator_task'.format(basename)) }}/artifacts/public/env/manifest.json"
+
+-
+    taskId: "{{ stable_slug_id('{}_balrog_task'.format(basename)) }}"
+    requires:
+        - "{{ stable_slug_id('{}_signing_task'.format(basename)) }}"
+    task:
+        created: "{{ now }}"
+        deadline: "{{ now.replace(hours=24) }}"
+        expires: "{{ never }}"
+        priority: "high"
+        routes:
+            - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
+            - index.funsize.v1.{{ branch }}.revision.{{ platform }}.{{ revision }}.{{ locale }}.{{ partialVersion }}.balrog
+            - index.funsize.v1.{{ branch }}.latest.{{ platform }}.{{ locale }}.{{ partialVersion }}.balrog
+        extra:
+        treeherderEnv:
+            - staging
+        treeherder:
+            symbol: {{ locale }}-{{ partialVersion }}-3
+            groupSymbol: Update
+            collection:
+                opt: true
+            machine:
+                platform: {{ get_treeherder_platform(platform) }}
+            build:
+                platform: {{ get_treeherder_platform(platform) }}
+
+        metadata:
+            owner: release+funsize@mozilla.com
+            source: https://github.com/mozilla/funsize
+            name: "[funsize] Publish to Balrog"
+            description: |
+                This task publishes signed updates to Balrog.
+
+        workerType: "funsize-balrog"
+        provisionerId: "aws-provisioner-v1"
+        scopes:
+            - docker-worker:feature:balrogVPNProxy
+        tags:
+            createdForUser: release+funsize@mozilla.com
+
+        payload:
+            image: "rail/funsize-balrog-submitter@sha256:25796839f7c8a7828a2003ef932f79edd07ff89d230bddebad02b723d8de023e"
+        maxRunTime: 1800
+        command:
+            - /runme.sh
+
+        env:
+            PARENT_TASK_ARTIFACTS_URL_PREFIX: "https://queue.taskcluster.net/v1/task/{{ stable_slug_id('{}_signing_task'.format(basename)) }}/artifacts/public/env"
+            BALROG_API_ROOT: {{ balrog_api_root }}
+            # TODO: should funsize be publishing to an s3 bucket? or will beetmover do that?
+            S3_BUCKET: "todo"
+            SIGNING_CERT: "release"
+            {% if extra_balrog_submitter_params is defined %}
+            EXTRA_BALROG_SUBMITTER_PARAMS: "{{ extra_balrog_submitter_params }}"
+            {% endif %}
+        encryptedEnv:
+            - {{ encrypt_env_var(stable_slug_id('{}_balrog_task'.format(basename)), now_ms,
+                                now_ms + 24 * 3600 * 1000, "BALROG_USERNAME",
+                                balrog_username) }}
+            - {{ encrypt_env_var(stable_slug_id('{}_balrog_task'.format(basename)), now_ms,
+                                now_ms + 24 * 3600 * 1000, "BALROG_PASSWORD",
+                                balrog_password) }}
+            - {{ encrypt_env_var(stable_slug_id('{}_balrog_task'.format(basename)), now_ms,
+                                now_ms + 24 * 3600 * 1000, "AWS_ACCESS_KEY_ID",
+                                aws_access_key_id) }}
+            - {{ encrypt_env_var(stable_slug_id('{}_balrog_task'.format(basename)), now_ms,
+                                now_ms + 24 * 3600 * 1000, "AWS_SECRET_ACCESS_KEY",
+                                aws_secret_access_key) }}
+        features:
+            balrogVPNProxy: true
+
+{% endfor %}

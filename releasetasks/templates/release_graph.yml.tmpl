@@ -5,6 +5,25 @@ metadata:
     owner: "release@mozilla.com"
     source: "https://github.com/rail/releasetasks"
 
+scopes:
+{% if updates_enabled %}
+  - queue:*
+  - docker-worker:*
+  - scheduler:*
+  - signing:cert:release-signing
+  - signing:format:gpg
+  - signing:format:mar
+  - docker-worker:feature:balrogVPNProxy
+{% endif %}
+
 tasks:
+    {% if l10n_enabled %}
     {% macro l10n_tasks() %}{% include "l10n.yml.tmpl" %}{% endmacro %}
     {{ l10n_tasks()|indent(4) }}
+    {% endif %}
+
+    {% for platform in enUS_platforms %}
+    {% set locale = "en-US" %}
+    {% macro funsize_tasks() %}{% include "funsize.yml.tmpl" %}{% endmacro %}
+    {{ funsize_tasks()|indent(4) }}
+    {% endfor %}
