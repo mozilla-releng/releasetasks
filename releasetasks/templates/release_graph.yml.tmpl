@@ -17,10 +17,11 @@ scopes:
 {% endif %}
 
 tasks:
-    {% if l10n_enabled %}
-    {% macro l10n_tasks() %}{% include "l10n.yml.tmpl" %}{% endmacro %}
-    {{ l10n_tasks()|indent(4) }}
-    {% endif %}
+# Commented out until buildbot builders exist
+#    {% if l10n_enabled %}
+#    {% macro l10n_tasks() %}{% include "l10n.yml.tmpl" %}{% endmacro %}
+#    {{ l10n_tasks()|indent(4) }}
+#    {% endif %}
 
     {% for platform in enUS_platforms %}
     {% set locale = "en-US" %}
