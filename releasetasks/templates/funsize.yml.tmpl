@@ -1,4 +1,4 @@
-{% for partialVersion in partialUpdates.keys() %}
+{% for partial_version in partial_updates.keys() %}
 {% set basename = "{}_{}_{}_{}_funsize".format(branch, product, platform, locale) %}
 -
     taskId: "{{ stable_slug_id('{}_update_generator'.format(basename)) }}"
@@ -16,13 +16,13 @@
 
         routes:
             - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
-            - index.funsize.v1.{{ branch }}.revision.{{ platform }}.{{ revision }}.{{ locale }}.{{ partialVersion }}.updates
-            - index.funsize.v1.{{ branch }}.latest.{{ platform }}.{{ locale }}.{{ partialVersion }}.updates
+            - index.funsize.v1.{{ branch }}.revision.{{ platform }}.{{ revision }}.{{ locale }}.{{ partial_version }}.updates
+            - index.funsize.v1.{{ branch }}.latest.{{ platform }}.{{ locale }}.{{ partial_version }}.updates
         extra:
             treeherderEnv:
                 - staging
         treeherder:
-            symbol: {{ locale }}-{{ partialVersion }}-1
+            symbol: {{ locale }}-{{ partial_version }}-1
             groupSymbol: Update
             collection:
                 opt: true
@@ -44,7 +44,7 @@
             - /runme.sh
 
         env:
-            FROM_MAR: "{{ get_complete_mar_url(product, platform, locale, partialVersion) }}"
+            FROM_MAR: "{{ get_complete_mar_url(product, platform, locale, partial_version) }}"
             TO_MAR: "{{ get_complete_mar_artifact(platform, branch, revision) }}"
             PLATFORM: "{{ platform }}"
             LOCALE: "{{ locale }}"
@@ -74,13 +74,13 @@
 
         routes:
             - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
-            - index.funsize.v1.{{ branch }}.revision.{{ platform }}.{{ revision }}.{{ locale }}.{{ partialVersion }}.signing
-            - index.funsize.v1.{{ branch }}.latest.{{ platform }}.{{ locale }}.{{ partialVersion }}.signing
+            - index.funsize.v1.{{ branch }}.revision.{{ platform }}.{{ revision }}.{{ locale }}.{{ partial_version }}.signing
+            - index.funsize.v1.{{ branch }}.latest.{{ platform }}.{{ locale }}.{{ partial_version }}.signing
         extra:
         treeherderEnv:
             - staging
         treeherder:
-            symbol: {{ locale }}-{{ partialVersion }}-2
+            symbol: {{ locale }}-{{ partial_version }}-2
             groupSymbol: Update
             collection:
                 opt: true
@@ -112,13 +112,13 @@
         priority: "high"
         routes:
             - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
-            - index.funsize.v1.{{ branch }}.revision.{{ platform }}.{{ revision }}.{{ locale }}.{{ partialVersion }}.balrog
-            - index.funsize.v1.{{ branch }}.latest.{{ platform }}.{{ locale }}.{{ partialVersion }}.balrog
+            - index.funsize.v1.{{ branch }}.revision.{{ platform }}.{{ revision }}.{{ locale }}.{{ partial_version }}.balrog
+            - index.funsize.v1.{{ branch }}.latest.{{ platform }}.{{ locale }}.{{ partial_version }}.balrog
         extra:
         treeherderEnv:
             - staging
         treeherder:
-            symbol: {{ locale }}-{{ partialVersion }}-3
+            symbol: {{ locale }}-{{ partial_version }}-3
             groupSymbol: Update
             collection:
                 opt: true

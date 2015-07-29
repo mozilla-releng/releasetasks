@@ -12,8 +12,9 @@ from .tcutils import stable_slug_id
 DEFAULT_TEMPLATE_DIR = path.join(path.dirname(__file__), "templates")
 
 
+
 def make_task_graph(root_template="release_graph.yml.tmpl", template_dir=DEFAULT_TEMPLATE_DIR, **template_kwargs):
-    # TODO: some validation of template_kwargs
+    # TODO: some validation of template_kwargs + defaults
     env = Environment(loader=FileSystemLoader(template_dir), undefined=StrictUndefined)
 
     now = arrow.now()
