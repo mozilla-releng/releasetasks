@@ -2,11 +2,11 @@
   provisionerId: "aws-provisioner-v1"
   workerType: "b2gtest"
   payload:
-    image: "yesops/git"
+    image: "ubuntu:latest"
     command:
       - "/bin/bash"
       - "-c"
-      - "git clone ${GITHUB_HEAD_REPO_URL} && cd releasetasks && git checkout ${GITHUB_HEAD_SHA} && ./runtests.sh"
+      - "apt-get install -f git python-tox && git clone ${GITHUB_HEAD_REPO_URL} && cd releasetasks && git checkout ${GITHUB_HEAD_SHA} && tox -e py27"
     maxRunTime: 3600
   metadata:
     name: "Release Promotion Task Graph Generator"
