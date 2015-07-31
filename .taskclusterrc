@@ -6,7 +6,7 @@
     command:
       - "/bin/bash"
       - "-c"
-      - "git clone ${GITHUB_HEAD_REPO_URL} && cd releasetasks && git checkout ${GITHUB_HEAD_SHA} && tox -e py27u"
+      - "git clone ${GITHUB_HEAD_REPO_URL} && cd releasetasks && git checkout ${GITHUB_HEAD_SHA} && ./runtests.sh"
     maxRunTime: 3600
   metadata:
     name: "Release Promotion Task Graph Generator"
