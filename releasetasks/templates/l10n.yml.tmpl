@@ -1,4 +1,5 @@
 {% for platform in l10n_platforms %}
+# TODO: iterate over platform specific locales...probably need l10n json to do this
 {% for locale, locale_revision in l10n_changesets.iteritems() %}
 # TODO: make a helper function to generate consistent builder names?
 {% set buildername = "{}_{}_{}_l10n_repack".format(branch, product, platform) %}
