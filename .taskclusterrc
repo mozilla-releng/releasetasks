@@ -6,7 +6,7 @@
     command:
       - "/bin/bash"
       - "-c"
-      - "apt-get install -f git python-tox && git clone ${GITHUB_HEAD_REPO_URL} && cd releasetasks && git checkout ${GITHUB_HEAD_SHA} && tox -e py27"
+      - "apt-get update && apt-get install -f git python-tox && git clone ${GITHUB_HEAD_REPO_URL} && cd releasetasks && git checkout ${GITHUB_HEAD_SHA} && tox -e py27"
     maxRunTime: 3600
   metadata:
     name: "Release Promotion Task Graph Generator"
