@@ -25,6 +25,7 @@ class TestMakeTaskGraph(unittest.TestCase):
                 },
             },
             branch="mozilla-beta",
+            repo_path="releases/mozilla-beta",
             product="firefox",
             revision="abcdef123456",
             balrog_api_root="https://fake.balrog/api",

@@ -17,6 +17,9 @@ scopes:
 {% endif %}
 
 tasks:
+    {% macro source_tasks() %}{% include "source.yml.tmpl" %}{% endmacro %}
+    {{ source_tasks()|indent(4) }}
+
 # {# Commented out until buildbot builders exist
 #    {% macro l10n_tasks() %}{% include "l10n.yml.tmpl" %}{% endmacro %}
 #    {{ l10n_tasks()|indent(4) }} #}

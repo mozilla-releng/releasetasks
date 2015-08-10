@@ -1,0 +1,37 @@
+{% set buildername = "{}_source".format(branch) %}
+-
+    taskId: "{{ stable_slug_id(buildername) }}"
+    reruns: 5
+    task:
+        provisionerId: "buildbot-bridge"
+        workerType: "buildbot-bridge"
+        created: "{{ now }}"
+        deadline: "{{ now.replace(hours=6) }}"
+        expires: {{ never }}"
+        priority: "high"
+        retries: 5
+
+        payload:
+            buildername: "{{ buildername }}"
+            sourcestamp:
+                branch: "{{ repo_path }}"
+                revision: "{{ revision }}"
+
+        metadata:
+            owner: release@mozilla.com
+            source: https://github.com/rail/releasetasks
+            name: "{{ branch }} source generation"
+            description: |
+                Generates a source tarball
+
+        {# TODO: decide what to use here...
+        treeherder:
+            symbol: S
+            groupSymbol: Release
+            collection:
+                opt: true
+            machine:
+                platform: none
+            build:
+                platform: none
+        #}
