@@ -10,9 +10,10 @@ scopes:
   - queue:*
   - docker-worker:*
   - scheduler:*
-  - signing:cert:release-signing
   - signing:format:gpg
   - signing:format:mar
+  - signing:cert:{{ signing_class }}
+{# TODO: Does balrog proxy work for dev and prod? #}
   - docker-worker:feature:balrogVPNProxy
 {% endif %}
 
@@ -21,8 +22,10 @@ tasks:
 #    {% macro l10n_tasks() %}{% include "l10n.yml.tmpl" %}{% endmacro %}
 #    {{ l10n_tasks()|indent(4) }} #}
 
+    {% if updates_enabled %}
     {% for platform in enUS_platforms %}
     {% set locale = "en-US" %}
     {% macro funsize_tasks() %}{% include "funsize.yml.tmpl" %}{% endmacro %}
     {{ funsize_tasks()|indent(4) }}
     {% endfor %}
+    {% endif %}
