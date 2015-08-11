@@ -1,15 +1,13 @@
-{% for partial_version in partial_updates.keys() %}
+{% for partial_version, partial_info in partial_updates.iteritems() %}
 {# The basename needs to be unique across all jobs in this graph, so we need to
    take into account everything about it that we can have more than one of in a
-   single graph (platform, locale, and partial_version). Notable things that
-   aren't included in this:
+   single graph (platform, locale, partial_version, and build number). Notable
+   things that aren't included in this:
    * branch, product - because funsize isn't implemented in Buildbot we don't
                        need any sort of "builder name" (that's what taskId and
                        taskGraphId are for!)
-   * buildNumber - while important, we won't have more than one per graph,
-                   so it's unnecessary
 #}
-{% set basename = "{}_{}_{}_funsize".format(platform, locale, partial_version) %}
+{% set basename = "{}_{}_{}build{}_funsize".format(platform, locale, partial_version, partial_info["buildNumber"]) %}
 -
     taskId: "{{ stable_slug_id('{}_update_generator'.format(basename)) }}"
     task:
