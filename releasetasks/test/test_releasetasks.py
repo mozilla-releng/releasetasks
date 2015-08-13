@@ -1,18 +1,52 @@
 # -*- coding: utf-8 -*-
 import unittest
 
+from releasetasks import make_task_graph as make_task_graph_orig
 
-from releasetasks import make_task_graph
+
+def get_task_by_name(graph, name):
+    for t in graph["tasks"]:
+        if t["task"]["extra"]["task_name"] == name:
+            return t
+    return None
+
+
+def get_task_by_slugid(graph, slugid):
+    for t in graph["tasks"]:
+        if t["taskId"] == slugid:
+            return t
+    return None
+
+
+def make_task_graph(*args, **kwargs):
+    return make_task_graph_orig(*args, running_tests=True, **kwargs)
+
 
 class TestMakeTaskGraph(unittest.TestCase):
+    """Because of huge the graph gets, verifying every character of it is
+    impossible to maintain. Instead, we verify aspects of it. Eg, making sure
+    the correct number of funsize partials are happening, rather than verifying
+    the entire funsize tasks."""
     maxDiff = 30000
 
-    def testSimpleGraph(self):
-        # TODO: how to do this without manually rewriting insane amounts of template code?
-        # maybe manually rewriting it is the right thing to do?
-        expected = {
-        }
-        generated = make_task_graph(
+    def _do_common_assertions(self, graph):
+        if graph["tasks"]:
+            for t in graph["tasks"]:
+                task = t["task"]
+                self.assertEquals(task["priority"], "high")
+                self.assertIn("task_name", task["extra"])
+
+    def test_updates_disabled(self):
+        graph = make_task_graph(
+            updates_enabled=False
+        )
+
+        self._do_common_assertions(graph)
+        self.assertEquals(graph["tasks"], None)
+        self.assertEquals(graph["scopes"], None)
+
+    def test_funsize_en_US_deps(self):
+        graph = make_task_graph(
             updates_enabled=True,
             l10n_platforms=None,
             enUS_platforms=["win32", "macosx64"],
@@ -28,5 +62,12 @@ class TestMakeTaskGraph(unittest.TestCase):
             product="firefox",
             revision="abcdef123456",
             balrog_api_root="https://fake.balrog/api",
+            signing_class="release-signing",
         )
-        self.assertEquals(expected, generated)
+
+        self._do_common_assertions(graph)
+        self.assertIsNone(get_task_by_name(graph, "win32_en-US_38.0build1_funsize_update_generator").get("requires"))
+
+        for t in graph["tasks"]:
+            task = t["task"]
+            self.assertEquals(task["priority"], "high")

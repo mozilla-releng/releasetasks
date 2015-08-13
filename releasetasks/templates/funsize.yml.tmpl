@@ -27,17 +27,21 @@
             - index.funsize.v1.{{ branch }}.revision.{{ platform }}.{{ revision }}.{{ locale }}.{{ partial_version }}.updates
             - index.funsize.v1.{{ branch }}.latest.{{ platform }}.{{ locale }}.{{ partial_version }}.updates
         extra:
+            {% if running_tests is defined %}
+            task_name: "{{ '{}_update_generator'.format(basename) }}"
+            {% endif %}
+
             treeherderEnv:
                 - staging
-        treeherder:
-            symbol: {{ locale }}-{{ partial_version }}-1
-            groupSymbol: Update
-            collection:
-                opt: true
-            machine:
-                platform: {{ get_treeherder_platform(platform) }}
-            build:
-                platform: {{ get_treeherder_platform(platform) }}
+            treeherder:
+                symbol: {{ locale }}-{{ partial_version }}-1
+                groupSymbol: Update
+                collection:
+                    opt: true
+                machine:
+                    platform: {{ get_treeherder_platform(platform) }}
+                build:
+                    platform: {{ get_treeherder_platform(platform) }}
 
         workerType: "funsize-mar-generator"
         provisionerId: "aws-provisioner-v1"
@@ -85,17 +89,21 @@
             - index.funsize.v1.{{ branch }}.revision.{{ platform }}.{{ revision }}.{{ locale }}.{{ partial_version }}.signing
             - index.funsize.v1.{{ branch }}.latest.{{ platform }}.{{ locale }}.{{ partial_version }}.signing
         extra:
-        treeherderEnv:
-            - staging
-        treeherder:
-            symbol: {{ locale }}-{{ partial_version }}-2
-            groupSymbol: Update
-            collection:
-                opt: true
-            machine:
-                platform: {{ get_treeherder_platform(platform) }}
-            build:
-                platform: {{ get_treeherder_platform(platform) }}
+            {% if running_tests is defined %}
+            task_name: "{{ '{}_signing_task'.format(basename) }}"
+            {% endif %}
+
+            treeherderEnv:
+                - staging
+            treeherder:
+                symbol: {{ locale }}-{{ partial_version }}-2
+                groupSymbol: Update
+                collection:
+                    opt: true
+                machine:
+                    platform: {{ get_treeherder_platform(platform) }}
+                build:
+                    platform: {{ get_treeherder_platform(platform) }}
 
         workerType: "signing-worker-v1"
         provisionerId: "signing-provisioner-v1"
@@ -123,17 +131,21 @@
             - index.funsize.v1.{{ branch }}.revision.{{ platform }}.{{ revision }}.{{ locale }}.{{ partial_version }}.balrog
             - index.funsize.v1.{{ branch }}.latest.{{ platform }}.{{ locale }}.{{ partial_version }}.balrog
         extra:
-        treeherderEnv:
-            - staging
-        treeherder:
-            symbol: {{ locale }}-{{ partial_version }}-3
-            groupSymbol: Update
-            collection:
-                opt: true
-            machine:
-                platform: {{ get_treeherder_platform(platform) }}
-            build:
-                platform: {{ get_treeherder_platform(platform) }}
+            {% if running_tests is defined %}
+            task_name: "{{ '{}_balrog_task'.format(basename) }}"
+            {% endif %}
+
+            treeherderEnv:
+                - staging
+            treeherder:
+                symbol: {{ locale }}-{{ partial_version }}-3
+                groupSymbol: Update
+                collection:
+                    opt: true
+                machine:
+                    platform: {{ get_treeherder_platform(platform) }}
+                build:
+                    platform: {{ get_treeherder_platform(platform) }}
 
         metadata:
             owner: release+funsize@mozilla.com
