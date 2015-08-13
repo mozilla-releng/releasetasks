@@ -9,7 +9,7 @@
 #}
 {% set basename = "{}_{}_{}build{}_funsize".format(platform, locale, partial_version, partial_info["buildNumber"]) %}
 -
-    taskId: "{{ stable_slug_id('{}_update_generator'.format(basename)) }}"
+    taskId: "{{ stableSlugId('{}_update_generator'.format(basename)) }}"
     task:
         created: "{{ now }}"
         deadline: "{{ now.replace(hours=24) }}"
@@ -69,9 +69,9 @@
                 expires: "{{ never }}"
 
 -
-    taskId: "{{ stable_slug_id('{}_signing_task'.format(basename)) }}"
+    taskId: "{{ stableSlugId('{}_signing_task'.format(basename)) }}"
     requires:
-        - "{{ stable_slug_id('{}_update_generator'.format(basename)) }}"
+        - "{{ stableSlugId('{}_update_generator'.format(basename)) }}"
     task:
         created: "{{ now }}"
         deadline: "{{ now.replace(hours=24) }}"
@@ -115,12 +115,12 @@
             createdForUser: release+funsize@mozilla.com
 
         payload:
-            signingManifest: "https://queue.taskcluster.net/v1/task/{{ stable_slug_id('{}_update_generator_task'.format(basename)) }}/artifacts/public/env/manifest.json"
+            signingManifest: "https://queue.taskcluster.net/v1/task/{{ stableSlugId('{}_update_generator_task'.format(basename)) }}/artifacts/public/env/manifest.json"
 
 -
-    taskId: "{{ stable_slug_id('{}_balrog_task'.format(basename)) }}"
+    taskId: "{{ stableSlugId('{}_balrog_task'.format(basename)) }}"
     requires:
-        - "{{ stable_slug_id('{}_signing_task'.format(basename)) }}"
+        - "{{ stableSlugId('{}_signing_task'.format(basename)) }}"
     task:
         created: "{{ now }}"
         deadline: "{{ now.replace(hours=24) }}"
@@ -168,7 +168,7 @@
             - /runme.sh
 
         env:
-            PARENT_TASK_ARTIFACTS_URL_PREFIX: "https://queue.taskcluster.net/v1/task/{{ stable_slug_id('{}_signing_task'.format(basename)) }}/artifacts/public/env"
+            PARENT_TASK_ARTIFACTS_URL_PREFIX: "https://queue.taskcluster.net/v1/task/{{ stableSlugId('{}_signing_task'.format(basename)) }}/artifacts/public/env"
             BALROG_API_ROOT: {{ balrog_api_root }}
             # TODO: should funsize be publishing to an s3 bucket? or will beetmover do that?
             S3_BUCKET: "todo"
@@ -177,16 +177,16 @@
             EXTRA_BALROG_SUBMITTER_PARAMS: "{{ extra_balrog_submitter_params }}"
             {% endif %}
         encryptedEnv:
-            - {{ encrypt_env_var(stable_slug_id('{}_balrog_task'.format(basename)), now_ms,
+            - {{ encrypt_env_var(stableSlugId('{}_balrog_task'.format(basename)), now_ms,
                                 now_ms + 24 * 3600 * 1000, "BALROG_USERNAME",
                                 balrog_username) }}
-            - {{ encrypt_env_var(stable_slug_id('{}_balrog_task'.format(basename)), now_ms,
+            - {{ encrypt_env_var(stableSlugId('{}_balrog_task'.format(basename)), now_ms,
                                 now_ms + 24 * 3600 * 1000, "BALROG_PASSWORD",
                                 balrog_password) }}
-            - {{ encrypt_env_var(stable_slug_id('{}_balrog_task'.format(basename)), now_ms,
+            - {{ encrypt_env_var(stableSlugId('{}_balrog_task'.format(basename)), now_ms,
                                 now_ms + 24 * 3600 * 1000, "AWS_ACCESS_KEY_ID",
                                 aws_access_key_id) }}
-            - {{ encrypt_env_var(stable_slug_id('{}_balrog_task'.format(basename)), now_ms,
+            - {{ encrypt_env_var(stableSlugId('{}_balrog_task'.format(basename)), now_ms,
                                 now_ms + 24 * 3600 * 1000, "AWS_SECRET_ACCESS_KEY",
                                 aws_secret_access_key) }}
         features:

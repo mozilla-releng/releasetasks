@@ -6,7 +6,7 @@ import yaml
 import arrow
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 
-from .tcutils import stable_slug_id
+from taskcluster.utils import stableSlugId
 
 
 DEFAULT_TEMPLATE_DIR = path.join(path.dirname(__file__), "templates")
@@ -21,7 +21,7 @@ def make_task_graph(root_template="release_graph.yml.tmpl", template_dir=DEFAULT
 
     template = env.get_template(root_template)
     template_vars = {
-        "stable_slug_id": stable_slug_id(),
+        "stableSlugId": stableSlugId(),
         "now": now,
         "now_ms": now_ms,
         # This is used in defining expirations in tasks. There's no way to
