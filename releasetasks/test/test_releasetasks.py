@@ -153,4 +153,4 @@ class TestMakeTaskGraph(unittest.TestCase):
 
                 self.assertIsNone(generator["task"].get("scopes"))
                 self.assertItemsEqual(signing["task"]["scopes"], ["signing:cert:dep-signing", "signing:format:mar", "signing:format:gpg"])
-                self.assertItemsEqual(balrog["task"]["scopes"], ["docker-worker:feature:balrogVPNProxy"])
+                self.assertIsNone(balrog["task"].get("scopes"))

@@ -156,8 +156,10 @@
 
         workerType: "funsize-balrog"
         provisionerId: "aws-provisioner-v1"
+        {% if signing_class != "dep-signing" %}
         scopes:
             - docker-worker:feature:balrogVPNProxy
+        {% endif %}
         tags:
             createdForUser: release+funsize@mozilla.com
 
