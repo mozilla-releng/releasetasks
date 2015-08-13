@@ -1,8 +1,23 @@
 # -*- coding: utf-8 -*-
 import unittest
 
-
 from releasetasks import make_task_graph
+from ..tcutils import stable_slug_id
+
+
+def get_task_by_name(graph, name):
+    for t in graph["tasks"]:
+        if t["taskid"] == stable_slug_id(name):
+            return t
+    return None
+
+
+def get_task_by_slugid(graph, slugid):
+    for t in graph["tasks"]:
+        if t["taskid"] == slugid:
+            return t
+    return None
+
 
 class TestMakeTaskGraph(unittest.TestCase):
     """Because of huge the graph gets, verifying every character of it is
@@ -16,6 +31,7 @@ class TestMakeTaskGraph(unittest.TestCase):
             for t in graph["tasks"]:
                 task = t["task"]
                 self.assertEquals(task["priority"], "high")
+                self.assertEquals("task_name" in task["extra"])
 
     def test_updates_disabled(self):
         graph = make_task_graph(

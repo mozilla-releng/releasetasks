@@ -28,7 +28,7 @@
             - index.funsize.v1.{{ branch }}.latest.{{ platform }}.{{ locale }}.{{ partial_version }}.updates
         extra:
             {% if running_tests %}
-            basename: {{ basename }}
+            task_name: "{{ '{}_update_generator'.format(basename) }}"
             {% endif %}
 
             treeherderEnv:
@@ -90,7 +90,7 @@
             - index.funsize.v1.{{ branch }}.latest.{{ platform }}.{{ locale }}.{{ partial_version }}.signing
         extra:
             {% if running_tests %}
-            basename: {{ basename }}
+            task_name: "{{ '{}_signing_task'.format(basename) }}"
             {% endif %}
 
             treeherderEnv:
@@ -132,7 +132,7 @@
             - index.funsize.v1.{{ branch }}.latest.{{ platform }}.{{ locale }}.{{ partial_version }}.balrog
         extra:
             {% if running_tests %}
-            basename: {{ basename }}
+            task_name: "{{ '{}_balrog_task'.format(basename) }}"
             {% endif %}
 
             treeherderEnv:
