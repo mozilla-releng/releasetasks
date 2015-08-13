@@ -11,7 +11,7 @@ except ImportError:
 readme = open('README.rst').read()
 requirements = [
     "Jinja2",
-    "taskcluster>=0.0.16",
+    "taskcluster>=0.0.24",
     "arrow",
     "requests>=2.4.3,<=2.7.0",
     "PyYAML",
