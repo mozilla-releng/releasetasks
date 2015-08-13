@@ -1,6 +1,6 @@
 {% set buildername = "{}_source".format(branch) %}
 -
-    taskId: "{{ stable_slug_id(buildername) }}"
+    taskId: "{{ stableSlugId(buildername) }}"
     reruns: 5
     task:
         provisionerId: "buildbot-bridge"
@@ -23,6 +23,11 @@
             name: "{{ branch }} source generation"
             description: |
                 Generates a source tarball
+
+        extra:
+            {% if running_tests is defined %}
+            task_name: "{{ buildername }}"
+            {% endif %}
 
         {# TODO: decide what to use here...
         treeherder:

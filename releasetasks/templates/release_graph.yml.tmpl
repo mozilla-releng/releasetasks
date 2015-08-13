@@ -22,23 +22,19 @@ scopes:
 {% endif %}
 
 tasks:
-    {% if source_enabled is defined %}
     {% if source_enabled %}
     {% macro source_tasks() %}{% include "source.yml.tmpl" %}{% endmacro %}
     {{ source_tasks()|indent(4) }}
-    {% endif %}
     {% endif %}
 
 # {# Commented out until buildbot builders exist
 #    {% macro l10n_tasks() %}{% include "l10n.yml.tmpl" %}{% endmacro %}
 #    {{ l10n_tasks()|indent(4) }} #}
 
-    {% if updates_enabled is defined %}
     {% if updates_enabled %}
     {% for platform in enUS_platforms %}
     {% set locale = "en-US" %}
     {% macro funsize_tasks() %}{% include "funsize.yml.tmpl" %}{% endmacro %}
     {{ funsize_tasks()|indent(4) }}
     {% endfor %}
-    {% endif %}
     {% endif %}
