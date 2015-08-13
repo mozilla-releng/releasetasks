@@ -14,7 +14,9 @@ scopes:
   - signing:format:mar
   - signing:cert:{{ signing_class }}
 {# TODO: Does balrog proxy work for dev and prod? #}
+{% if signing_class == "release-signing" %}
   - docker-worker:feature:balrogVPNProxy
+{% endif %}
 {% endif %}
 
 tasks:

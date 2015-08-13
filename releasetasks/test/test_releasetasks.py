@@ -98,11 +98,13 @@ class TestMakeTaskGraph(unittest.TestCase):
         )
 
         self._do_common_assertions(graph)
-        self.assertTrue(
-            set(["queue:*", "docker-worker:*", "scheduler:*",
-                 "signing:format:gpg", "signing:format:mar",
-                 "signing:cert:release-signing",
-                 "docker-worker:feature:balrogVPNProxy"]).issubset(graph["scopes"]))
+        expected_scopes = set([
+            "queue:*", "docker-worker:*", "scheduler:*",
+            "signing:format:gpg", "signing:format:mar",
+            "signing:cert:release-signing",
+            "docker-worker:feature:balrogVPNProxy"
+        ])
+        self.assertTrue(expected_scopes.issubset(graph["scopes"]))
 
         for p in ("win32", "macosx64"):
             for v in ("38.0build1", "37.0build2"):
@@ -112,4 +114,43 @@ class TestMakeTaskGraph(unittest.TestCase):
 
                 self.assertIsNone(generator["task"].get("scopes"))
                 self.assertItemsEqual(signing["task"]["scopes"], ["signing:cert:release-signing", "signing:format:mar", "signing:format:gpg"])
+                self.assertItemsEqual(balrog["task"]["scopes"], ["docker-worker:feature:balrogVPNProxy"])
+
+    def test_funsize_en_US_scopes_dep_signing(self):
+        graph = make_task_graph(
+            updates_enabled=True,
+            l10n_platforms=None,
+            enUS_platforms=["win32", "macosx64"],
+            partial_updates={
+                "38.0": {
+                    "buildNumber": 1,
+                },
+                "37.0": {
+                    "buildNumber": 2,
+                },
+            },
+            branch="mozilla-beta",
+            product="firefox",
+            revision="abcdef123456",
+            balrog_api_root="https://fake.balrog/api",
+            signing_class="dep-signing",
+        )
+
+        self._do_common_assertions(graph)
+        expected_scopes = set([
+            "queue:*", "docker-worker:*", "scheduler:*",
+            "signing:format:gpg", "signing:format:mar",
+            "signing:cert:dep-signing",
+        ])
+        self.assertTrue(expected_scopes.issubset(graph["scopes"]))
+        self.assertNotIn("docker-worker:feature:balrogVPNProxy", graph["scopes"])
+
+        for p in ("win32", "macosx64"):
+            for v in ("38.0build1", "37.0build2"):
+                generator = get_task_by_name(graph, "{}_en-US_{}_funsize_update_generator".format(p, v))
+                signing = get_task_by_name(graph, "{}_en-US_{}_funsize_signing_task".format(p, v))
+                balrog = get_task_by_name(graph, "{}_en-US_{}_funsize_balrog_task".format(p, v))
+
+                self.assertIsNone(generator["task"].get("scopes"))
+                self.assertItemsEqual(signing["task"]["scopes"], ["signing:cert:dep-signing", "signing:format:mar", "signing:format:gpg"])
                 self.assertItemsEqual(balrog["task"]["scopes"], ["docker-worker:feature:balrogVPNProxy"])
