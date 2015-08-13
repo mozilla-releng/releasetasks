@@ -27,7 +27,7 @@
             - index.funsize.v1.{{ branch }}.revision.{{ platform }}.{{ revision }}.{{ locale }}.{{ partial_version }}.updates
             - index.funsize.v1.{{ branch }}.latest.{{ platform }}.{{ locale }}.{{ partial_version }}.updates
         extra:
-            {% if running_tests %}
+            {% if running_tests is defined %}
             task_name: "{{ '{}_update_generator'.format(basename) }}"
             {% endif %}
 
@@ -89,7 +89,7 @@
             - index.funsize.v1.{{ branch }}.revision.{{ platform }}.{{ revision }}.{{ locale }}.{{ partial_version }}.signing
             - index.funsize.v1.{{ branch }}.latest.{{ platform }}.{{ locale }}.{{ partial_version }}.signing
         extra:
-            {% if running_tests %}
+            {% if running_tests is defined %}
             task_name: "{{ '{}_signing_task'.format(basename) }}"
             {% endif %}
 
@@ -131,7 +131,7 @@
             - index.funsize.v1.{{ branch }}.revision.{{ platform }}.{{ revision }}.{{ locale }}.{{ partial_version }}.balrog
             - index.funsize.v1.{{ branch }}.latest.{{ platform }}.{{ locale }}.{{ partial_version }}.balrog
         extra:
-            {% if running_tests %}
+            {% if running_tests is defined %}
             task_name: "{{ '{}_balrog_task'.format(basename) }}"
             {% endif %}
 

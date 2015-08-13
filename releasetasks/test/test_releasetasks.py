@@ -1,22 +1,25 @@
 # -*- coding: utf-8 -*-
 import unittest
 
-from releasetasks import make_task_graph
-from ..tcutils import stable_slug_id
+from releasetasks import make_task_graph as make_task_graph_orig
 
 
 def get_task_by_name(graph, name):
     for t in graph["tasks"]:
-        if t["taskid"] == stable_slug_id(name):
+        if t["task"]["extra"]["task_name"] == name:
             return t
     return None
 
 
 def get_task_by_slugid(graph, slugid):
     for t in graph["tasks"]:
-        if t["taskid"] == slugid:
+        if t["taskId"] == slugid:
             return t
     return None
+
+
+def make_task_graph(*args, **kwargs):
+    return make_task_graph_orig(*args, running_tests=True, **kwargs)
 
 
 class TestMakeTaskGraph(unittest.TestCase):
@@ -31,7 +34,7 @@ class TestMakeTaskGraph(unittest.TestCase):
             for t in graph["tasks"]:
                 task = t["task"]
                 self.assertEquals(task["priority"], "high")
-                self.assertEquals("task_name" in task["extra"])
+                self.assertIn("task_name", task["extra"])
 
     def test_updates_disabled(self):
         graph = make_task_graph(
@@ -42,9 +45,7 @@ class TestMakeTaskGraph(unittest.TestCase):
         self.assertEquals(graph["tasks"], None)
         self.assertEquals(graph["scopes"], None)
 
-    def test_minimal_graph(self):
-        """Tests a very minimal graph, with some platforms, l10n and other
-        unnecessary tasks disabled."""
+    def test_funsize_en_US_deps(self):
         graph = make_task_graph(
             updates_enabled=True,
             l10n_platforms=None,
@@ -65,4 +66,8 @@ class TestMakeTaskGraph(unittest.TestCase):
         )
 
         self._do_common_assertions(graph)
-        self.assertEquals(graph, {})
+        self.assertIsNone(get_task_by_name(graph, "win32_en-US_38.0build1_funsize_update_generator").get("requires"))
+
+        for t in graph["tasks"]:
+            task = t["task"]
+            self.assertEquals(task["priority"], "high")
