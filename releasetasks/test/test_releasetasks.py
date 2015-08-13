@@ -66,8 +66,13 @@ class TestMakeTaskGraph(unittest.TestCase):
         )
 
         self._do_common_assertions(graph)
-        self.assertIsNone(get_task_by_name(graph, "win32_en-US_38.0build1_funsize_update_generator").get("requires"))
 
-        for t in graph["tasks"]:
-            task = t["task"]
-            self.assertEquals(task["priority"], "high")
+        for p in ("win32", "macosx64"):
+            for v in ("38.0build1", "37.0build2"):
+                generator = get_task_by_name(graph, "{}_en-US_{}_funsize_update_generator".format(p, v))
+                signing = get_task_by_name(graph, "{}_en-US_{}_funsize_signing_task".format(p, v))
+                balrog = get_task_by_name(graph, "{}_en-US_{}_funsize_balrog_task".format(p, v))
+
+                self.assertIsNone(generator.get("requires"))
+                self.assertEquals(signing.get("requires"), [generator["taskId"]])
+                self.assertEquals(balrog.get("requires"), [signing["taskId"]])
