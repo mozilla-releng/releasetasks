@@ -108,7 +108,7 @@
         workerType: "signing-worker-v1"
         provisionerId: "signing-provisioner-v1"
         scopes:
-            - signing:cert:release-signing
+            - signing:cert:{{ signing_class }}
             - signing:format:gpg
             - signing:format:mar
         tags:
@@ -156,8 +156,10 @@
 
         workerType: "funsize-balrog"
         provisionerId: "aws-provisioner-v1"
+        {% if signing_class != "dep-signing" %}
         scopes:
             - docker-worker:feature:balrogVPNProxy
+        {% endif %}
         tags:
             createdForUser: release+funsize@mozilla.com
 

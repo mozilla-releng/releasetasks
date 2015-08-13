@@ -13,8 +13,12 @@ scopes:
   - signing:format:gpg
   - signing:format:mar
   - signing:cert:{{ signing_class }}
-{# TODO: Does balrog proxy work for dev and prod? #}
+{# dep signing uses Balrog dev environment, which is publicly available and
+   this doesn't need to use the proxy
+#}
+{% if signing_class != "dep-signing" %}
   - docker-worker:feature:balrogVPNProxy
+{% endif %}
 {% endif %}
 
 tasks:
