@@ -13,22 +13,32 @@ scopes:
   - signing:format:gpg
   - signing:format:mar
   - signing:cert:{{ signing_class }}
-{# TODO: Does balrog proxy work for dev and prod? #}
+{# dep signing uses Balrog dev environment, which is publicly available and
+   this doesn't need to use the proxy
+#}
+{% if signing_class != "dep-signing" %}
   - docker-worker:feature:balrogVPNProxy
+{% endif %}
 {% endif %}
 
 tasks:
+    {% if source_enabled is defined %}
+    {% if source_enabled %}
     {% macro source_tasks() %}{% include "source.yml.tmpl" %}{% endmacro %}
     {{ source_tasks()|indent(4) }}
+    {% endif %}
+    {% endif %}
 
 # {# Commented out until buildbot builders exist
 #    {% macro l10n_tasks() %}{% include "l10n.yml.tmpl" %}{% endmacro %}
 #    {{ l10n_tasks()|indent(4) }} #}
 
+    {% if updates_enabled is defined %}
     {% if updates_enabled %}
     {% for platform in enUS_platforms %}
     {% set locale = "en-US" %}
     {% macro funsize_tasks() %}{% include "funsize.yml.tmpl" %}{% endmacro %}
     {{ funsize_tasks()|indent(4) }}
     {% endfor %}
+    {% endif %}
     {% endif %}

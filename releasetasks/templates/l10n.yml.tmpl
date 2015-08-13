@@ -4,7 +4,7 @@
 # TODO: make a helper function to generate consistent builder names?
 {% set buildername = "{}_{}_{}_l10n_repack".format(branch, product, platform) %}
 -
-    taskId: "{{ stable_slug_id(buildername) }}"
+    taskId: "{{ stableSlugId(buildername) }}"
     reruns: 5
     task:
         provisionerId: "buildbot-bridge"
