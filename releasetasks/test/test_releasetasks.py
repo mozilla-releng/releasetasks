@@ -36,9 +36,35 @@ class TestMakeTaskGraph(unittest.TestCase):
                 self.assertEquals(task["priority"], "high")
                 self.assertIn("task_name", task["extra"])
 
-    def test_updates_disabled(self):
+    def test_source_task_definition(self):
         graph = make_task_graph(
-            updates_enabled=False
+            source_enabled=True,
+            repo_path="releases/foo",
+            revision="fedcba654321",
+            branch="foo",
+            updates_enabled=False,
+        )
+
+        self._do_common_assertions(graph)
+
+        task = get_task_by_name(graph, "foo_source")["task"]
+        self.assertEquals(task["provisionerId"], "buildbot-bridge")
+        self.assertEquals(task["workerType"], "buildbot-bridge")
+        self.assertEquals(
+            task["payload"],
+            {
+                "buildername": "foo_source",
+                "sourcestamp": {
+                    "branch": "releases/foo",
+                    "revision": "fedcba654321",
+                },
+            }
+        )
+
+    def test_everything_disabled(self):
+        graph = make_task_graph(
+            updates_enabled=False,
+            source_enabled=False,
         )
 
         self._do_common_assertions(graph)
@@ -47,6 +73,7 @@ class TestMakeTaskGraph(unittest.TestCase):
 
     def test_funsize_en_US_deps(self):
         graph = make_task_graph(
+            source_enabled=False,
             updates_enabled=True,
             l10n_platforms=None,
             enUS_platforms=["win32", "macosx64"],
@@ -59,6 +86,7 @@ class TestMakeTaskGraph(unittest.TestCase):
                 },
             },
             branch="mozilla-beta",
+            repo_path="releases/mozilla-beta",
             product="firefox",
             revision="abcdef123456",
             balrog_api_root="https://fake.balrog/api",
@@ -79,6 +107,7 @@ class TestMakeTaskGraph(unittest.TestCase):
 
     def test_funsize_en_US_scopes(self):
         graph = make_task_graph(
+            source_enabled=False,
             updates_enabled=True,
             l10n_platforms=None,
             enUS_platforms=["win32", "macosx64"],
@@ -118,6 +147,7 @@ class TestMakeTaskGraph(unittest.TestCase):
 
     def test_funsize_en_US_scopes_dep_signing(self):
         graph = make_task_graph(
+            source_enabled=False,
             updates_enabled=True,
             l10n_platforms=None,
             enUS_platforms=["win32", "macosx64"],
