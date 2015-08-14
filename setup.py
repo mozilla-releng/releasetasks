@@ -24,7 +24,7 @@ test_requirements = [
 
 setup(
     name='releasetasks',
-    version='0.1.0',
+    version='0.2.0',
     description="""Mozilla Release Promotion Tasks contains code to generate
     release-related Taskcluster graphs.""",
     long_description=readme,
