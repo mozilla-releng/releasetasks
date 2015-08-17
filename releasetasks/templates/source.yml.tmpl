@@ -7,7 +7,7 @@
         workerType: "buildbot-bridge"
         created: "{{ now }}"
         deadline: "{{ now.replace(hours=6) }}"
-        expires: {{ never }}"
+        expires: "{{ never }}"
         priority: "high"
         retries: 5
 
@@ -24,10 +24,10 @@
             description: |
                 Generates a source tarball
 
+        {% if running_tests is defined %}
         extra:
-            {% if running_tests is defined %}
             task_name: "{{ buildername }}"
-            {% endif %}
+        {% endif %}
 
         {# TODO: decide what to use here...
         treeherder:
