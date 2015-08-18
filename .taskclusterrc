@@ -2,7 +2,7 @@
 version: 1
 tasks:
   - payload:
-      image: "bhearsum/releasetasks:v2"
+      image: "bhearsum/python-test-runner"
       command:
         - "/bin/bash"
         - "-c"
