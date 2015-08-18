@@ -57,6 +57,25 @@ class TestMakeTaskGraph(unittest.TestCase):
         self.assertTrue("env" in payload)
         self.assertTrue("command" in payload)
 
+        expected_graph_scopes = set([
+            "docker-worker:cache:tc-vcs",
+            "docker-worker:image:taskcluster/builder:*",
+            "queue:define-task:aws-provisioner-v1/build-c4-2xlarge",
+            "queue:create-task:aws-provisioner-v1/build-c4-2xlarge",
+            "docker-worker:cache:build-linux64-workspace",
+            "docker-worker:cache:tooltool-cache"
+        ])
+        self.assertTrue(expected_graph_scopes.issubset(graph["scopes"]))
+        expected_task_scopes = set([
+            "docker-worker:cache:tc-vcs",
+            "docker-worker:image:taskcluster/builder:0.5.7",
+            "queue:define-task:aws-provisioner-v1/build-c4-2xlarge",
+            "queue:create-task:aws-provisioner-v1/build-c4-2xlarge",
+            "docker-worker:cache:build-linux64-workspace",
+            "docker-worker:cache:tooltool-cache"
+        ])
+        self.assertTrue(expected_task_scopes.issubset(task["scopes"]))
+
     def test_required_graph_scopes(self):
         graph = make_task_graph(
             updates_enabled=False,
