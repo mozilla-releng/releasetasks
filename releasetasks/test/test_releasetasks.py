@@ -61,7 +61,7 @@ class TestMakeTaskGraph(unittest.TestCase):
             }
         )
 
-    def test_everything_disabled(self):
+    def test_required_graph_scopes(self):
         graph = make_task_graph(
             updates_enabled=False,
             source_enabled=False,
@@ -69,7 +69,14 @@ class TestMakeTaskGraph(unittest.TestCase):
 
         self._do_common_assertions(graph)
         self.assertEquals(graph["tasks"], None)
-        self.assertEquals(graph["scopes"], None)
+
+        expected_scopes = set([
+            "signing:format:gpg",
+            "queue:define-task:buildbot-bridge/buildbot-bridge",
+            "queue:create-task:buildbot-bridge/buildbot-bridge",
+            "queue:task-priority:high",
+        ])
+        self.assertTrue(expected_scopes.issubset(graph["scopes"]))
 
     def test_funsize_en_US_deps(self):
         graph = make_task_graph(
