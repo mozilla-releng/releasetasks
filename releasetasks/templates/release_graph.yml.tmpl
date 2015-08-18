@@ -1,16 +1,19 @@
 ---
 metadata:
     name: "Release Promotion"
-    description": "Release Promotion"
+    description: "Release Promotion"
     owner: "release@mozilla.com"
     source: "https://github.com/rail/releasetasks"
 
 scopes:
+  - signing:format:gpg
+  - queue:define-task:buildbot-bridge/buildbot-bridge
+  - queue:create-task:buildbot-bridge/buildbot-bridge
+  - queue:task-priority:high
 {% if updates_enabled %}
   - queue:*
   - docker-worker:*
   - scheduler:*
-  - signing:format:gpg
   - signing:format:mar
   - signing:cert:{{ signing_class }}
 {# dep signing uses Balrog dev environment, which is publicly available and
