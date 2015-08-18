@@ -3,20 +3,50 @@
     taskId: "{{ stableSlugId(buildername) }}"
     reruns: 5
     task:
-        provisionerId: "buildbot-bridge"
-        workerType: "buildbot-bridge"
+        provisionerId: aws-provisioner-v1
+        workerType: opt-linux64
         created: "{{ now }}"
         deadline: "{{ now.replace(hours=6) }}"
         expires: "{{ never }}"
         priority: "high"
         retries: 5
+        scopes:
+            - docker-worker:cache:tc-vcs
+            - docker-worker:image:taskcluster/builder:0.5.7
+            - queue:define-task:aws-provisioner-v1/build-c4-2xlarge
+            - queue:create-task:aws-provisioner-v1/build-c4-2xlarge
+            - docker-worker:cache:build-linux64-workspace
+            - docker-worker:cache:tooltool-cache
 
         payload:
-            buildername: "{{ buildername }}"
-            sourcestamp:
-                branch: "{{ repo_path }}"
-                revision: "{{ revision }}"
-
+            maxRunTime: 7200
+            image: taskcluster/desktop-build:0.0.23
+            cache:
+                build-linux64-workspace: /home/worker/workspace
+                tooltool-cache: /home/worker/tooltool-cache
+                tc-vcs: /home/worker/.tc-vcs
+            artifacts:
+                public/build:
+                    path: /home/worker/artifacts/
+                    expires: {{ now.replace(days=365) }}
+                    type: directory
+            command:
+                - /bin/bash
+                - bin/build.sh
+            env:
+                GECKO_REPOSITORY: "https://hg.mozilla.org/{{ repo_path }}"
+                GECKO_HEAD_REV: "{{ revision }}"
+                MOZHARNESS_SCRIPT: "workspace/build/src/testing/mozharness/scripts/fx_desktop_build.py"
+                MOZHARNESS_CONFIG: "builds/releng_sub_linux_configs/64_source.py"
+                # MH_BRANCH is used for branch specific MH configs
+                MH_BRANCH: "{{ branch }}"
+                MH_BUILD_POOL: "taskcluster"
+                # Don't clone mozharness, use the in-tree version
+                MOZHARNESS_DISABLE: "true"
+                # the tools repo is not used by this builder
+                TOOLS_DISABLE: "true"
+                TOOLTOOL_CACHE: "/home/worker/tooltool-cache"
+                DIST_TARGET_UPLOADS: "source.tar.xz bundle"
         metadata:
             owner: release@mozilla.com
             source: https://github.com/rail/releasetasks
