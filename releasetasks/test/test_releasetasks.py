@@ -48,18 +48,33 @@ class TestMakeTaskGraph(unittest.TestCase):
         self._do_common_assertions(graph)
 
         task = get_task_by_name(graph, "foo_source")["task"]
-        self.assertEquals(task["provisionerId"], "buildbot-bridge")
-        self.assertEquals(task["workerType"], "buildbot-bridge")
-        self.assertEquals(
-            task["payload"],
-            {
-                "buildername": "foo_source",
-                "sourcestamp": {
-                    "branch": "releases/foo",
-                    "revision": "fedcba654321",
-                },
-            }
-        )
+        payload = task["payload"]
+        self.assertEquals(task["provisionerId"], "aws-provisioner-v1")
+        self.assertEquals(task["workerType"], "opt-linux64")
+        self.assertTrue(payload["image"].startswith("taskcluster/desktop-build:"))
+        self.assertTrue("cache" in payload)
+        self.assertTrue("artifacts" in payload)
+        self.assertTrue("env" in payload)
+        self.assertTrue("command" in payload)
+
+        expected_graph_scopes = set([
+            "docker-worker:cache:tc-vcs",
+            "docker-worker:image:taskcluster/builder:*",
+            "queue:define-task:aws-provisioner-v1/build-c4-2xlarge",
+            "queue:create-task:aws-provisioner-v1/build-c4-2xlarge",
+            "docker-worker:cache:build-linux64-workspace",
+            "docker-worker:cache:tooltool-cache"
+        ])
+        self.assertTrue(expected_graph_scopes.issubset(graph["scopes"]))
+        expected_task_scopes = set([
+            "docker-worker:cache:tc-vcs",
+            "docker-worker:image:taskcluster/builder:0.5.7",
+            "queue:define-task:aws-provisioner-v1/build-c4-2xlarge",
+            "queue:create-task:aws-provisioner-v1/build-c4-2xlarge",
+            "docker-worker:cache:build-linux64-workspace",
+            "docker-worker:cache:tooltool-cache"
+        ])
+        self.assertTrue(expected_task_scopes.issubset(task["scopes"]))
 
     def test_required_graph_scopes(self):
         graph = make_task_graph(

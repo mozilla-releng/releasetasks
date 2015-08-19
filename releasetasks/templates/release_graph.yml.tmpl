@@ -10,6 +10,14 @@ scopes:
   - queue:define-task:buildbot-bridge/buildbot-bridge
   - queue:create-task:buildbot-bridge/buildbot-bridge
   - queue:task-priority:high
+{% if source_enabled %}
+  - docker-worker:cache:tc-vcs
+  - docker-worker:image:taskcluster/builder:*
+  - queue:define-task:aws-provisioner-v1/build-c4-2xlarge
+  - queue:create-task:aws-provisioner-v1/build-c4-2xlarge
+  - docker-worker:cache:build-linux64-workspace
+  - docker-worker:cache:tooltool-cache
+{% endif %}
 {% if updates_enabled %}
   - queue:*
   - docker-worker:*
