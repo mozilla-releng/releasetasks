@@ -60,6 +60,8 @@ class TestMakeTaskGraph(unittest.TestCase):
         expected_graph_scopes = set([
             "docker-worker:cache:tc-vcs",
             "docker-worker:image:taskcluster/builder:*",
+            "queue:define-task:aws-provisioner-v1/opt-linux64",
+            "queue:create-task:aws-provisioner-v1/opt-linux64",
             "queue:define-task:aws-provisioner-v1/build-c4-2xlarge",
             "queue:create-task:aws-provisioner-v1/build-c4-2xlarge",
             "docker-worker:cache:build-linux64-workspace",
@@ -69,6 +71,8 @@ class TestMakeTaskGraph(unittest.TestCase):
         expected_task_scopes = set([
             "docker-worker:cache:tc-vcs",
             "docker-worker:image:taskcluster/builder:0.5.7",
+            "queue:define-task:aws-provisioner-v1/opt-linux64",
+            "queue:create-task:aws-provisioner-v1/opt-linux64",
             "queue:define-task:aws-provisioner-v1/build-c4-2xlarge",
             "queue:create-task:aws-provisioner-v1/build-c4-2xlarge",
             "docker-worker:cache:build-linux64-workspace",
