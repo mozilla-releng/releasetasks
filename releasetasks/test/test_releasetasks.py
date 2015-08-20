@@ -39,6 +39,7 @@ class TestMakeTaskGraph(unittest.TestCase):
     def test_source_task_definition(self):
         graph = make_task_graph(
             source_enabled=True,
+            l10n_platforms=[],
             repo_path="releases/foo",
             revision="fedcba654321",
             branch="foo",
@@ -84,6 +85,7 @@ class TestMakeTaskGraph(unittest.TestCase):
         graph = make_task_graph(
             updates_enabled=False,
             source_enabled=False,
+            l10n_platforms=[],
         )
 
         self._do_common_assertions(graph)
@@ -101,7 +103,7 @@ class TestMakeTaskGraph(unittest.TestCase):
         graph = make_task_graph(
             source_enabled=False,
             updates_enabled=True,
-            l10n_platforms=None,
+            l10n_platforms=[],
             enUS_platforms=["win32", "macosx64"],
             partial_updates={
                 "38.0": {
@@ -135,7 +137,7 @@ class TestMakeTaskGraph(unittest.TestCase):
         graph = make_task_graph(
             source_enabled=False,
             updates_enabled=True,
-            l10n_platforms=None,
+            l10n_platforms=[],
             enUS_platforms=["win32", "macosx64"],
             partial_updates={
                 "38.0": {
@@ -175,7 +177,7 @@ class TestMakeTaskGraph(unittest.TestCase):
         graph = make_task_graph(
             source_enabled=False,
             updates_enabled=True,
-            l10n_platforms=None,
+            l10n_platforms=[],
             enUS_platforms=["win32", "macosx64"],
             partial_updates={
                 "38.0": {
@@ -210,3 +212,33 @@ class TestMakeTaskGraph(unittest.TestCase):
                 self.assertIsNone(generator["task"].get("scopes"))
                 self.assertItemsEqual(signing["task"]["scopes"], ["signing:cert:dep-signing", "signing:format:mar", "signing:format:gpg"])
                 self.assertIsNone(balrog["task"].get("scopes"))
+
+    def test_l10n_simple(self):
+        graph = make_task_graph(
+            source_enabled=False,
+            updates_enabled=False,
+            l10n_platforms=["win32"],
+            enUS_platforms=["win32"],
+            branch="mozilla-beta",
+            product="firefox",
+            repo_path="releases/mozilla-beta",
+            revision="abcdef123456",
+            l10n_changesets={
+                "de": "default",
+                "en-GB": "default",
+                "zh-TW": "default",
+            },
+            l10n_chunks=1,
+        )
+
+        self._do_common_assertions(graph)
+
+        task = get_task_by_name(graph, "mozilla-beta_firefox_win32_l10n_repack_1/1")
+
+        payload = task["task"]["payload"]
+        properties = payload["properties"]
+
+        self.assertEquals(task["task"]["provisionerId"], "buildbot-bridge")
+        self.assertEquals(task["task"]["workerType"], "buildbot-bridge")
+        self.assertEquals(payload["buildername"], "mozilla-beta_firefox_win32_l10n_repack")
+        self.assertEquals(properties["locales"], "de:default en-GB:default zh-TW:default")
