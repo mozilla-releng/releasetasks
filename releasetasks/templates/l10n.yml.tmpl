@@ -1,10 +1,13 @@
 {% for platform in l10n_platforms %}
-# TODO: iterate over platform specific locales...probably need l10n json to do this
-{% for locale, locale_revision in l10n_changesets.iteritems() %}
+{% for chunk in range(1, l10n_chunks+1) %}
+{% set our_locales = chunkify(l10n_changesets, chunk, l10n_chunks) %}
 # TODO: make a helper function to generate consistent builder names?
 {% set buildername = "{}_{}_{}_l10n_repack".format(branch, product, platform) %}
 -
-    taskId: "{{ stableSlugId(buildername) }}"
+    # We have multiple chunks of l10n per platform, so we need unique task ids
+    # for each of them. However, they all share the same builder because the
+    # only differences between them are in the properties that we set.
+    taskId: "{{ stableSlugId('{}_{}'.format(buildername, chunk)) }}"
     reruns: 5
     task:
         provisionerId: "buildbot-bridge"
@@ -21,10 +24,19 @@
                 branch: "{{ repo_path }}"
                 revision: "{{ revision }}"
             properties:
-                extra_args: "--locale {{ '{}:{} '.format(locale, locale_revision)}}"
+                # TODO: It would be better to have a stable artifact name like public/build/installer
+                # Or maybe a manifest to look it up in
+                # Also this should probably be calculate in release runner, verified (for non-404), and passed in
+                {# en_us_binary_url: https://queue.taskcluster.net/v1/task/\{\{ en_task_id \}\}/artifacts/public/build/\{\{ product \}\}-\{\{ version \}\}.en-US.\{\{ ftp_platform \}\}.extension #}
+                locales: {% for l in our_locales %}{{ '{}:{} '.format(l, l10n_changesets[l]) }}{% endfor %}
 
         metadata:
-            name: "{{ product }} {{ branch }} {{ platform }} {{ locale }} l10n repack"
+            name: "{{ product }} {{ branch }} {{ platform }} l10n repack {{ chunk }}/{{ l10n_chunks }}"
+
+        {% if running_tests is defined %}
+        extra:
+            task_name: "{{ buildername }}_{{ chunk }}"
+        {% endif %}
 
 {% endfor %}
 {% endfor %}

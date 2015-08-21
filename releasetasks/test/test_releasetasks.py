@@ -33,7 +33,7 @@ class TestMakeTaskGraph(unittest.TestCase):
         if graph["tasks"]:
             for t in graph["tasks"]:
                 task = t["task"]
-                self.assertEquals(task["priority"], "high")
+                self.assertEqual(task["priority"], "high")
                 self.assertIn("task_name", task["extra"])
 
     def test_source_task_definition(self):
@@ -50,8 +50,8 @@ class TestMakeTaskGraph(unittest.TestCase):
 
         task = get_task_by_name(graph, "foo_source")["task"]
         payload = task["payload"]
-        self.assertEquals(task["provisionerId"], "aws-provisioner-v1")
-        self.assertEquals(task["workerType"], "opt-linux64")
+        self.assertEqual(task["provisionerId"], "aws-provisioner-v1")
+        self.assertEqual(task["workerType"], "opt-linux64")
         self.assertTrue(payload["image"].startswith("taskcluster/desktop-build:"))
         self.assertTrue("cache" in payload)
         self.assertTrue("artifacts" in payload)
@@ -89,7 +89,7 @@ class TestMakeTaskGraph(unittest.TestCase):
         )
 
         self._do_common_assertions(graph)
-        self.assertEquals(graph["tasks"], None)
+        self.assertEqual(graph["tasks"], None)
 
         expected_scopes = set([
             "signing:format:gpg",
@@ -130,8 +130,8 @@ class TestMakeTaskGraph(unittest.TestCase):
                 balrog = get_task_by_name(graph, "{}_en-US_{}_funsize_balrog_task".format(p, v))
 
                 self.assertIsNone(generator.get("requires"))
-                self.assertEquals(signing.get("requires"), [generator["taskId"]])
-                self.assertEquals(balrog.get("requires"), [signing["taskId"]])
+                self.assertEqual(signing.get("requires"), [generator["taskId"]])
+                self.assertEqual(balrog.get("requires"), [signing["taskId"]])
 
     def test_funsize_en_US_scopes(self):
         graph = make_task_graph(
@@ -213,7 +213,7 @@ class TestMakeTaskGraph(unittest.TestCase):
                 self.assertItemsEqual(signing["task"]["scopes"], ["signing:cert:dep-signing", "signing:format:mar", "signing:format:gpg"])
                 self.assertIsNone(balrog["task"].get("scopes"))
 
-    def test_l10n_simple(self):
+    def test_l10n_one_chunk(self):
         graph = make_task_graph(
             source_enabled=False,
             updates_enabled=False,
@@ -233,12 +233,15 @@ class TestMakeTaskGraph(unittest.TestCase):
 
         self._do_common_assertions(graph)
 
-        task = get_task_by_name(graph, "mozilla-beta_firefox_win32_l10n_repack_1/1")
+        task = get_task_by_name(graph, "mozilla-beta_firefox_win32_l10n_repack_1")
 
         payload = task["task"]["payload"]
         properties = payload["properties"]
+        # The order of the locales is not predictable, so we need to sort them
+        # before comparing against our reference value.
+        locales = sorted(properties["locales"].split())
 
-        self.assertEquals(task["task"]["provisionerId"], "buildbot-bridge")
-        self.assertEquals(task["task"]["workerType"], "buildbot-bridge")
-        self.assertEquals(payload["buildername"], "mozilla-beta_firefox_win32_l10n_repack")
-        self.assertEquals(properties["locales"], "de:default en-GB:default zh-TW:default")
+        self.assertEqual(task["task"]["provisionerId"], "buildbot-bridge")
+        self.assertEqual(task["task"]["workerType"], "buildbot-bridge")
+        self.assertEqual(payload["buildername"], "mozilla-beta_firefox_win32_l10n_repack")
+        self.assertEqual(locales, ["de:default", "en-GB:default", "zh-TW:default"])

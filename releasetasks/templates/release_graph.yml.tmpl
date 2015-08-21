@@ -40,9 +40,10 @@ tasks:
     {{ source_tasks()|indent(4) }}
     {% endif %}
 
-# {# Commented out until buildbot builders exist
-#    {% macro l10n_tasks() %}{% include "l10n.yml.tmpl" %}{% endmacro %}
-#    {{ l10n_tasks()|indent(4) }} #}
+    {% if l10n_platforms %}
+    {% macro l10n_tasks() %}{% include "l10n.yml.tmpl" %}{% endmacro %}
+    {{ l10n_tasks()|indent(4) }}
+    {% endif %}
 
     {% if updates_enabled %}
     {% for platform in enUS_platforms %}
