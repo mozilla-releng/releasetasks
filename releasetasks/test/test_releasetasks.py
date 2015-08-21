@@ -237,11 +237,41 @@ class TestMakeTaskGraph(unittest.TestCase):
 
         payload = task["task"]["payload"]
         properties = payload["properties"]
-        # The order of the locales is not predictable, so we need to sort them
-        # before comparing against our reference value.
-        locales = sorted(properties["locales"].split())
 
         self.assertEqual(task["task"]["provisionerId"], "buildbot-bridge")
         self.assertEqual(task["task"]["workerType"], "buildbot-bridge")
         self.assertEqual(payload["buildername"], "mozilla-beta_firefox_win32_l10n_repack")
-        self.assertEqual(locales, ["de:default", "en-GB:default", "zh-TW:default"])
+        self.assertEqual(properties["locales"], "de:default en-GB:default zh-TW:default")
+
+    def test_l10n_multiple_chunks(self):
+        graph = make_task_graph(
+            source_enabled=False,
+            updates_enabled=False,
+            l10n_platforms=["win32"],
+            enUS_platforms=["win32"],
+            branch="mozilla-beta",
+            product="firefox",
+            repo_path="releases/mozilla-beta",
+            revision="abcdef123456",
+            l10n_changesets={
+                "de": "default",
+                "en-GB": "default",
+                "ru": "default",
+                "uk": "default",
+                "zh-TW": "default",
+            },
+            l10n_chunks=2,
+        )
+
+        self._do_common_assertions(graph)
+
+        chunk1 = get_task_by_name(graph, "mozilla-beta_firefox_win32_l10n_repack_1")
+        chunk2 = get_task_by_name(graph, "mozilla-beta_firefox_win32_l10n_repack_2")
+
+        chunk1_locales = chunk1["task"]["payload"]["properties"]["locales"]
+        chunk2_locales = chunk2["task"]["payload"]["properties"]["locales"]
+
+        self.assertEquals(chunk1["task"]["payload"]["buildername"], "mozilla-beta_firefox_win32_l10n_repack")
+        self.assertEquals(chunk1_locales, "de:default en-GB:default ru:default")
+        self.assertEquals(chunk2["task"]["payload"]["buildername"], "mozilla-beta_firefox_win32_l10n_repack")
+        self.assertEquals(chunk2_locales, "uk:default zh-TW:default")

@@ -24,6 +24,7 @@ def make_task_graph(root_template="release_graph.yml.tmpl", template_dir=DEFAULT
     template_vars = {
         "stableSlugId": stableSlugId(),
         "chunkify": chunkify,
+        "sorted": sorted,
         "now": now,
         "now_ms": now_ms,
         # This is used in defining expirations in tasks. There's no way to

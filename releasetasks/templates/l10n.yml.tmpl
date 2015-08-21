@@ -1,6 +1,6 @@
 {% for platform in l10n_platforms %}
 {% for chunk in range(1, l10n_chunks+1) %}
-{% set our_locales = chunkify(l10n_changesets, chunk, l10n_chunks) %}
+{% set our_locales = chunkify(sorted(l10n_changesets), chunk, l10n_chunks) %}
 # TODO: make a helper function to generate consistent builder names?
 {% set buildername = "{}_{}_{}_l10n_repack".format(branch, product, platform) %}
 -
