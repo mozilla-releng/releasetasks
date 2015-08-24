@@ -243,6 +243,9 @@ class TestMakeTaskGraph(unittest.TestCase):
         self.assertEqual(payload["buildername"], "mozilla-beta_firefox_win32_l10n_repack")
         self.assertEqual(properties["locales"], "de:default en-GB:default zh-TW:default")
 
+        # Make sure only one chunk was generated
+        self.assertEqual(get_task_by_name(graph, "mozilla-beta_firefox_win32_l10n_repack_2"), None)
+
     def test_l10n_multiple_chunks(self):
         graph = make_task_graph(
             source_enabled=False,
@@ -271,7 +274,9 @@ class TestMakeTaskGraph(unittest.TestCase):
         chunk1_locales = chunk1["task"]["payload"]["properties"]["locales"]
         chunk2_locales = chunk2["task"]["payload"]["properties"]["locales"]
 
-        self.assertEquals(chunk1["task"]["payload"]["buildername"], "mozilla-beta_firefox_win32_l10n_repack")
-        self.assertEquals(chunk1_locales, "de:default en-GB:default ru:default")
-        self.assertEquals(chunk2["task"]["payload"]["buildername"], "mozilla-beta_firefox_win32_l10n_repack")
-        self.assertEquals(chunk2_locales, "uk:default zh-TW:default")
+        self.assertEqual(chunk1["task"]["payload"]["buildername"], "mozilla-beta_firefox_win32_l10n_repack")
+        self.assertEqual(chunk1_locales, "de:default en-GB:default ru:default")
+        self.assertEqual(chunk2["task"]["payload"]["buildername"], "mozilla-beta_firefox_win32_l10n_repack")
+        self.assertEqual(chunk2_locales, "uk:default zh-TW:default")
+
+        self.assertEqual(get_task_by_name(graph, "mozilla-beta_firefox_win32_l10n_repack_3"), None)
