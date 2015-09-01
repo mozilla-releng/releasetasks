@@ -28,7 +28,7 @@
                 # Or maybe a manifest to look it up in
                 # Also this should probably be calculate in release runner, verified (for non-404), and passed in
                 {# en_us_binary_url: https://queue.taskcluster.net/v1/task/\{\{ en_task_id \}\}/artifacts/public/build/\{\{ product \}\}-\{\{ version \}\}.en-US.\{\{ ftp_platform \}\}.extension #}
-                locales: {% for l in our_locales %}{{ '{}:{} '.format(l, l10n_changesets[l]) }}{% endfor %}
+                locales: "{% for l in our_locales %}{{ '{}:{} '.format(l, l10n_changesets[l]) }}{% endfor %}"
 
         metadata:
             name: "{{ product }} {{ branch }} {{ platform }} l10n repack {{ chunk }}/{{ l10n_chunks }}"
