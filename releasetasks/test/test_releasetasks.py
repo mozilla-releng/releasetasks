@@ -244,7 +244,8 @@ class TestMakeTaskGraph(unittest.TestCase):
         self.assertEqual(properties["locales"], "de:default en-GB:default zh-TW:default")
 
         # Make sure only one chunk was generated
-        self.assertEqual(get_task_by_name(graph, "mozilla-beta_firefox_win32_l10n_repack_2"), None)
+        self.assertIsNone(get_task_by_name(graph, "mozilla-beta_firefox_win32_l10n_repack_0"))
+        self.assertIsNone(get_task_by_name(graph, "mozilla-beta_firefox_win32_l10n_repack_2"))
 
     def test_l10n_multiple_chunks(self):
         graph = make_task_graph(
