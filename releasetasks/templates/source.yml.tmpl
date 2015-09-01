@@ -1,4 +1,5 @@
 {% set buildername = "{}_source".format(branch) %}
+{% set buildername_signing = "{}_signing".format(buildername) %}
 -
     taskId: "{{ stableSlugId(buildername) }}"
     reruns: 5
@@ -72,3 +73,32 @@
             build:
                 platform: none
         #}
+-
+    taskId: "{{ stableSlugId(buildername_signing) }}"
+    requires:
+        - "{{ stableSlugId(buildername) }}"
+    reruns: 5
+    task:
+        provisionerId: signing-provisioner-v1
+        workerType: signing-worker-v1
+        created: "{{ now }}"
+        deadline: "{{ now.replace(hours=6) }}"
+        expires: "{{ never }}"
+        priority: "high"
+        retries: 5
+        scopes:
+            - signing:format:gpg
+            - signing:cert:{{ signing_class }}
+        payload:
+            signingManifest: https://queue.taskcluster.net/v1/task/{{ stableSlugId(buildername) }}/artifacts/public/env/manifest.json
+        metadata:
+            owner: release@mozilla.com
+            source: https://github.com/rail/releasetasks
+            name: "{{ branch }} source generation"
+            description: |
+                Sign source tarball
+
+        {% if running_tests is defined %}
+        extra:
+            task_name: "{{ buildername_signing }}"
+        {% endif %}

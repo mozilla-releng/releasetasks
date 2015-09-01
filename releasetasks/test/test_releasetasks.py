@@ -43,11 +43,13 @@ class TestMakeTaskGraph(unittest.TestCase):
             revision="fedcba654321",
             branch="foo",
             updates_enabled=False,
+            signing_class="release-signing",
         )
 
         self._do_common_assertions(graph)
 
-        task = get_task_by_name(graph, "foo_source")["task"]
+        task_def = get_task_by_name(graph, "foo_source")
+        task = task_def["task"]
         payload = task["payload"]
         self.assertEquals(task["provisionerId"], "aws-provisioner-v1")
         self.assertEquals(task["workerType"], "opt-linux64")
@@ -65,7 +67,9 @@ class TestMakeTaskGraph(unittest.TestCase):
             "queue:define-task:aws-provisioner-v1/build-c4-2xlarge",
             "queue:create-task:aws-provisioner-v1/build-c4-2xlarge",
             "docker-worker:cache:build-linux64-workspace",
-            "docker-worker:cache:tooltool-cache"
+            "docker-worker:cache:tooltool-cache",
+            "signing:format:gpg",
+            "signing:cert:release-signing"
         ])
         self.assertTrue(expected_graph_scopes.issubset(graph["scopes"]))
         expected_task_scopes = set([
@@ -79,6 +83,21 @@ class TestMakeTaskGraph(unittest.TestCase):
             "docker-worker:cache:tooltool-cache"
         ])
         self.assertTrue(expected_task_scopes.issubset(task["scopes"]))
+
+        signing_task_def = get_task_by_name(graph, "foo_source_signing")
+        signing_task = signing_task_def["task"]
+        self.assertEqual(signing_task_def["requires"][0], task_def["taskId"])
+        self.assertEqual(signing_task["provisionerId"],
+                         "signing-provisioner-v1")
+        self.assertEqual(signing_task["workerType"], "signing-worker-v1")
+        expected_task_scopes = set([
+            "signing:format:gpg",
+            "signing:cert:release-signing"
+        ])
+        self.assertTrue(expected_task_scopes.issubset(signing_task["scopes"]))
+        payload = signing_task["payload"]
+        self.assertTrue("signingManifest" in payload)
+        self.assertEqual(len(payload), 1)
 
     def test_required_graph_scopes(self):
         graph = make_task_graph(
