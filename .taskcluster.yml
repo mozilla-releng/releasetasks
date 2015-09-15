@@ -9,11 +9,11 @@ tasks:
     workerType: "{{ taskcluster.docker.workerType }}"
     payload:
       maxRunTime: 1200
-      image: "rail/python-test-runner"
+      image: "quay.io/mrrrgn/ubuntu-ci:0.0.2"
       command:
         - "/bin/bash"
         - "-c"
-        - "git clone $GITHUB_HEAD_REPO_URL && cd releasetasks && git checkout $GITHUB_HEAD_BRANCH && tox -e py27"
+        - "checkout-pull-request && pip install tox==2.1.1 && cd repo && tox -e py27"
     extra:
       github:
         env: true
