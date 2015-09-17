@@ -38,6 +38,8 @@ class TestMakeTaskGraph(unittest.TestCase):
 
     def test_source_task_definition(self):
         graph = make_task_graph(
+            version="42.0b2",
+            buildNumber=3,
             source_enabled=True,
             l10n_platforms=[],
             repo_path="releases/foo",
@@ -102,6 +104,8 @@ class TestMakeTaskGraph(unittest.TestCase):
 
     def test_required_graph_scopes(self):
         graph = make_task_graph(
+            version="42.0b2",
+            buildNumber=3,
             updates_enabled=False,
             source_enabled=False,
             l10n_platforms=[],
@@ -120,6 +124,8 @@ class TestMakeTaskGraph(unittest.TestCase):
 
     def test_funsize_en_US_deps(self):
         graph = make_task_graph(
+            version="42.0b2",
+            buildNumber=3,
             source_enabled=False,
             updates_enabled=True,
             l10n_platforms=[],
@@ -154,6 +160,8 @@ class TestMakeTaskGraph(unittest.TestCase):
 
     def test_funsize_en_US_scopes(self):
         graph = make_task_graph(
+            version="42.0b2",
+            buildNumber=3,
             source_enabled=False,
             updates_enabled=True,
             l10n_platforms=[],
@@ -194,6 +202,8 @@ class TestMakeTaskGraph(unittest.TestCase):
 
     def test_funsize_en_US_scopes_dep_signing(self):
         graph = make_task_graph(
+            version="42.0b2",
+            buildNumber=3,
             source_enabled=False,
             updates_enabled=True,
             l10n_platforms=[],
@@ -234,6 +244,8 @@ class TestMakeTaskGraph(unittest.TestCase):
 
     def test_l10n_one_chunk(self):
         graph = make_task_graph(
+            version="42.0b2",
+            buildNumber=3,
             source_enabled=False,
             updates_enabled=False,
             l10n_platforms=["win32"],
@@ -268,6 +280,8 @@ class TestMakeTaskGraph(unittest.TestCase):
 
     def test_l10n_multiple_chunks(self):
         graph = make_task_graph(
+            version="42.0b2",
+            buildNumber=3,
             source_enabled=False,
             updates_enabled=False,
             l10n_platforms=["win32"],
