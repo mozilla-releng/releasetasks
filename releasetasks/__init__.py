@@ -36,8 +36,10 @@ def make_task_graph(root_template="release_graph.yml.tmpl", template_dir=DEFAULT
         # TODO: this should be a hash of the revisions in the push
         "revision_hash": "abcdef",
         "get_treeherder_platform": lambda p: p,
-        # TODO: unstub this
+        # TODO: unstub these
         "encrypt_env_var": lambda a, b, c, d, e: "ENCRYPTED",
+        "from_mar": lambda a, b, c, d: "FROM_MAR",
+        "to_mar": lambda a, b: "TO_MAR"
     }
     template_vars.update(template_kwargs)
 
