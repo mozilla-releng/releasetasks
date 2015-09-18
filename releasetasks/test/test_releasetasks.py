@@ -248,7 +248,7 @@ class TestMakeTaskGraph(unittest.TestCase):
             buildNumber=3,
             source_enabled=False,
             updates_enabled=False,
-            enuS_platforms=["win32"],
+            enUS_platforms=["win32"],
             l10n_platforms={
                 "win32": {
                     "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.exe",
