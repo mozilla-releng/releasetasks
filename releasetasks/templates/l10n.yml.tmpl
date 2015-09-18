@@ -1,4 +1,4 @@
-{% for platform in l10n_platforms %}
+{% for platform, platform_info in l10n_platforms.iteritems() %}
 {% for chunk in range(1, l10n_chunks+1) %}
 {% set our_locales = chunkify(sorted(l10n_changesets), chunk, l10n_chunks) %}
 # TODO: make a helper function to generate consistent builder names?
@@ -24,10 +24,10 @@
                 branch: "{{ repo_path }}"
                 revision: "{{ revision }}"
             properties:
-                # TODO: It would be better to have a stable artifact name like public/build/installer
-                # Or maybe a manifest to look it up in
+                # TODO: It would be better to have a stable artifact name like public/build/installer.
+                # Probably can switch to MOZ_SIMPLE_PACKAGE_NAME later
                 # Also this should probably be calculate in release runner, verified (for non-404), and passed in
-                {# en_us_binary_url: https://queue.taskcluster.net/v1/task/\{\{ en_task_id \}\}/artifacts/public/build/\{\{ product \}\}-\{\{ version \}\}.en-US.\{\{ ftp_platform \}\}.extension #}
+                en_us_binary_url: "{{ platform_info['en_us_binary_url'] }}"
                 # Quotes cannot be used around this string because the loop causes it to have trailing whitespace
                 # (which gets stripped by the yaml parser when unquoted). Kindof hacky.
                 locales: {% for l in our_locales %}{{ '{}:{} '.format(l, l10n_changesets[l]) }}{% endfor %}
