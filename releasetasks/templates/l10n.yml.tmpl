@@ -24,9 +24,6 @@
                 branch: "{{ repo_path }}"
                 revision: "{{ revision }}"
             properties:
-                # TODO: It would be better to have a stable artifact name like public/build/installer.
-                # Probably can switch to MOZ_SIMPLE_PACKAGE_NAME later
-                # Also this should probably be calculate in release runner, verified (for non-404), and passed in
                 en_us_binary_url: "{{ platform_info['en_us_binary_url'] }}"
                 # Quotes cannot be used around this string because the loop causes it to have trailing whitespace
                 # (which gets stripped by the yaml parser when unquoted). Kindof hacky.
