@@ -313,4 +313,4 @@ class TestMakeTaskGraph(unittest.TestCase):
         self.assertEqual(chunk2["task"]["payload"]["buildername"], "mozilla-beta_firefox_win32_l10n_repack")
         self.assertEqual(chunk2_locales, "uk:default zh-TW:default")
 
-        self.assertEqual(get_task_by_name(graph, "mozilla-beta_firefox_win32_l10n_repack_3"), None)
+        self.assertIsNone(get_task_by_name(graph, "mozilla-beta_firefox_win32_l10n_repack_3"))
