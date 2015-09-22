@@ -6,8 +6,10 @@ import yaml
 import arrow
 from chunkify import chunkify
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
+from thclient import TreeherderClient
 
 from taskcluster.utils import stableSlugId
+from releasetasks.util import treeherder_platform, encryptEnvVar_wrapper
 
 
 DEFAULT_TEMPLATE_DIR = path.join(path.dirname(__file__), "templates")
@@ -16,6 +18,7 @@ DEFAULT_TEMPLATE_DIR = path.join(path.dirname(__file__), "templates")
 def make_task_graph(root_template="release_graph.yml.tmpl", template_dir=DEFAULT_TEMPLATE_DIR, **template_kwargs):
     # TODO: some validation of template_kwargs + defaults
     env = Environment(loader=FileSystemLoader(template_dir), undefined=StrictUndefined)
+    th = TreeherderClient()
 
     now = arrow.now()
     now_ms = now.timestamp * 1000
@@ -33,13 +36,17 @@ def make_task_graph(root_template="release_graph.yml.tmpl", template_dir=DEFAULT
         "never": arrow.now().replace(years=1000),
         "get_complete_mar_url": lambda a, b, c, d: "COMPLETE MAR URL",
         "get_complete_mar_artifact": lambda a, b, c: "COMPLETE MAR ARTIFACT",
-        # TODO: this should be a hash of the revisions in the push
-        "revision_hash": "abcdef",
-        "get_treeherder_platform": lambda p: p,
+        # Treeherder expects 12 symbols in revision
+        "revision_hash": th.get_resultsets(
+            template_kwargs["branch"],
+            revision=template_kwargs["revision"][:12])[0]["revision_hash"],
+        "get_treeherder_platform": treeherder_platform,
         # TODO: unstub these
-        "encrypt_env_var": lambda a, b, c, d, e: "ENCRYPTED",
+        "encrypt_env_var": encryptEnvVar_wrapper,
         "from_mar": lambda a, b, c, d: "FROM_MAR",
-        "to_mar": lambda a, b: "TO_MAR"
+        "to_mar": lambda a, b: "TO_MAR",
+        "balrog_username": "TODO",
+        "balrog_password": "TODO",
     }
     template_vars.update(template_kwargs)
 

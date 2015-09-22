@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import unittest
+import mock
+import thclient.client
 
 from releasetasks import make_task_graph as make_task_graph_orig
 
@@ -18,7 +20,11 @@ def get_task_by_slugid(graph, slugid):
     return None
 
 
+@mock.patch.object(thclient.client.TreeherderClient, "get_resultsets")
 def make_task_graph(*args, **kwargs):
+    args = list(args)
+    mocked_get_resultsets = args.pop()
+    mocked_get_resultsets.return_value = [{"revision_hash": "abcdefgh1234567"}]
     return make_task_graph_orig(*args, running_tests=True, **kwargs)
 
 
@@ -106,6 +112,8 @@ class TestMakeTaskGraph(unittest.TestCase):
         graph = make_task_graph(
             version="42.0b2",
             buildNumber=3,
+            branch="foo",
+            revision="abcdef123456",
             updates_enabled=False,
             source_enabled=False,
             l10n_platforms=[],

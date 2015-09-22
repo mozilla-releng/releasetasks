@@ -16,11 +16,14 @@ requirements = [
     "requests>=2.4.3,<=2.7.0",
     "PyYAML",
     "chunkify",
+    "treeherder-client",
+    "PGPy",
 ]
 test_requirements = [
     "pytest",
     "pytest-cov",
     "flake8",
+    "mock",
 ]
 
 setup(
