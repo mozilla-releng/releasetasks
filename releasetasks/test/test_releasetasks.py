@@ -41,7 +41,7 @@ class TestMakeTaskGraph(unittest.TestCase):
             version="42.0b2",
             buildNumber=3,
             source_enabled=True,
-            l10n_platforms=[],
+            l10n_config={},
             repo_path="releases/foo",
             revision="fedcba654321",
             branch="foo",
@@ -108,7 +108,7 @@ class TestMakeTaskGraph(unittest.TestCase):
             buildNumber=3,
             updates_enabled=False,
             source_enabled=False,
-            l10n_platforms=[],
+            l10n_config={},
         )
 
         self._do_common_assertions(graph)
@@ -128,7 +128,7 @@ class TestMakeTaskGraph(unittest.TestCase):
             buildNumber=3,
             source_enabled=False,
             updates_enabled=True,
-            l10n_platforms=[],
+            l10n_config={},
             enUS_platforms=["win32", "macosx64"],
             partial_updates={
                 "38.0": {
@@ -164,7 +164,7 @@ class TestMakeTaskGraph(unittest.TestCase):
             buildNumber=3,
             source_enabled=False,
             updates_enabled=True,
-            l10n_platforms=[],
+            l10n_config={},
             enUS_platforms=["win32", "macosx64"],
             partial_updates={
                 "38.0": {
@@ -206,7 +206,7 @@ class TestMakeTaskGraph(unittest.TestCase):
             buildNumber=3,
             source_enabled=False,
             updates_enabled=True,
-            l10n_platforms=[],
+            l10n_config={},
             enUS_platforms=["win32", "macosx64"],
             partial_updates={
                 "38.0": {
@@ -249,21 +249,24 @@ class TestMakeTaskGraph(unittest.TestCase):
             source_enabled=False,
             updates_enabled=False,
             enUS_platforms=["win32"],
-            l10n_platforms={
-                "win32": {
-                    "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.exe",
+            l10n_config={
+                "platforms": {
+                    "win32": {
+                        "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.exe",
+                        "locales": ["de", "en-GB", "zh-TW"],
+                        "chunks": 1,
+                    },
+                },
+                "changesets": {
+                    "de": "default",
+                    "en-GB": "default",
+                    "zh-TW": "default",
                 },
             },
             branch="mozilla-beta",
             product="firefox",
             repo_path="releases/mozilla-beta",
             revision="abcdef123456",
-            l10n_changesets={
-                "de": "default",
-                "en-GB": "default",
-                "zh-TW": "default",
-            },
-            l10n_chunks=1,
         )
 
         self._do_common_assertions(graph)
@@ -290,23 +293,26 @@ class TestMakeTaskGraph(unittest.TestCase):
             source_enabled=False,
             updates_enabled=False,
             enUS_platforms=["win32"],
-            l10n_platforms={
-                "win32": {
-                    "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.exe",
+            l10n_config={
+                "platforms": {
+                    "win32": {
+                        "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.exe",
+                        "locales": ["de", "en-GB", "ru", "uk", "zh-TW"],
+                        "chunks": 2,
+                    },
+                },
+                "changesets": {
+                    "de": "default",
+                    "en-GB": "default",
+                    "ru": "default",
+                    "uk": "default",
+                    "zh-TW": "default",
                 },
             },
             branch="mozilla-beta",
             product="firefox",
             repo_path="releases/mozilla-beta",
             revision="abcdef123456",
-            l10n_changesets={
-                "de": "default",
-                "en-GB": "default",
-                "ru": "default",
-                "uk": "default",
-                "zh-TW": "default",
-            },
-            l10n_chunks=2,
         )
 
         self._do_common_assertions(graph)
