@@ -41,7 +41,7 @@ class TestMakeTaskGraph(unittest.TestCase):
             version="42.0b2",
             buildNumber=3,
             source_enabled=True,
-            l10n_platforms=[],
+            l10n_config={},
             repo_path="releases/foo",
             revision="fedcba654321",
             branch="foo",
@@ -108,7 +108,7 @@ class TestMakeTaskGraph(unittest.TestCase):
             buildNumber=3,
             updates_enabled=False,
             source_enabled=False,
-            l10n_platforms=[],
+            l10n_config={},
         )
 
         self._do_common_assertions(graph)
@@ -128,7 +128,7 @@ class TestMakeTaskGraph(unittest.TestCase):
             buildNumber=3,
             source_enabled=False,
             updates_enabled=True,
-            l10n_platforms=[],
+            l10n_config={},
             enUS_platforms=["win32", "macosx64"],
             partial_updates={
                 "38.0": {
@@ -164,7 +164,7 @@ class TestMakeTaskGraph(unittest.TestCase):
             buildNumber=3,
             source_enabled=False,
             updates_enabled=True,
-            l10n_platforms=[],
+            l10n_config={},
             enUS_platforms=["win32", "macosx64"],
             partial_updates={
                 "38.0": {
@@ -206,7 +206,7 @@ class TestMakeTaskGraph(unittest.TestCase):
             buildNumber=3,
             source_enabled=False,
             updates_enabled=True,
-            l10n_platforms=[],
+            l10n_config={},
             enUS_platforms=["win32", "macosx64"],
             partial_updates={
                 "38.0": {
@@ -248,18 +248,25 @@ class TestMakeTaskGraph(unittest.TestCase):
             buildNumber=3,
             source_enabled=False,
             updates_enabled=False,
-            l10n_platforms=["win32"],
             enUS_platforms=["win32"],
+            l10n_config={
+                "platforms": {
+                    "win32": {
+                        "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.exe",
+                        "locales": ["de", "en-GB", "zh-TW"],
+                        "chunks": 1,
+                    },
+                },
+                "changesets": {
+                    "de": "default",
+                    "en-GB": "default",
+                    "zh-TW": "default",
+                },
+            },
             branch="mozilla-beta",
             product="firefox",
             repo_path="releases/mozilla-beta",
             revision="abcdef123456",
-            l10n_changesets={
-                "de": "default",
-                "en-GB": "default",
-                "zh-TW": "default",
-            },
-            l10n_chunks=1,
         )
 
         self._do_common_assertions(graph)
@@ -273,6 +280,7 @@ class TestMakeTaskGraph(unittest.TestCase):
         self.assertEqual(task["task"]["workerType"], "buildbot-bridge")
         self.assertEqual(payload["buildername"], "mozilla-beta_firefox_win32_l10n_repack")
         self.assertEqual(properties["locales"], "de:default en-GB:default zh-TW:default")
+        self.assertEqual(properties["en_us_binary_url"], "https://queue.taskcluster.net/something/firefox.exe")
 
         # Make sure only one chunk was generated
         self.assertIsNone(get_task_by_name(graph, "mozilla-beta_firefox_win32_l10n_repack_0"))
@@ -284,20 +292,27 @@ class TestMakeTaskGraph(unittest.TestCase):
             buildNumber=3,
             source_enabled=False,
             updates_enabled=False,
-            l10n_platforms=["win32"],
             enUS_platforms=["win32"],
+            l10n_config={
+                "platforms": {
+                    "win32": {
+                        "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.exe",
+                        "locales": ["de", "en-GB", "ru", "uk", "zh-TW"],
+                        "chunks": 2,
+                    },
+                },
+                "changesets": {
+                    "de": "default",
+                    "en-GB": "default",
+                    "ru": "default",
+                    "uk": "default",
+                    "zh-TW": "default",
+                },
+            },
             branch="mozilla-beta",
             product="firefox",
             repo_path="releases/mozilla-beta",
             revision="abcdef123456",
-            l10n_changesets={
-                "de": "default",
-                "en-GB": "default",
-                "ru": "default",
-                "uk": "default",
-                "zh-TW": "default",
-            },
-            l10n_chunks=2,
         )
 
         self._do_common_assertions(graph)
@@ -305,12 +320,14 @@ class TestMakeTaskGraph(unittest.TestCase):
         chunk1 = get_task_by_name(graph, "mozilla-beta_firefox_win32_l10n_repack_1")
         chunk2 = get_task_by_name(graph, "mozilla-beta_firefox_win32_l10n_repack_2")
 
-        chunk1_locales = chunk1["task"]["payload"]["properties"]["locales"]
-        chunk2_locales = chunk2["task"]["payload"]["properties"]["locales"]
+        chunk1_properties = chunk1["task"]["payload"]["properties"]
+        chunk2_properties = chunk2["task"]["payload"]["properties"]
 
         self.assertEqual(chunk1["task"]["payload"]["buildername"], "mozilla-beta_firefox_win32_l10n_repack")
-        self.assertEqual(chunk1_locales, "de:default en-GB:default ru:default")
+        self.assertEqual(chunk1_properties["locales"], "de:default en-GB:default ru:default")
+        self.assertEqual(chunk1_properties["en_us_binary_url"], "https://queue.taskcluster.net/something/firefox.exe")
         self.assertEqual(chunk2["task"]["payload"]["buildername"], "mozilla-beta_firefox_win32_l10n_repack")
-        self.assertEqual(chunk2_locales, "uk:default zh-TW:default")
+        self.assertEqual(chunk2_properties["locales"], "uk:default zh-TW:default")
+        self.assertEqual(chunk2_properties["en_us_binary_url"], "https://queue.taskcluster.net/something/firefox.exe")
 
-        self.assertEqual(get_task_by_name(graph, "mozilla-beta_firefox_win32_l10n_repack_3"), None)
+        self.assertIsNone(get_task_by_name(graph, "mozilla-beta_firefox_win32_l10n_repack_3"))
