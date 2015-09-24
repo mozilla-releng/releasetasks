@@ -14,12 +14,13 @@
         workerType: "buildbot-bridge"
         created: "{{ now }}"
         deadline: "{{ now.replace(hours=36) }}"
-        expires: {{ never }}"
+        expires: "{{ never }}"
         priority: "high"
         retries: 5
 
         payload:
             buildername: "{{ buildername }}"
+            product; "{{ product }}"
             sourcestamp:
                 branch: "{{ repo_path }}"
                 revision: "{{ revision }}"
@@ -31,6 +32,9 @@
 
         metadata:
             name: "{{ product }} {{ branch }} {{ platform }} l10n repack {{ chunk }}/{{ platform_info["chunks"] }}"
+            description: "Release Promotion l10n repack job"
+            owner: "release@mozilla.com"
+            source: https://github.com/mozilla/releasetasks
 
         {% if running_tests is defined %}
         extra:
