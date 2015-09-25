@@ -8,14 +8,15 @@ from chunkify import chunkify
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 from thclient import TreeherderClient
 
-from taskcluster.utils import stableSlugId
-from releasetasks.util import treeherder_platform, encryptEnvVar_wrapper
+from taskcluster.utils import stableSlugId, encryptEnvVar
+from releasetasks.util import treeherder_platform
 
 
 DEFAULT_TEMPLATE_DIR = path.join(path.dirname(__file__), "templates")
 
 
-def make_task_graph(root_template="release_graph.yml.tmpl", template_dir=DEFAULT_TEMPLATE_DIR, **template_kwargs):
+def make_task_graph(public_key, root_template="release_graph.yml.tmpl",
+                    template_dir=DEFAULT_TEMPLATE_DIR, **template_kwargs):
     # TODO: some validation of template_kwargs + defaults
     env = Environment(loader=FileSystemLoader(template_dir), undefined=StrictUndefined)
     th = TreeherderClient()
@@ -34,7 +35,7 @@ def make_task_graph(root_template="release_graph.yml.tmpl", template_dir=DEFAULT
         # actually tell Taskcluster never to expire them, but 1,000 years
         # is as good as never....
         "never": arrow.now().replace(years=1000),
-        "get_complete_mar_url": lambda a, b, c, d: "COMPLETE MAR URL",
+        "get_complete_mar_url": lambda a, b, c, d, e: "COMPLETE MAR URL",
         "get_complete_mar_artifact": lambda a, b, c: "COMPLETE MAR ARTIFACT",
         # Treeherder expects 12 symbols in revision
         "revision_hash": th.get_resultsets(
@@ -42,9 +43,8 @@ def make_task_graph(root_template="release_graph.yml.tmpl", template_dir=DEFAULT
             revision=template_kwargs["revision"][:12])[0]["revision_hash"],
         "get_treeherder_platform": treeherder_platform,
         # TODO: unstub these
-        "encrypt_env_var": encryptEnvVar_wrapper,
-        "from_mar": lambda a, b, c, d: "FROM_MAR",
-        "to_mar": lambda a, b: "TO_MAR",
+        "encrypt_env_var": lambda *args: encryptEnvVar(*args,
+                                                       keyFile=public_key),
         "balrog_username": "TODO",
         "balrog_password": "TODO",
     }
