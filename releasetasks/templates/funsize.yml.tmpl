@@ -34,8 +34,8 @@
                 partials:
                     -
                         locale: {{ locale }}
-                        from_mar: "{{ from_mar(platform, locale, partial_version, partial_info["buildNumber"]) }}"
-                        to_mar: "{{ to_mar(platform, locale) }}"
+                        from_mar: "{{ get_complete_mar_url(product, platform, locale, partial_version, partial_info["buildNumber"]) }}"
+                        to_mar: "{{ get_complete_mar_artifact(platform, branch, revision) }}"
                         platform: {{ platform }}
                         branch: {{ branch }}
                         previousVersion: {{ partial_version }}
@@ -67,10 +67,6 @@
                 - /runme.sh
 
             env:
-                FROM_MAR: "{{ get_complete_mar_url(product, platform, locale, partial_version) }}"
-                TO_MAR: "{{ get_complete_mar_artifact(platform, branch, revision) }}"
-                PLATFORM: "{{ platform }}"
-                LOCALE: "{{ locale }}"
                 SIGNING_CERT: "release"
 
             artifacts:
