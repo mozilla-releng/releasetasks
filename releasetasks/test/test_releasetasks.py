@@ -1,7 +1,12 @@
 # -*- coding: utf-8 -*-
+import os
 import unittest
+import mock
+import thclient.client
 
 from releasetasks import make_task_graph as make_task_graph_orig
+
+DUMMY_PUBLIC_KEY = os.path.join(os.path.dirname(__file__), "public.key")
 
 
 def get_task_by_name(graph, name):
@@ -18,8 +23,13 @@ def get_task_by_slugid(graph, slugid):
     return None
 
 
+@mock.patch.object(thclient.client.TreeherderClient, "get_resultsets")
 def make_task_graph(*args, **kwargs):
-    return make_task_graph_orig(*args, running_tests=True, **kwargs)
+    args = list(args)
+    mocked_get_resultsets = args.pop()
+    mocked_get_resultsets.return_value = [{"revision_hash": "abcdefgh1234567"}]
+    return make_task_graph_orig(*args, public_key=DUMMY_PUBLIC_KEY,
+                                running_tests=True, **kwargs)
 
 
 class TestMakeTaskGraph(unittest.TestCase):
@@ -106,6 +116,8 @@ class TestMakeTaskGraph(unittest.TestCase):
         graph = make_task_graph(
             version="42.0b2",
             buildNumber=3,
+            branch="foo",
+            revision="abcdef123456",
             updates_enabled=False,
             source_enabled=False,
             l10n_config={},
@@ -331,3 +343,34 @@ class TestMakeTaskGraph(unittest.TestCase):
         self.assertEqual(chunk2_properties["en_us_binary_url"], "https://queue.taskcluster.net/something/firefox.exe")
 
         self.assertIsNone(get_task_by_name(graph, "release-mozilla-beta_firefox_win32_l10n_repack_3"))
+
+    def test_encryption(self):
+        graph = make_task_graph(
+            version="42.0b2",
+            buildNumber=3,
+            source_enabled=False,
+            updates_enabled=True,
+            l10n_config={},
+            enUS_platforms=["win32", "macosx64"],
+            partial_updates={
+                "38.0": {
+                    "buildNumber": 1,
+                },
+                "37.0": {
+                    "buildNumber": 2,
+                },
+            },
+            branch="mozilla-beta",
+            product="firefox",
+            revision="abcdef123456",
+            balrog_api_root="https://fake.balrog/api",
+            signing_class="dep-signing",
+        )
+        self._do_common_assertions(graph)
+        for p in ("win32", "macosx64"):
+            for v in ("38.0build1", "37.0build2"):
+                balrog = get_task_by_name(graph, "{}_en-US_{}_funsize_balrog_task".format(p, v))
+                self.assertEqual(len(balrog["task"]["payload"]["encryptedEnv"]), 2)
+                self.assertTrue(
+                    balrog["task"]["payload"]["encryptedEnv"][0].startswith("wcB"),
+                    "Encrypted string should always start with 'wcB'")
