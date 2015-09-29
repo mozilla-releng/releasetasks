@@ -2,7 +2,7 @@
 {% for chunk in range(1, platform_info["chunks"]+1) %}
 {% set our_locales = chunkify(sorted(platform_info["locales"]), chunk, platform_info["chunks"]) %}
 # TODO: make a helper function to generate consistent builder names?
-{% set buildername = "{}_{}_{}_l10n_repack".format(branch, product, platform) %}
+{% set buildername = "release-{}_{}_{}_l10n_repack".format(branch, product, platform) %}
 -
     # We have multiple chunks of l10n per platform, so we need unique task ids
     # for each of them. However, they all share the same builder because the
