@@ -283,20 +283,20 @@ class TestMakeTaskGraph(unittest.TestCase):
 
         self._do_common_assertions(graph)
 
-        task = get_task_by_name(graph, "mozilla-beta_firefox_win32_l10n_repack_1")
+        task = get_task_by_name(graph, "release-mozilla-beta_firefox_win32_l10n_repack_1")
 
         payload = task["task"]["payload"]
         properties = payload["properties"]
 
         self.assertEqual(task["task"]["provisionerId"], "buildbot-bridge")
         self.assertEqual(task["task"]["workerType"], "buildbot-bridge")
-        self.assertEqual(payload["buildername"], "mozilla-beta_firefox_win32_l10n_repack")
+        self.assertEqual(payload["buildername"], "release-mozilla-beta_firefox_win32_l10n_repack")
         self.assertEqual(properties["locales"], "de:default en-GB:default zh-TW:default")
         self.assertEqual(properties["en_us_binary_url"], "https://queue.taskcluster.net/something/firefox.exe")
 
         # Make sure only one chunk was generated
-        self.assertIsNone(get_task_by_name(graph, "mozilla-beta_firefox_win32_l10n_repack_0"))
-        self.assertIsNone(get_task_by_name(graph, "mozilla-beta_firefox_win32_l10n_repack_2"))
+        self.assertIsNone(get_task_by_name(graph, "release-mozilla-beta_firefox_win32_l10n_repack_0"))
+        self.assertIsNone(get_task_by_name(graph, "release-mozilla-beta_firefox_win32_l10n_repack_2"))
 
     def test_l10n_multiple_chunks(self):
         graph = make_task_graph(
@@ -329,20 +329,20 @@ class TestMakeTaskGraph(unittest.TestCase):
 
         self._do_common_assertions(graph)
 
-        chunk1 = get_task_by_name(graph, "mozilla-beta_firefox_win32_l10n_repack_1")
-        chunk2 = get_task_by_name(graph, "mozilla-beta_firefox_win32_l10n_repack_2")
+        chunk1 = get_task_by_name(graph, "release-mozilla-beta_firefox_win32_l10n_repack_1")
+        chunk2 = get_task_by_name(graph, "release-mozilla-beta_firefox_win32_l10n_repack_2")
 
         chunk1_properties = chunk1["task"]["payload"]["properties"]
         chunk2_properties = chunk2["task"]["payload"]["properties"]
 
-        self.assertEqual(chunk1["task"]["payload"]["buildername"], "mozilla-beta_firefox_win32_l10n_repack")
+        self.assertEqual(chunk1["task"]["payload"]["buildername"], "release-mozilla-beta_firefox_win32_l10n_repack")
         self.assertEqual(chunk1_properties["locales"], "de:default en-GB:default ru:default")
         self.assertEqual(chunk1_properties["en_us_binary_url"], "https://queue.taskcluster.net/something/firefox.exe")
-        self.assertEqual(chunk2["task"]["payload"]["buildername"], "mozilla-beta_firefox_win32_l10n_repack")
+        self.assertEqual(chunk2["task"]["payload"]["buildername"], "release-mozilla-beta_firefox_win32_l10n_repack")
         self.assertEqual(chunk2_properties["locales"], "uk:default zh-TW:default")
         self.assertEqual(chunk2_properties["en_us_binary_url"], "https://queue.taskcluster.net/something/firefox.exe")
 
-        self.assertIsNone(get_task_by_name(graph, "mozilla-beta_firefox_win32_l10n_repack_3"))
+        self.assertIsNone(get_task_by_name(graph, "release-mozilla-beta_firefox_win32_l10n_repack_3"))
 
     def test_encryption(self):
         graph = make_task_graph(
