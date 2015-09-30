@@ -20,11 +20,11 @@
 
         payload:
             buildername: "{{ buildername }}"
-            product: "{{ product }}"
             sourcestamp:
                 branch: "{{ repo_path }}"
                 revision: "{{ revision }}"
             properties:
+                product: "{{ product }}"
                 en_us_binary_url: "{{ platform_info['en_us_binary_url'] }}"
                 # Quotes cannot be used around this string because the loop causes it to have trailing whitespace
                 # (which gets stripped by the yaml parser when unquoted). Kindof hacky.
