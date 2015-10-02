@@ -10,6 +10,8 @@ scopes:
   - queue:define-task:buildbot-bridge/buildbot-bridge
   - queue:create-task:buildbot-bridge/buildbot-bridge
   - queue:task-priority:high
+  # TODO: need a better way to specify dev/prod scopes
+  - buildbot-bridge:builder-name:release-date*
 {% if source_enabled %}
   - docker-worker:cache:tc-vcs
   - docker-worker:image:taskcluster/builder:*
