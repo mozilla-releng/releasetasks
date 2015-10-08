@@ -45,6 +45,11 @@ class TestMakeTaskGraph(unittest.TestCase):
                 task = t["task"]
                 self.assertEqual(task["priority"], "high")
                 self.assertIn("task_name", task["extra"])
+                properties = task["payload"].get("properties")
+                if properties:
+                    # The following properties are required by log_uploader.py
+                    self.assertIn("version", properties)
+                    self.assertIn("build_number", properties)
 
     def test_source_task_definition(self):
         graph = make_task_graph(
