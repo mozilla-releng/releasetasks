@@ -50,6 +50,7 @@ class TestMakeTaskGraph(unittest.TestCase):
                     # The following properties are required by log_uploader.py
                     self.assertIn("version", properties)
                     self.assertIn("build_number", properties)
+                    self.assertIn("release_promotion", properties)
 
     def test_source_task_definition(self):
         graph = make_task_graph(
