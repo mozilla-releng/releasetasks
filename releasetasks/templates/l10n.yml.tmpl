@@ -31,6 +31,9 @@
                 # Quotes cannot be used around this string because the loop causes it to have trailing whitespace
                 # (which gets stripped by the yaml parser when unquoted). Kindof hacky.
                 locales: {% for l in our_locales %}{{ "{}:{} ".format(l, l10n_config["changesets"][l]) }}{% endfor %}
+                version: {{ version }}
+                build_number: {{ buildNumber }}
+                release_promotion: true
 
         metadata:
             name: "{{ product }} {{ branch }} {{ platform }} l10n repack {{ chunk }}/{{ platform_info["chunks"] }}"
