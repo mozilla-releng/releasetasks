@@ -298,6 +298,9 @@ class TestMakeTaskGraph(unittest.TestCase):
                 self.assertIsNone(generator["task"].get("scopes"))
                 self.assertItemsEqual(signing["task"]["scopes"], ["signing:cert:dep-signing", "signing:format:mar", "signing:format:gpg"])
                 self.assertIsNone(balrog["task"].get("scopes"))
+                self.assertEqual(
+                    signing["task"]["payload"]["signingManifest"],
+                    "https://queue.taskcluster.net/v1/task/%s/artifacts/public/env/manifest.json" % generator["taskId"])
 
     def test_l10n_one_chunk(self):
         graph = make_task_graph(

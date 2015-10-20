@@ -132,7 +132,7 @@
             createdForUser: release+funsize@mozilla.com
 
         payload:
-            signingManifest: "https://queue.taskcluster.net/v1/task/{{ stableSlugId('{}_update_generator_task'.format(basename)) }}/artifacts/public/env/manifest.json"
+            signingManifest: "https://queue.taskcluster.net/v1/task/{{ stableSlugId('{}_update_generator'.format(basename)) }}/artifacts/public/env/manifest.json"
 
 -
     taskId: "{{ stableSlugId('{}_balrog_task'.format(basename)) }}"
