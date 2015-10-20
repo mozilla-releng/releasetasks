@@ -206,7 +206,9 @@
                 - {{ encrypt_env_var(stableSlugId('{}_balrog_task'.format(basename)), now_ms,
                                     now_ms + 24 * 3600 * 1000, "BALROG_PASSWORD",
                                     balrog_password) }}
+            {% if signing_class != "dep-signing" %}
             features:
                 balrogVPNProxy: true
+            {% endif %}
 
 {% endfor %}
