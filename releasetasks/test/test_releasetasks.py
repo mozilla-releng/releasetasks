@@ -55,8 +55,13 @@ class TestMakeTaskGraph(unittest.TestCase):
     def test_source_task_definition(self):
         graph = make_task_graph(
             version="42.0b2",
+            appVersion="42.0",
             buildNumber=3,
             source_enabled=True,
+            en_US_config={"platforms": {
+                "linux": {"task_id": "xyz"},
+                "win32": {"task_id": "xyy"}
+            }},
             l10n_config={},
             repo_path="releases/foo",
             revision="fedcba654321",
@@ -121,11 +126,16 @@ class TestMakeTaskGraph(unittest.TestCase):
     def test_required_graph_scopes(self):
         graph = make_task_graph(
             version="42.0b2",
+            appVersion="42.0",
             buildNumber=3,
             branch="foo",
             revision="abcdef123456",
             updates_enabled=False,
             source_enabled=False,
+            en_US_config={"platforms": {
+                "linux": {"task_id": "xyz"},
+                "win32": {"task_id": "xyy"}
+            }},
             l10n_config={},
         )
 
@@ -143,9 +153,14 @@ class TestMakeTaskGraph(unittest.TestCase):
     def test_funsize_en_US_deps(self):
         graph = make_task_graph(
             version="42.0b2",
+            appVersion="42.0",
             buildNumber=3,
             source_enabled=False,
             updates_enabled=True,
+            en_US_config={"platforms": {
+                "macosx64": {"task_id": "xyz"},
+                "win32": {"task_id": "xyy"}
+            }},
             l10n_config={},
             enUS_platforms=["win32", "macosx64"],
             partial_updates={
@@ -167,7 +182,7 @@ class TestMakeTaskGraph(unittest.TestCase):
         self._do_common_assertions(graph)
 
         for p in ("win32", "macosx64"):
-            for v in ("38.0build1", "37.0build2"):
+            for v, appV in (("38.0build1", "38.0"), ("37.0build2", "37.0")):
                 generator = get_task_by_name(graph, "{}_en-US_{}_funsize_update_generator".format(p, v))
                 signing = get_task_by_name(graph, "{}_en-US_{}_funsize_signing_task".format(p, v))
                 balrog = get_task_by_name(graph, "{}_en-US_{}_funsize_balrog_task".format(p, v))
@@ -175,13 +190,32 @@ class TestMakeTaskGraph(unittest.TestCase):
                 self.assertIsNone(generator.get("requires"))
                 self.assertEqual(signing.get("requires"), [generator["taskId"]])
                 self.assertEqual(balrog.get("requires"), [signing["taskId"]])
+                if p == "win32":
+                    self.assertEqual(
+                        "http://download.mozilla.org/?product=firefox-%s-complete&os=win&lang=en-US" % appV,
+                        generator["task"]["extra"]["funsize"]["partials"][0]["from_mar"])
+                    self.assertEqual(
+                        "https://queue.taskcluster.net/v1/task/xyy/artifacts/public/build/firefox-42.0.en-US.win32.complete.mar",
+                        generator["task"]["extra"]["funsize"]["partials"][0]["to_mar"])
+                elif p == "macosx64":
+                    self.assertEqual(
+                        "http://download.mozilla.org/?product=firefox-%s-complete&os=osx&lang=en-US" % appV,
+                        generator["task"]["extra"]["funsize"]["partials"][0]["from_mar"])
+                    self.assertEqual(
+                        "https://queue.taskcluster.net/v1/task/xyz/artifacts/public/build/firefox-42.0.en-US.mac.complete.mar",
+                        generator["task"]["extra"]["funsize"]["partials"][0]["to_mar"])
 
     def test_funsize_en_US_scopes(self):
         graph = make_task_graph(
             version="42.0b2",
+            appVersion="42.0",
             buildNumber=3,
             source_enabled=False,
             updates_enabled=True,
+            en_US_config={"platforms": {
+                "macosx64": {"task_id": "xyz"},
+                "win32": {"task_id": "xyy"}
+            }},
             l10n_config={},
             enUS_platforms=["win32", "macosx64"],
             partial_updates={
@@ -221,9 +255,14 @@ class TestMakeTaskGraph(unittest.TestCase):
     def test_funsize_en_US_scopes_dep_signing(self):
         graph = make_task_graph(
             version="42.0b2",
+            appVersion="42.0",
             buildNumber=3,
             source_enabled=False,
             updates_enabled=True,
+            en_US_config={"platforms": {
+                "macosx64": {"task_id": "xyz"},
+                "win32": {"task_id": "xyy"}
+            }},
             l10n_config={},
             enUS_platforms=["win32", "macosx64"],
             partial_updates={
@@ -259,14 +298,21 @@ class TestMakeTaskGraph(unittest.TestCase):
                 self.assertIsNone(generator["task"].get("scopes"))
                 self.assertItemsEqual(signing["task"]["scopes"], ["signing:cert:dep-signing", "signing:format:mar", "signing:format:gpg"])
                 self.assertIsNone(balrog["task"].get("scopes"))
+                self.assertEqual(
+                    signing["task"]["payload"]["signingManifest"],
+                    "https://queue.taskcluster.net/v1/task/%s/artifacts/public/env/manifest.json" % generator["taskId"])
 
     def test_l10n_one_chunk(self):
         graph = make_task_graph(
             version="42.0b2",
+            appVersion="42.0",
             buildNumber=3,
             source_enabled=False,
             updates_enabled=False,
             enUS_platforms=["win32"],
+            en_US_config={"platforms": {
+                "win32": {"task_id": "xyy"}
+            }},
             l10n_config={
                 "platforms": {
                     "win32": {
@@ -307,10 +353,14 @@ class TestMakeTaskGraph(unittest.TestCase):
     def test_l10n_multiple_chunks(self):
         graph = make_task_graph(
             version="42.0b2",
+            appVersion="42.0",
             buildNumber=3,
             source_enabled=False,
             updates_enabled=False,
             enUS_platforms=["win32"],
+            en_US_config={"platforms": {
+                "win32": {"task_id": "xyy"}
+            }},
             l10n_config={
                 "platforms": {
                     "win32": {
@@ -353,9 +403,14 @@ class TestMakeTaskGraph(unittest.TestCase):
     def test_encryption(self):
         graph = make_task_graph(
             version="42.0b2",
+            appVersion="42.0",
             buildNumber=3,
             source_enabled=False,
             updates_enabled=True,
+            en_US_config={"platforms": {
+                "macosx64": {"task_id": "xyz"},
+                "win32": {"task_id": "xyy"}
+            }},
             l10n_config={},
             enUS_platforms=["win32", "macosx64"],
             partial_updates={

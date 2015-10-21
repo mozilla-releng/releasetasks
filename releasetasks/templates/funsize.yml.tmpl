@@ -35,7 +35,12 @@
                     -
                         locale: {{ locale }}
                         from_mar: "{{ get_complete_mar_url(product, platform, locale, partial_version, partial_info["buildNumber"]) }}"
-                        to_mar: "{{ get_complete_mar_artifact(platform, branch, revision) }}"
+                        # en-US: task ID comes from from buildbot via releaserunner
+                        {% if locale == "en-US" %}
+                        to_mar: "https://queue.taskcluster.net/v1/task/{{ en_US_config["platforms"][platform]["task_id"] }}/artifacts/public/build/{{ product }}-{{ appVersion }}.{{ locale }}.{{ buildbot2ftp(platform) }}.complete.mar"
+                        {% else %}
+                        to_mar: "TODO: generate mar url using BBB task_id and locale"
+                        {% endif %}
                         platform: {{ platform }}
                         branch: {{ branch }}
                         previousVersion: {{ partial_version }}
@@ -67,7 +72,12 @@
                 - /runme.sh
 
             env:
+                {% if signing_class == "dep-signing" %}
+                MOZ_DISABLE_MAR_CERT_VERIFICATION: true
+                SIGNING_CERT: "dep"
+                {% else %}
                 SIGNING_CERT: "release"
+                {% endif %}
 
             artifacts:
                 "public/env":
@@ -122,7 +132,7 @@
             createdForUser: release+funsize@mozilla.com
 
         payload:
-            signingManifest: "https://queue.taskcluster.net/v1/task/{{ stableSlugId('{}_update_generator_task'.format(basename)) }}/artifacts/public/env/manifest.json"
+            signingManifest: "https://queue.taskcluster.net/v1/task/{{ stableSlugId('{}_update_generator'.format(basename)) }}/artifacts/public/env/manifest.json"
 
 -
     taskId: "{{ stableSlugId('{}_balrog_task'.format(basename)) }}"
@@ -177,10 +187,15 @@
                 - /runme.sh
 
             env:
+                {% if signing_class == "dep-signing" %}
+                MOZ_DISABLE_MAR_CERT_VERIFICATION: true
+                SIGNING_CERT: "dep"
+                {% else %}
+                SIGNING_CERT: "release"
+                {% endif %}
                 PARENT_TASK_ARTIFACTS_URL_PREFIX: "https://queue.taskcluster.net/v1/task/{{ stableSlugId('{}_signing_task'.format(basename)) }}/artifacts/public/env"
                 BALROG_API_ROOT: {{ balrog_api_root }}
                 # TODO: should funsize be publishing to an s3 bucket? or will beetmover do that?
-                SIGNING_CERT: "release"
                 {% if extra_balrog_submitter_params is defined %}
                 EXTRA_BALROG_SUBMITTER_PARAMS: "{{ extra_balrog_submitter_params }}"
                 {% endif %}
@@ -191,7 +206,9 @@
                 - {{ encrypt_env_var(stableSlugId('{}_balrog_task'.format(basename)), now_ms,
                                     now_ms + 24 * 3600 * 1000, "BALROG_PASSWORD",
                                     balrog_password) }}
+            {% if signing_class != "dep-signing" %}
             features:
                 balrogVPNProxy: true
+            {% endif %}
 
 {% endfor %}

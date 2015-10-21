@@ -18,6 +18,7 @@ requirements = [
     "chunkify",
     "treeherder-client",
     "PGPy",
+    "buildtools",
 ]
 test_requirements = [
     "pytest",
