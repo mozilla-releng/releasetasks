@@ -44,9 +44,6 @@ def make_task_graph(public_key, root_template="release_graph.yml.tmpl",
         "encrypt_env_var": lambda *args: encryptEnvVar(*args,
                                                        keyFile=public_key),
         "buildbot2ftp": buildbot2ftp,
-        # TODO: unstub these
-        "balrog_username": "TODO",
-        "balrog_password": "TODO",
     }
     template_vars.update(template_kwargs)
 
