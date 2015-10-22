@@ -91,21 +91,23 @@ class TestMakeTaskGraph(unittest.TestCase):
             "queue:create-task:aws-provisioner-v1/opt-linux64",
             "queue:define-task:aws-provisioner-v1/build-c4-2xlarge",
             "queue:create-task:aws-provisioner-v1/build-c4-2xlarge",
-            "docker-worker:cache:build-linux64-workspace",
+            "docker-worker:cache:build-foo-release-workspace",
             "docker-worker:cache:tooltool-cache",
             "signing:format:gpg",
-            "signing:cert:release-signing"
+            "signing:cert:release-signing",
+            "docker-worker:relengapi-proxy:tooltool.download.public"
         ])
         self.assertTrue(expected_graph_scopes.issubset(graph["scopes"]))
         expected_task_scopes = set([
             "docker-worker:cache:tc-vcs",
-            "docker-worker:image:taskcluster/builder:0.5.7",
+            "docker-worker:image:taskcluster/builder:0.5.9",
             "queue:define-task:aws-provisioner-v1/opt-linux64",
             "queue:create-task:aws-provisioner-v1/opt-linux64",
             "queue:define-task:aws-provisioner-v1/build-c4-2xlarge",
             "queue:create-task:aws-provisioner-v1/build-c4-2xlarge",
-            "docker-worker:cache:build-linux64-workspace",
-            "docker-worker:cache:tooltool-cache"
+            "docker-worker:cache:build-foo-release-workspace",
+            "docker-worker:cache:tooltool-cache",
+            "docker-worker:relengapi-proxy:tooltool.download.public",
         ])
         self.assertTrue(expected_task_scopes.issubset(task["scopes"]))
 
