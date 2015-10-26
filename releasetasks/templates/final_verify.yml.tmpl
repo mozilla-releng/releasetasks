@@ -1,0 +1,48 @@
+{% set buildername = "{}_final_verify".format(branch) %}
+-
+    taskId: "{{ stableSlugId(buildername) }}"
+    reruns: 5
+    task:
+        provisionerId: aws-provisioner-v1
+        workerType: b2gtest
+        created: "{{ now }}"
+        deadline: "{{ now.replace(hours=6) }}"
+        expires: "{{ never }}"
+        priority: "high"
+        retries: 5
+        scopes:
+
+        payload:
+            maxRunTime: 7200
+            image: rail/python-test-runner
+            cache:
+                
+            command:
+                - /bin/bash
+                - bin/build.sh
+            env:
+                TAG: "default"
+                RELEASE_CONFIGS: {% for key, val in verifyConfigs.iteritems() %}{{ val }} {% endfor %}
+        metadata:
+            owner: release@mozilla.com
+            source: https://github.com/mozilla/releasetasks
+            name: "{{ branch }} final verification"
+            description: |
+                Verifies that all release blobs are in the correct place
+
+        {% if running_tests is defined %}
+        extra:
+            task_name: "{{ buildername }}"
+        {% endif %}
+
+        {# TODO: decide what to use here...
+        treeherder:
+            symbol: FV
+            groupSymbol: Release
+            collection:
+                opt: true
+            machine:
+                platform: none
+            build:
+                platform: none
+        #}
