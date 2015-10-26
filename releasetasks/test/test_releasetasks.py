@@ -69,6 +69,7 @@ class TestMakeTaskGraph(unittest.TestCase):
             branch="foo",
             updates_enabled=False,
             signing_class="release-signing",
+            verifyConfigs={}
         )
 
         self._do_common_assertions(graph)
@@ -140,6 +141,11 @@ class TestMakeTaskGraph(unittest.TestCase):
                 "win32": {"task_id": "xyy"}
             }},
             l10n_config={},
+            verifyConfigs={'linux': "beta-firefox-linux.cfg",
+                           'linux64': "beta-firefox-linux64.cfg",
+                           'macosx64': "beta-firefox-macosx64.cfg",
+                           'win32': "beta-firefox-win32.cfg",
+                           'win64': "beta-firefox-win64.cfg"}
         )
 
         self._do_common_assertions(graph)
@@ -180,6 +186,7 @@ class TestMakeTaskGraph(unittest.TestCase):
             revision="abcdef123456",
             balrog_api_root="https://fake.balrog/api",
             signing_class="release-signing",
+            verifyConfigs={}
         )
 
         self._do_common_assertions(graph)
@@ -234,6 +241,7 @@ class TestMakeTaskGraph(unittest.TestCase):
             revision="abcdef123456",
             balrog_api_root="https://fake.balrog/api",
             signing_class="release-signing",
+            verifyConfigs={}
         )
 
         self._do_common_assertions(graph)
@@ -281,6 +289,11 @@ class TestMakeTaskGraph(unittest.TestCase):
             revision="abcdef123456",
             balrog_api_root="https://fake.balrog/api",
             signing_class="dep-signing",
+            verifyConfigs={'linux': "beta-firefox-linux.cfg",
+                           'linux64': "beta-firefox-linux64.cfg",
+                           'macosx64': "beta-firefox-macosx64.cfg",
+                           'win32': "beta-firefox-win32.cfg",
+                           'win64': "beta-firefox-win64.cfg"}
         )
 
         self._do_common_assertions(graph)
@@ -334,6 +347,11 @@ class TestMakeTaskGraph(unittest.TestCase):
             product="firefox",
             repo_path="releases/mozilla-beta",
             revision="abcdef123456",
+            verifyConfigs={'linux': "beta-firefox-linux.cfg",
+                           'linux64': "beta-firefox-linux64.cfg",
+                           'macosx64': "beta-firefox-macosx64.cfg",
+                           'win32': "beta-firefox-win32.cfg",
+                           'win64': "beta-firefox-win64.cfg"}
         )
 
         self._do_common_assertions(graph)
@@ -384,6 +402,11 @@ class TestMakeTaskGraph(unittest.TestCase):
             product="firefox",
             repo_path="releases/mozilla-beta",
             revision="abcdef123456",
+            verifyConfigs={'linux': "beta-firefox-linux.cfg",
+                           'linux64': "beta-firefox-linux64.cfg",
+                           'macosx64': "beta-firefox-macosx64.cfg",
+                           'win32': "beta-firefox-win32.cfg",
+                           'win64': "beta-firefox-win64.cfg"}
         )
 
         self._do_common_assertions(graph)
@@ -429,6 +452,11 @@ class TestMakeTaskGraph(unittest.TestCase):
             revision="abcdef123456",
             balrog_api_root="https://fake.balrog/api",
             signing_class="dep-signing",
+            verifyConfigs={'linux': "beta-firefox-linux.cfg",
+                           'linux64': "beta-firefox-linux64.cfg",
+                           'macosx64': "beta-firefox-macosx64.cfg",
+                           'win32': "beta-firefox-win32.cfg",
+                           'win64': "beta-firefox-win64.cfg"}
         )
         self._do_common_assertions(graph)
         for p in ("win32", "macosx64"):
