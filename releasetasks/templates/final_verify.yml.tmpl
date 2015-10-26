@@ -19,7 +19,8 @@
                 
             command:
                 - /bin/bash
-                - bin/build.sh
+                - -c
+                - hg clone https://hg.mozilla.org/build/tools && cd tools && hg up -r $TAG && cd release/ && ./final-verification.sh $RELEASE_CONFIGS"
             env:
                 TAG: "default"
                 RELEASE_CONFIGS: {% for key, val in verifyConfigs.iteritems() %}{{ val }} {% endfor %}
