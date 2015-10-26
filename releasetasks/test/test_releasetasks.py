@@ -34,7 +34,7 @@ def make_task_graph(*args, **kwargs):
 
 
 class TestMakeTaskGraph(unittest.TestCase):
-    """Because of huge the graph gets, verifying every character of it is
+    """Because of how huge the graph gets, verifying every character of it is
     impossible to maintain. Instead, we verify aspects of it. Eg, making sure
     the correct number of funsize partials are happening, rather than verifying
     the entire funsize tasks."""
