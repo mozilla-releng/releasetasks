@@ -57,3 +57,8 @@ tasks:
     {{ funsize_tasks()|indent(4) }}
     {% endfor %}
     {% endif %}
+
+    {% if verifyConfigs %}
+    {% macro finalVerify_tasks() %}{% include "final_verify.yml.tmpl" %}{% endmacro %}
+    {{ finalVerify_tasks()|indent(4) }}
+    {% endif %}
