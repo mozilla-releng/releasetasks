@@ -52,6 +52,7 @@ class TestMakeTaskGraph(unittest.TestCase):
                     self.assertIn("version", properties)
                     self.assertIn("build_number", properties)
                     self.assertIn("release_promotion", properties)
+                    self.assertIn("revision", properties)
 
     def test_source_task_definition(self):
         graph = make_task_graph(
