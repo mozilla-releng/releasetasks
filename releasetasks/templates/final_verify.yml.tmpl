@@ -10,13 +10,9 @@
         expires: "{{ never }}"
         priority: "high"
         retries: 5
-        scopes:
-
         payload:
             maxRunTime: 7200
             image: rail/python-test-runner
-            cache:
-                
             command:
                 - /bin/bash
                 - -c

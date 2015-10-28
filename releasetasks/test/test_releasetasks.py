@@ -141,11 +141,7 @@ class TestMakeTaskGraph(unittest.TestCase):
                 "win32": {"task_id": "xyy"}
             }},
             l10n_config={},
-            verifyConfigs={'linux': "beta-firefox-linux.cfg",
-                           'linux64': "beta-firefox-linux64.cfg",
-                           'macosx64': "beta-firefox-macosx64.cfg",
-                           'win32': "beta-firefox-win32.cfg",
-                           'win64': "beta-firefox-win64.cfg"}
+            verifyConfigs={}
         )
 
         self._do_common_assertions(graph)
@@ -466,3 +462,45 @@ class TestMakeTaskGraph(unittest.TestCase):
                 self.assertTrue(
                     balrog["task"]["payload"]["encryptedEnv"][0].startswith("wcB"),
                     "Encrypted string should always start with 'wcB'")
+
+    def test_final_verify_task_definition(self):
+        graph = make_task_graph(
+            version="42.0b2",
+            appVersion="42.0",
+            buildNumber=3,
+            source_enabled=False,
+            en_US_config={"platforms": {
+                "linux": {"task_id": "xyz"},
+                "win32": {"task_id": "xyy"}
+            }},
+            l10n_config={},
+            repo_path="releases/foo",
+            revision="fedcba654321",
+            branch="foo",
+            updates_enabled=False,
+            signing_class="release-signing",
+            verifyConfigs={'linux': "foo-firefox-linux.cfg",
+                           'linux64': "foo-firefox-linux64.cfg",
+                           'macosx64': "foo-firefox-macosx64.cfg",
+                           'win32': "foo-firefox-win32.cfg",
+                           'win64': "foo-firefox-win64.cfg"}
+        )
+        self._do_common_assertions(graph)
+
+        task_def = get_task_by_name(graph, "foo_final_verify")
+        task = task_def["task"]
+        payload = task["payload"]
+        self.assertEqual(task["provisionerId"], "aws-provisioner-v1")
+        self.assertEqual(task["workerType"], "b2gtest")
+        self.assertFalse("scopes" in task)
+        # XXX: Change the image name once it's in-tree.
+        self.assertTrue(payload["image"].startswith("rail/python-test-runner"))
+        self.assertFalse("cache" in payload)
+        self.assertFalse("artifacts" in payload)
+        self.assertTrue("env" in payload)
+        self.assertTrue("command" in payload)
+
+        expected_graph_scopes = set([
+            "queue:task-priority:high",
+        ])
+        self.assertTrue(expected_graph_scopes.issubset(graph["scopes"]))

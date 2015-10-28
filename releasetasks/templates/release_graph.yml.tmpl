@@ -49,10 +49,6 @@ tasks:
     {% macro l10n_tasks() %}{% include "l10n.yml.tmpl" %}{% endmacro %}
     {{ l10n_tasks()|indent(4) }}
     {% endif %}
-    
-    {% if verifyConfigs %}
-    {% macro finalVerify_tasks() %}{% include "final_verify.yml.tmpl" %}{% endmacro %}
-    {% endif %}
 
     {% if updates_enabled %}
     {% for platform in enUS_platforms %}
@@ -60,8 +56,9 @@ tasks:
     {% macro funsize_tasks() %}{% include "funsize.yml.tmpl" %}{% endmacro %}
     {{ funsize_tasks()|indent(4) }}
     {% endfor %}
-    
-    {% if verifyConfigs %}
-    {{ finalVerify_tasks()|indent(4) }}
     {% endif %}
+
+    {% if verifyConfigs %}
+    {% macro finalVerify_tasks() %}{% include "final_verify.yml.tmpl" %}{% endmacro %}
+    {{ finalVerify_tasks()|indent(4) }}
     {% endif %}
