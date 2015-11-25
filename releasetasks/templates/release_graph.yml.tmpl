@@ -65,6 +65,19 @@ tasks:
     {% endif %}
 
     {% if verifyConfigs %}
+        {% macro updateVerify_task(platform) %}
+            {% if platform in ["linux", "linux64"] %}
+                {% include "tc_update_verify.yml.tmpl" %}
+            {# Commented Out until I create the bridge template
+            {% else %}
+                {% include "bb_update_verify.yml.tmpl" %}
+            # End comment #}
+            {% endif %}
+        {% endmacro %}
+        {% for plat in verifyConfigs.keys() %}
+            {{ updateVerify_task(plat)|indent(4) }}
+        {% endfor %}
+            
         {% macro finalVerify_tasks() %}
             {% include "final_verify.yml.tmpl" %}
         {% endmacro %}
