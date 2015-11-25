@@ -77,7 +77,7 @@ tasks:
         {% for plat in verifyConfigs.keys() %}
             {{ updateVerify_task(plat)|indent(4) }}
         {% endfor %}
-            
+
         {% macro finalVerify_tasks() %}
             {% include "final_verify.yml.tmpl" %}
         {% endmacro %}
