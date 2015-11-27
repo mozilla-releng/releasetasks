@@ -385,6 +385,7 @@ class TestMakeTaskGraph(unittest.TestCase):
             buildNumber=3,
             source_enabled=False,
             updates_enabled=False,
+            bouncer_enabled=False,
             enUS_platforms=["win32"],
             en_US_config={"platforms": {
                 "win32": {"task_id": "xyy"}
