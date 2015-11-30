@@ -41,6 +41,7 @@ class TestMakeTaskGraph(unittest.TestCase):
     maxDiff = 30000
 
     def _do_common_assertions(self, graph):
+        _cached_taskIDs = set()
         if graph["tasks"]:
             for t in graph["tasks"]:
                 task = t["task"]
@@ -57,6 +58,8 @@ class TestMakeTaskGraph(unittest.TestCase):
                         "%s: `revision' property is required by QE automation"
                         % task["extra"]["task_name"]
                     )
+                self.assertNotIn(t["taskId"], _cached_taskIDs)
+                _cached_taskIDs.add(t["taskId"])
 
     def test_source_task_definition(self):
         graph = make_task_graph(

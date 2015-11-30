@@ -1,6 +1,6 @@
-{% set uv_buildername = "{}_{}_update_verify".format(platform, branch) %}
 {% set uv_totalchunks = 12 %}
 {% for chunk in range(uv_totalchunks) %}
+{% set uv_buildername = "{}_{}_update_verify_{}".format(platform, branch, chunk) %}
 -
     taskId: "{{ stableSlugId(uv_buildername) }}"
     reruns: 5
