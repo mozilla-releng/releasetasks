@@ -73,6 +73,7 @@ class TestMakeTaskGraph(unittest.TestCase):
             revision="fedcba654321",
             branch="foo",
             updates_enabled=False,
+            bouncer_enabled=False,
             signing_class="release-signing",
             verifyConfigs={}
         )
@@ -140,6 +141,7 @@ class TestMakeTaskGraph(unittest.TestCase):
             branch="foo",
             revision="abcdef123456",
             updates_enabled=False,
+            bouncer_enabled=False,
             source_enabled=False,
             en_US_config={"platforms": {
                 "linux": {"task_id": "xyz"},
@@ -167,6 +169,7 @@ class TestMakeTaskGraph(unittest.TestCase):
             buildNumber=3,
             source_enabled=False,
             updates_enabled=True,
+            bouncer_enabled=False,
             en_US_config={"platforms": {
                 "macosx64": {"task_id": "xyz"},
                 "win32": {"task_id": "xyy"}
@@ -223,6 +226,7 @@ class TestMakeTaskGraph(unittest.TestCase):
             buildNumber=3,
             source_enabled=False,
             updates_enabled=True,
+            bouncer_enabled=False,
             en_US_config={"platforms": {
                 "macosx64": {"task_id": "xyz"},
                 "win32": {"task_id": "xyy"}
@@ -271,6 +275,7 @@ class TestMakeTaskGraph(unittest.TestCase):
             buildNumber=3,
             source_enabled=False,
             updates_enabled=True,
+            bouncer_enabled=False,
             en_US_config={"platforms": {
                 "macosx64": {"task_id": "xyz"},
                 "win32": {"task_id": "xyy"}
@@ -326,6 +331,7 @@ class TestMakeTaskGraph(unittest.TestCase):
             buildNumber=3,
             source_enabled=False,
             updates_enabled=False,
+            bouncer_enabled=False,
             enUS_platforms=["win32"],
             en_US_config={"platforms": {
                 "win32": {"task_id": "xyy"}
@@ -379,6 +385,7 @@ class TestMakeTaskGraph(unittest.TestCase):
             buildNumber=3,
             source_enabled=False,
             updates_enabled=False,
+            bouncer_enabled=False,
             enUS_platforms=["win32"],
             en_US_config={"platforms": {
                 "win32": {"task_id": "xyy"}
@@ -434,6 +441,7 @@ class TestMakeTaskGraph(unittest.TestCase):
             buildNumber=3,
             source_enabled=False,
             updates_enabled=True,
+            bouncer_enabled=False,
             en_US_config={"platforms": {
                 "macosx64": {"task_id": "xyz"},
                 "win32": {"task_id": "xyy"}
@@ -483,6 +491,7 @@ class TestMakeTaskGraph(unittest.TestCase):
             revision="fedcba654321",
             branch="foo",
             updates_enabled=False,
+            bouncer_enabled=False,
             signing_class="release-signing",
             verifyConfigs={'linux': "foo-firefox-linux.cfg",
                            'linux64': "foo-firefox-linux64.cfg",
