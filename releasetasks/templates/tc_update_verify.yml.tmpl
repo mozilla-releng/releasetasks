@@ -1,0 +1,51 @@
+{% set uv_totalchunks = 12 %}
+{% for chunk in range(uv_totalchunks) %}
+{% set uv_buildername = "{}_{}_update_verify_{}".format(platform, branch, chunk) %}
+-
+    taskId: "{{ stableSlugId(uv_buildername) }}"
+    reruns: 5
+    task:
+        provisionerId: aws-provisioner-v1
+        workerType: opt-linux64
+        created: "{{ now }}"
+        deadline: "{{ now.replace(hours=6) }}"
+        expires: "{{ never }}"
+        priority: "high"
+        retries: 5
+        payload:
+            maxRunTime: 7200
+            image: callek/update-test-runner2
+            command:
+                - /bin/bash
+                - -c
+                - hg clone https://hg.mozilla.org/build/tools && cd tools && hg up -r $TAG && cd .. && /tools/scripts/release/updates/chunked-verify.sh UNUSED UNUSED $TOTAL_CHUNKS $THIS_CHUNK
+            env:
+                TAG: "default"
+                TOTAL_CHUNKS: "{{ uv_totalchunks }}"
+                THIS_CHUNK: "{{ chunk + 1 }}"
+                NO_BBCONFIG: "1"
+                VERIFY_CONFIG: "{{ verifyConfigs[platform] }}"
+        metadata:
+            owner: release@mozilla.com
+            source: https://github.com/mozilla/releasetasks
+            name: "{{ platform }} {{ branch }} update verification"
+            description: |
+                Verifies updates for {{ platform }}
+
+        {% if running_tests is defined %}
+        extra:
+            task_name: "{{ uv_buildername }}"
+        {% endif %}
+
+        {# TODO: decide what to use here...
+        treeherder:
+            symbol: UV
+            groupSymbol: Release
+            collection:
+                opt: true
+            machine:
+                platform: {{ platform }}
+            build:
+                platform: none
+        #}
+{% endfor %}
