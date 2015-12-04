@@ -1,6 +1,7 @@
+{% for channel in release_channels %}
 {% set uv_totalchunks = 12 %}
 {% for chunk in range(uv_totalchunks) %}
-{% set uv_buildername = "{}_{}_update_verify_{}".format(platform, branch, chunk) %}
+{% set uv_buildername = "{}_{}_update_verify_{}".format(platform, channel, chunk) %}
 -
     taskId: "{{ stableSlugId(uv_buildername) }}"
     reruns: 5
@@ -24,11 +25,14 @@
                 TOTAL_CHUNKS: "{{ uv_totalchunks }}"
                 THIS_CHUNK: "{{ chunk + 1 }}"
                 NO_BBCONFIG: "1"
-                VERIFY_CONFIG: "{{ verifyConfigs[platform] }}"
+                VERIFY_CONFIG: "{{ "{channel}-{product}-{platform}.cfg".format(
+                                   platform=platform,
+                                   channel=channel,
+                                   product=product) }}"
         metadata:
             owner: release@mozilla.com
             source: https://github.com/mozilla/releasetasks
-            name: "{{ platform }} {{ branch }} update verification"
+            name: "{{ platform }} {{ channel }} update verification"
             description: |
                 Verifies updates for {{ platform }}
 
@@ -48,4 +52,5 @@
             build:
                 platform: none
         #}
+{% endfor %}
 {% endfor %}
