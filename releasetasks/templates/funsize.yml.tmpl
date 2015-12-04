@@ -107,6 +107,10 @@
             - index.funsize.v1.{{ branch }}.revision.{{ platform }}.{{ revision }}.{{ locale }}.{{ partial_version }}.signing
             - index.funsize.v1.{{ branch }}.latest.{{ platform }}.{{ locale }}.{{ partial_version }}.signing
         extra:
+            signing:
+               # assert that this signing task was created by the real releaserunner
+               signature: {{ sign_task(stableSlugId('{}_signing_task'.format(basename)),
+                                       valid_for=8 * 3600) }}
             {% if running_tests is defined %}
             task_name: "{{ '{}_signing_task'.format(basename) }}"
             {% endif %}
