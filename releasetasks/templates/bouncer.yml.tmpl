@@ -15,6 +15,7 @@
             - buildbot-bridge:builder-name:{{ buildername }}
 
         payload:
+            image: rail/python-test-runner
             buildername: "{{ buildername }}"
             sourcestamp:
                 branch: "{{ repo_path }}"
@@ -27,10 +28,15 @@
                 build_number: {{ buildNumber }}
                 release_promotion: true
                 revision: "{{ revision }}"
-                partial_versions: {% for p in partial_version %}{{ "{}, ".format(p) }}{% endfor %}
+                partial_versions: {% for p in sorted(partial_updates.keys()) %}{{ "{}, ".format(p) }}{% endfor %}
         metadata:
             name: "{{ product }} {{ branch }} bncr sub }}"
             description: "Release Promotion bouncer submission job"
             owner: "release@mozilla.com"
             source: https://github.com/mozilla/releasetasks
+
+        {% if running_tests is defined %}
+        extra:
+            task_name: "{{ buildername }}"
+        {% endif %}
 
