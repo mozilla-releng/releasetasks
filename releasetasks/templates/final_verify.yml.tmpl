@@ -1,4 +1,5 @@
-{% set buildername = "{}_final_verify".format(branch) %}
+{% for channel in release_channels %}
+{% set buildername = "{}_final_verify".format(channel) %}
 -
     taskId: "{{ stableSlugId(buildername) }}"
     reruns: 5
@@ -19,7 +20,13 @@
                 - hg clone https://hg.mozilla.org/build/tools && cd tools && hg up -r $TAG && cd release/ && ./final-verification.sh $RELEASE_CONFIGS
             env:
                 TAG: "default"
-                RELEASE_CONFIGS: {% for key, val in verifyConfigs.iteritems() %}{{ val }} {% endfor %}
+                RELEASE_CONFIGS: {#
+                    #}{% for platform in enUS_platforms %}{#
+                        #}{{ "{channel}-{product}-{platform}.cfg".format(
+                               platform=platform,
+                               channel=channel,
+                               product=product) }} {#
+                    #}{% endfor %}
         metadata:
             owner: release@mozilla.com
             source: https://github.com/mozilla/releasetasks
@@ -43,3 +50,4 @@
             build:
                 platform: none
         #}
+{% endfor %}

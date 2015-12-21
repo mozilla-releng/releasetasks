@@ -71,7 +71,7 @@ tasks:
         {{ bouncer_tasks()|indent(4) }}
     {% endif %}
 
-    {% if verifyConfigs %}
+    {% if release_channels is defined %}
         {% macro updateVerify_task(platform) %}
             {% if platform in ["linux", "linux64"] %}
                 {% include "tc_update_verify.yml.tmpl" %}
@@ -81,7 +81,7 @@ tasks:
             # End comment #}
             {% endif %}
         {% endmacro %}
-        {% for plat in verifyConfigs.keys() %}
+        {% for plat in enUS_platforms %}
             {{ updateVerify_task(plat)|indent(4) }}
         {% endfor %}
 
