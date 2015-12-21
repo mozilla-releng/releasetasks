@@ -65,8 +65,10 @@ tasks:
     {% endif %}
 
     {% if bouncer_enabled %}
-    {% macro bouncer_tasks() %}{% include "bouncer.yml.tmpl" %}{% endmacro %}
-    {{ bouncer_tasks()|indent(4) }}
+        {% macro bouncer_tasks() %}
+            {% include "bouncer.yml.tmpl" %}
+        {% endmacro %}
+        {{ bouncer_tasks()|indent(4) }}
     {% endif %}
 
     {% if verifyConfigs %}
