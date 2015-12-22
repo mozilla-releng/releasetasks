@@ -539,7 +539,6 @@ class TestMakeTaskGraph(unittest.TestCase):
         self.assertEqual(task["task"]["workerType"], "buildbot-bridge")
         self.assertFalse("scopes" in task)
         # XXX: Change the image name once it's in-tree.
-        self.assertTrue(payload["image"].startswith("rail/python-test-runner"))
         self.assertEqual(payload["properties"]["partial_versions"], "37.0, 38.0,")
         self.assertEqual(payload["properties"]["build_number"], 3)
 
