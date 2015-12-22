@@ -30,7 +30,7 @@
                 revision: "{{ revision }}"
                 partial_versions: {% for p in sorted(partial_updates.keys()) %}{{ "{}, ".format(p) }}{% endfor %}
         metadata:
-            name: "{{ product }} {{ branch }} bncr sub }}"
+            name: "{{ product }} {{ branch }} bncr sub"
             description: "Release Promotion bouncer submission job"
             owner: "release@mozilla.com"
             source: https://github.com/mozilla/releasetasks
