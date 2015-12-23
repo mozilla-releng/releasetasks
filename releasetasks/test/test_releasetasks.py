@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
 import os
+from jose import jwt, jws
+from jose.constants import ALGORITHMS
 import unittest
 import mock
 import thclient.client
 
 from releasetasks import make_task_graph as make_task_graph_orig
+from releasetasks.util import sign_task
+from . import PVT_KEY, PUB_KEY, OTHER_PUB_KEY
 
 DUMMY_PUBLIC_KEY = os.path.join(os.path.dirname(__file__), "public.key")
 
@@ -31,6 +35,37 @@ def make_task_graph(*args, **kwargs):
     return make_task_graph_orig(*args, public_key=DUMMY_PUBLIC_KEY,
                                 balrog_username="fake", balrog_password="fake",
                                 running_tests=True, **kwargs)
+
+
+class TestTaskSigning(unittest.TestCase):
+
+    def test_task_id(self):
+        token = sign_task("xyz", pvt_key=PVT_KEY)
+        claims = jwt.decode(token, PUB_KEY, algorithms=[ALGORITHMS.RS512])
+        assert claims["taskId"] == "xyz"
+
+    def test_exp(self):
+        token = sign_task("xyz", pvt_key=PVT_KEY)
+        claims = jwt.decode(token, PUB_KEY, algorithms=[ALGORITHMS.RS512])
+        assert "exp" in claims
+
+    def test_exp_int(self):
+        token = sign_task("xyz", pvt_key=PVT_KEY)
+        claims = jwt.decode(token, PUB_KEY, algorithms=[ALGORITHMS.RS512])
+        assert isinstance(claims["exp"], int)
+
+    def test_verify(self):
+        token = sign_task("xyz", pvt_key=PVT_KEY)
+        claims = jws.verify(token, PUB_KEY, algorithms=[ALGORITHMS.RS512])
+        assert claims["taskId"] == "xyz"
+
+    def test_verify_bad_signature(self):
+        token = sign_task("xyz", pvt_key=PVT_KEY)
+        self.assertRaises(jws.JWSError, jws.verify, token, OTHER_PUB_KEY,
+                          [ALGORITHMS.RS512])
+
+
+PVT_KEY_FILE = os.path.join(os.path.dirname(__file__), "id_rsa")
 
 
 class TestMakeTaskGraph(unittest.TestCase):
@@ -78,7 +113,8 @@ class TestMakeTaskGraph(unittest.TestCase):
             updates_enabled=False,
             bouncer_enabled=False,
             signing_class="release-signing",
-            verifyConfigs={}
+            verifyConfigs={},
+            signing_pvt_key=PVT_KEY_FILE,
         )
 
         self._do_common_assertions(graph)
@@ -151,7 +187,8 @@ class TestMakeTaskGraph(unittest.TestCase):
                 "win32": {"task_id": "xyy"}
             }},
             l10n_config={},
-            verifyConfigs={}
+            verifyConfigs={},
+            signing_pvt_key=PVT_KEY_FILE,
         )
 
         self._do_common_assertions(graph)
@@ -193,7 +230,8 @@ class TestMakeTaskGraph(unittest.TestCase):
             revision="abcdef123456",
             balrog_api_root="https://fake.balrog/api",
             signing_class="release-signing",
-            verifyConfigs={}
+            verifyConfigs={},
+            signing_pvt_key=PVT_KEY_FILE,
         )
 
         self._do_common_assertions(graph)
@@ -249,7 +287,8 @@ class TestMakeTaskGraph(unittest.TestCase):
             revision="abcdef123456",
             balrog_api_root="https://fake.balrog/api",
             signing_class="release-signing",
-            verifyConfigs={}
+            verifyConfigs={},
+            signing_pvt_key=PVT_KEY_FILE,
         )
 
         self._do_common_assertions(graph)
@@ -299,6 +338,7 @@ class TestMakeTaskGraph(unittest.TestCase):
             balrog_api_root="https://fake.balrog/api",
             signing_class="dep-signing",
             release_channels=["beta"],
+            signing_pvt_key=PVT_KEY_FILE,
         )
 
         self._do_common_assertions(graph)
@@ -354,6 +394,7 @@ class TestMakeTaskGraph(unittest.TestCase):
             repo_path="releases/mozilla-beta",
             revision="abcdef123456",
             release_channels=["beta"],
+            signing_pvt_key=PVT_KEY_FILE,
         )
 
         self._do_common_assertions(graph)
@@ -406,6 +447,7 @@ class TestMakeTaskGraph(unittest.TestCase):
             repo_path="releases/mozilla-beta",
             revision="abcdef123456",
             release_channels=["beta"],
+            signing_pvt_key=PVT_KEY_FILE,
         )
 
         self._do_common_assertions(graph)
@@ -453,6 +495,7 @@ class TestMakeTaskGraph(unittest.TestCase):
             balrog_api_root="https://fake.balrog/api",
             signing_class="dep-signing",
             release_channels=["beta"],
+            signing_pvt_key=PVT_KEY_FILE,
         )
         self._do_common_assertions(graph)
         for p in ("win32", "macosx64"):
@@ -483,6 +526,7 @@ class TestMakeTaskGraph(unittest.TestCase):
             signing_class="release-signing",
             release_channels=["foo"],
             enUS_platforms=["linux", "linux64", "win64", "win32", "macosx64"],
+            signing_pvt_key=PVT_KEY_FILE,
         )
         self._do_common_assertions(graph)
 
@@ -528,6 +572,7 @@ class TestMakeTaskGraph(unittest.TestCase):
             signing_class="release-signing",
             release_channels=["foo"],
             enUS_platforms=["linux", "linux64", "win64", "win32", "macosx64"],
+            signing_pvt_key=PVT_KEY_FILE,
         )
         self._do_common_assertions(graph)
 
@@ -567,6 +612,7 @@ class TestMakeTaskGraph(unittest.TestCase):
             signing_class="release-signing",
             release_channels=["beta", "release"],
             enUS_platforms=["linux", "linux64", "win64", "win32", "macosx64"],
+            signing_pvt_key=PVT_KEY_FILE,
         )
         self._do_common_assertions(graph)
 

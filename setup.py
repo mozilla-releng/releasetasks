@@ -19,6 +19,7 @@ requirements = [
     "treeherder-client",
     "PGPy",
     "buildtools",
+    "python-jose",
 ]
 test_requirements = [
     "pytest",
