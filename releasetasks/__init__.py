@@ -15,8 +15,10 @@ from release.platforms import buildbot2ftp, buildbot2bouncer
 DEFAULT_TEMPLATE_DIR = path.join(path.dirname(__file__), "templates")
 
 
-def make_task_graph(public_key, root_template="release_graph.yml.tmpl",
-                    template_dir=DEFAULT_TEMPLATE_DIR, **template_kwargs):
+def make_task_graph(public_key, signing_pvt_key,
+                    root_template="release_graph.yml.tmpl",
+                    template_dir=DEFAULT_TEMPLATE_DIR,
+                    **template_kwargs):
     # TODO: some validation of template_kwargs + defaults
     env = Environment(loader=FileSystemLoader(template_dir),
                       undefined=StrictUndefined)
@@ -25,12 +27,9 @@ def make_task_graph(public_key, root_template="release_graph.yml.tmpl",
     now = arrow.now()
     now_ms = now.timestamp * 1000
 
-    signing_pvt_key = None
     # Don't let the signing pvt key leak into the task graph.
-    if 'signing_pvt_key' in template_kwargs:
-        with open(template_kwargs['signing_pvt_key']) as f:
-            signing_pvt_key = f.read()
-        del template_kwargs['signing_pvt_key']
+    with open(signing_pvt_key) as f:
+        pvt_key = f.read()
 
     template = env.get_template(root_template)
     template_vars = {
@@ -52,7 +51,7 @@ def make_task_graph(public_key, root_template="release_graph.yml.tmpl",
                                                        keyFile=public_key),
         "buildbot2ftp": buildbot2ftp,
         "buildbot2bouncer": buildbot2bouncer,
-        "sign_task": partial(sign_task, pvt_key=signing_pvt_key),
+        "sign_task": partial(sign_task, pvt_key=pvt_key),
     }
     template_vars.update(template_kwargs)
 
