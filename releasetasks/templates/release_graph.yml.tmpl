@@ -41,19 +41,52 @@ scopes:
 
 tasks:
     {% if source_enabled %}
-    {% macro source_tasks() %}{% include "source.yml.tmpl" %}{% endmacro %}
-    {{ source_tasks()|indent(4) }}
+        {% macro source_tasks() %}
+            {% include "source.yml.tmpl" %}
+        {% endmacro %}
+        {{ source_tasks()|indent(4) }}
     {% endif %}
 
     {% if l10n_config.get("platforms") %}
-    {% macro l10n_tasks() %}{% include "l10n.yml.tmpl" %}{% endmacro %}
-    {{ l10n_tasks()|indent(4) }}
+        {% macro l10n_tasks() %}
+            {% include "l10n.yml.tmpl" %}
+        {% endmacro %}
+        {{ l10n_tasks()|indent(4) }}
     {% endif %}
 
     {% if updates_enabled %}
-    {% for platform in enUS_platforms %}
-    {% set locale = "en-US" %}
-    {% macro funsize_tasks() %}{% include "funsize.yml.tmpl" %}{% endmacro %}
-    {{ funsize_tasks()|indent(4) }}
-    {% endfor %}
+        {% for platform in enUS_platforms %}
+            {% set locale = "en-US" %}
+            {% macro funsize_tasks() %}
+                {% include "funsize.yml.tmpl" %}
+            {% endmacro %}
+            {{ funsize_tasks()|indent(4) }}
+        {% endfor %}
+    {% endif %}
+
+    {% if bouncer_enabled %}
+        {% macro bouncer_tasks() %}
+            {% include "bouncer.yml.tmpl" %}
+        {% endmacro %}
+        {{ bouncer_tasks()|indent(4) }}
+    {% endif %}
+
+    {% if release_channels is defined %}
+        {% macro updateVerify_task(platform) %}
+            {% if platform in ["linux", "linux64"] %}
+                {% include "tc_update_verify.yml.tmpl" %}
+            {# Commented Out until I create the bridge template
+            {% else %}
+                {% include "bb_update_verify.yml.tmpl" %}
+            # End comment #}
+            {% endif %}
+        {% endmacro %}
+        {% for plat in enUS_platforms %}
+            {{ updateVerify_task(plat)|indent(4) }}
+        {% endfor %}
+
+        {% macro finalVerify_tasks() %}
+            {% include "final_verify.yml.tmpl" %}
+        {% endmacro %}
+        {{ finalVerify_tasks()|indent(4) }}
     {% endif %}

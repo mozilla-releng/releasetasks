@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
 import os
+from jose import jwt, jws
+from jose.constants import ALGORITHMS
 import unittest
 import mock
 import thclient.client
 
 from releasetasks import make_task_graph as make_task_graph_orig
+from releasetasks.util import sign_task
+from . import PVT_KEY, PUB_KEY, OTHER_PUB_KEY
 
 DUMMY_PUBLIC_KEY = os.path.join(os.path.dirname(__file__), "public.key")
 
@@ -33,14 +37,46 @@ def make_task_graph(*args, **kwargs):
                                 running_tests=True, **kwargs)
 
 
+class TestTaskSigning(unittest.TestCase):
+
+    def test_task_id(self):
+        token = sign_task("xyz", pvt_key=PVT_KEY)
+        claims = jwt.decode(token, PUB_KEY, algorithms=[ALGORITHMS.RS512])
+        assert claims["taskId"] == "xyz"
+
+    def test_exp(self):
+        token = sign_task("xyz", pvt_key=PVT_KEY)
+        claims = jwt.decode(token, PUB_KEY, algorithms=[ALGORITHMS.RS512])
+        assert "exp" in claims
+
+    def test_exp_int(self):
+        token = sign_task("xyz", pvt_key=PVT_KEY)
+        claims = jwt.decode(token, PUB_KEY, algorithms=[ALGORITHMS.RS512])
+        assert isinstance(claims["exp"], int)
+
+    def test_verify(self):
+        token = sign_task("xyz", pvt_key=PVT_KEY)
+        claims = jws.verify(token, PUB_KEY, algorithms=[ALGORITHMS.RS512])
+        assert claims["taskId"] == "xyz"
+
+    def test_verify_bad_signature(self):
+        token = sign_task("xyz", pvt_key=PVT_KEY)
+        self.assertRaises(jws.JWSError, jws.verify, token, OTHER_PUB_KEY,
+                          [ALGORITHMS.RS512])
+
+
+PVT_KEY_FILE = os.path.join(os.path.dirname(__file__), "id_rsa")
+
+
 class TestMakeTaskGraph(unittest.TestCase):
-    """Because of huge the graph gets, verifying every character of it is
+    """Because of how huge the graph gets, verifying every character of it is
     impossible to maintain. Instead, we verify aspects of it. Eg, making sure
     the correct number of funsize partials are happening, rather than verifying
     the entire funsize tasks."""
     maxDiff = 30000
 
     def _do_common_assertions(self, graph):
+        _cached_taskIDs = set()
         if graph["tasks"]:
             for t in graph["tasks"]:
                 task = t["task"]
@@ -57,6 +93,8 @@ class TestMakeTaskGraph(unittest.TestCase):
                         "%s: `revision' property is required by QE automation"
                         % task["extra"]["task_name"]
                     )
+                self.assertNotIn(t["taskId"], _cached_taskIDs)
+                _cached_taskIDs.add(t["taskId"])
 
     def test_source_task_definition(self):
         graph = make_task_graph(
@@ -73,7 +111,10 @@ class TestMakeTaskGraph(unittest.TestCase):
             revision="fedcba654321",
             branch="foo",
             updates_enabled=False,
+            bouncer_enabled=False,
             signing_class="release-signing",
+            verifyConfigs={},
+            signing_pvt_key=PVT_KEY_FILE,
         )
 
         self._do_common_assertions(graph)
@@ -139,12 +180,15 @@ class TestMakeTaskGraph(unittest.TestCase):
             branch="foo",
             revision="abcdef123456",
             updates_enabled=False,
+            bouncer_enabled=False,
             source_enabled=False,
             en_US_config={"platforms": {
                 "linux": {"task_id": "xyz"},
                 "win32": {"task_id": "xyy"}
             }},
             l10n_config={},
+            verifyConfigs={},
+            signing_pvt_key=PVT_KEY_FILE,
         )
 
         self._do_common_assertions(graph)
@@ -165,6 +209,7 @@ class TestMakeTaskGraph(unittest.TestCase):
             buildNumber=3,
             source_enabled=False,
             updates_enabled=True,
+            bouncer_enabled=False,
             en_US_config={"platforms": {
                 "macosx64": {"task_id": "xyz"},
                 "win32": {"task_id": "xyy"}
@@ -185,6 +230,8 @@ class TestMakeTaskGraph(unittest.TestCase):
             revision="abcdef123456",
             balrog_api_root="https://fake.balrog/api",
             signing_class="release-signing",
+            verifyConfigs={},
+            signing_pvt_key=PVT_KEY_FILE,
         )
 
         self._do_common_assertions(graph)
@@ -220,6 +267,7 @@ class TestMakeTaskGraph(unittest.TestCase):
             buildNumber=3,
             source_enabled=False,
             updates_enabled=True,
+            bouncer_enabled=False,
             en_US_config={"platforms": {
                 "macosx64": {"task_id": "xyz"},
                 "win32": {"task_id": "xyy"}
@@ -239,6 +287,8 @@ class TestMakeTaskGraph(unittest.TestCase):
             revision="abcdef123456",
             balrog_api_root="https://fake.balrog/api",
             signing_class="release-signing",
+            verifyConfigs={},
+            signing_pvt_key=PVT_KEY_FILE,
         )
 
         self._do_common_assertions(graph)
@@ -267,6 +317,7 @@ class TestMakeTaskGraph(unittest.TestCase):
             buildNumber=3,
             source_enabled=False,
             updates_enabled=True,
+            bouncer_enabled=False,
             en_US_config={"platforms": {
                 "macosx64": {"task_id": "xyz"},
                 "win32": {"task_id": "xyy"}
@@ -286,6 +337,8 @@ class TestMakeTaskGraph(unittest.TestCase):
             revision="abcdef123456",
             balrog_api_root="https://fake.balrog/api",
             signing_class="dep-signing",
+            release_channels=["beta"],
+            signing_pvt_key=PVT_KEY_FILE,
         )
 
         self._do_common_assertions(graph)
@@ -317,6 +370,7 @@ class TestMakeTaskGraph(unittest.TestCase):
             buildNumber=3,
             source_enabled=False,
             updates_enabled=False,
+            bouncer_enabled=False,
             enUS_platforms=["win32"],
             en_US_config={"platforms": {
                 "win32": {"task_id": "xyy"}
@@ -339,6 +393,8 @@ class TestMakeTaskGraph(unittest.TestCase):
             product="firefox",
             repo_path="releases/mozilla-beta",
             revision="abcdef123456",
+            release_channels=["beta"],
+            signing_pvt_key=PVT_KEY_FILE,
         )
 
         self._do_common_assertions(graph)
@@ -370,6 +426,7 @@ class TestMakeTaskGraph(unittest.TestCase):
             buildNumber=3,
             source_enabled=False,
             updates_enabled=False,
+            bouncer_enabled=False,
             enUS_platforms=["win32"],
             en_US_config={"platforms": {
                 "win32": {"task_id": "xyy"}
@@ -394,6 +451,8 @@ class TestMakeTaskGraph(unittest.TestCase):
             product="firefox",
             repo_path="releases/mozilla-beta",
             revision="abcdef123456",
+            release_channels=["beta"],
+            signing_pvt_key=PVT_KEY_FILE,
         )
 
         self._do_common_assertions(graph)
@@ -425,6 +484,7 @@ class TestMakeTaskGraph(unittest.TestCase):
             buildNumber=3,
             source_enabled=False,
             updates_enabled=True,
+            bouncer_enabled=False,
             en_US_config={"platforms": {
                 "macosx64": {"task_id": "xyz"},
                 "win32": {"task_id": "xyy"}
@@ -444,6 +504,8 @@ class TestMakeTaskGraph(unittest.TestCase):
             revision="abcdef123456",
             balrog_api_root="https://fake.balrog/api",
             signing_class="dep-signing",
+            release_channels=["beta"],
+            signing_pvt_key=PVT_KEY_FILE,
         )
         self._do_common_assertions(graph)
         for p in ("win32", "macosx64"):
@@ -453,3 +515,133 @@ class TestMakeTaskGraph(unittest.TestCase):
                 self.assertTrue(
                     balrog["task"]["payload"]["encryptedEnv"][0].startswith("wcB"),
                     "Encrypted string should always start with 'wcB'")
+
+    def test_final_verify_task_definition(self):
+        graph = make_task_graph(
+            version="42.0b2",
+            appVersion="42.0",
+            buildNumber=3,
+            source_enabled=False,
+            en_US_config={"platforms": {
+                "linux": {"task_id": "xyz"},
+                "win32": {"task_id": "xyy"}
+            }},
+            l10n_config={},
+            repo_path="releases/foo",
+            revision="fedcba654321",
+            branch="foo",
+            updates_enabled=False,
+            bouncer_enabled=False,
+            product="firefox",
+            signing_class="release-signing",
+            release_channels=["foo"],
+            enUS_platforms=["linux", "linux64", "win64", "win32", "macosx64"],
+            signing_pvt_key=PVT_KEY_FILE,
+        )
+        self._do_common_assertions(graph)
+
+        task_def = get_task_by_name(graph, "foo_final_verify")
+        task = task_def["task"]
+        payload = task["payload"]
+        self.assertEqual(task["provisionerId"], "aws-provisioner-v1")
+        self.assertEqual(task["workerType"], "b2gtest")
+        self.assertFalse("scopes" in task)
+        # XXX: Change the image name once it's in-tree.
+        self.assertTrue(payload["image"].startswith("rail/python-test-runner"))
+        self.assertFalse("cache" in payload)
+        self.assertFalse("artifacts" in payload)
+        self.assertTrue("env" in payload)
+        self.assertTrue("command" in payload)
+
+        expected_graph_scopes = set([
+            "queue:task-priority:high",
+        ])
+        self.assertTrue(expected_graph_scopes.issubset(graph["scopes"]))
+
+    def test_bouncer_submission_task_definition(self):
+        graph = make_task_graph(
+            version="42.0b2",
+            appVersion="42.0",
+            buildNumber=3,
+            source_enabled=False,
+            l10n_config={},
+            repo_path="releases/foo",
+            product="firefox",
+            revision="fedcba654321",
+            partial_updates={
+                "38.0": {
+                    "buildNumber": 1,
+                },
+                "37.0": {
+                    "buildNumber": 2,
+                },
+            },
+            branch="foo",
+            updates_enabled=False,
+            bouncer_enabled=True,
+            signing_class="release-signing",
+            release_channels=["foo"],
+            enUS_platforms=["linux", "linux64", "win64", "win32", "macosx64"],
+            signing_pvt_key=PVT_KEY_FILE,
+        )
+        self._do_common_assertions(graph)
+
+        task = get_task_by_name(graph, "release-foo_firefox_bncr_sub")
+
+        payload = task["task"]["payload"]
+
+        self.assertEqual(task["task"]["provisionerId"], "buildbot-bridge")
+        self.assertEqual(task["task"]["workerType"], "buildbot-bridge")
+        self.assertFalse("scopes" in task)
+        # XXX: Change the image name once it's in-tree.
+        self.assertEqual(payload["properties"]["partial_versions"], "37.0, 38.0,")
+        self.assertEqual(payload["properties"]["build_number"], 3)
+
+        expected_graph_scopes = set([
+            "queue:task-priority:high",
+        ])
+        self.assertTrue(expected_graph_scopes.issubset(graph["scopes"]))
+
+    def test_multi_channel_final_verify_task_definition(self):
+        graph = make_task_graph(
+            version="42.0b2",
+            appVersion="42.0",
+            buildNumber=3,
+            source_enabled=False,
+            en_US_config={"platforms": {
+                "linux": {"task_id": "xyz"},
+                "win32": {"task_id": "xyy"}
+            }},
+            l10n_config={},
+            repo_path="releases/foo",
+            revision="fedcba654321",
+            branch="foo",
+            updates_enabled=False,
+            bouncer_enabled=False,
+            product="firefox",
+            signing_class="release-signing",
+            release_channels=["beta", "release"],
+            enUS_platforms=["linux", "linux64", "win64", "win32", "macosx64"],
+            signing_pvt_key=PVT_KEY_FILE,
+        )
+        self._do_common_assertions(graph)
+
+        for chan in ["beta", "release"]:
+            task_def = get_task_by_name(graph,
+                                        "{chan}_final_verify".format(chan=chan))
+            task = task_def["task"]
+            payload = task["payload"]
+            self.assertEqual(task["provisionerId"], "aws-provisioner-v1")
+            self.assertEqual(task["workerType"], "b2gtest")
+            self.assertFalse("scopes" in task)
+            # XXX: Change the image name once it's in-tree.
+            self.assertTrue(payload["image"].startswith("rail/python-test-runner"))
+            self.assertFalse("cache" in payload)
+            self.assertFalse("artifacts" in payload)
+            self.assertTrue("env" in payload)
+            self.assertTrue("command" in payload)
+
+            expected_graph_scopes = set([
+                "queue:task-priority:high",
+            ])
+            self.assertTrue(expected_graph_scopes.issubset(graph["scopes"]))
