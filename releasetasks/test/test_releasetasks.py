@@ -418,6 +418,9 @@ class TestMakeTaskGraph(unittest.TestCase):
         self.assertIsNotNone(get_task_by_name(graph, "release-mozilla-beta_firefox_win32_l10n_repack_artifacts_1"))
         self.assertIsNone(get_task_by_name(graph, "release-mozilla-beta_firefox_win32_l10n_repack_artifacts_0"))
         self.assertIsNone(get_task_by_name(graph, "release-mozilla-beta_firefox_win32_l10n_repack_artifacts_2"))
+        art_task = get_task_by_name(graph, "release-mozilla-beta_firefox_win32_l10n_repack_artifacts_1")
+        self.assertEqual(art_task["task"]["provisionerId"], "null-provisioner")
+        self.assertEqual(art_task["task"]["workerType"], "buildbot")
 
     def test_l10n_multiple_chunks(self):
         graph = make_task_graph(
