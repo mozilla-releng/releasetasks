@@ -418,7 +418,6 @@ class TestMakeTaskGraph(unittest.TestCase):
         self.assertIsNotNone(get_task_by_name(graph, "release-mozilla-beta_firefox_win32_l10n_repack_artifacts_2"))
         self.assertIsNone(get_task_by_name(graph, "release-mozilla-beta_firefox_win32_l10n_repack_artifacts_3"))
 
-
     def test_encryption(self):
         graph = make_task_graph(
             version="42.0b2",
