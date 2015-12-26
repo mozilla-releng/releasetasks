@@ -35,6 +35,7 @@
                 build_number: {{ buildNumber }}
                 release_promotion: true
                 revision: "{{ revision }}"
+                artifactsTaskId: "{{ stableSlugId('{}_artifacts_{}'.format(buildername, chunk)) }}"
 
         metadata:
             name: "{{ product }} {{ branch }} {{ platform }} l10n repack {{ chunk }}/{{ platform_info["chunks"] }}"
@@ -45,6 +46,32 @@
         {% if running_tests is defined %}
         extra:
             task_name: "{{ buildername }}_{{ chunk }}"
+        {% endif %}
+-
+    # Every l10n task requires a special task to attach all artifacts
+    taskId: "{{ stableSlugId('{}_artifacts_{}'.format(buildername, chunk)) }}"
+    reruns: 5
+    task:
+        provisionerId: "null-provisioner"
+        workerType: "buildbot"
+        created: "{{ now }}"
+        deadline: "{{ now.replace(hours=36) }}"
+        expires: "{{ never }}"
+        priority: "high"
+        retries: 5
+        scopes:
+            - buildbot-bridge:builder-name:{{ buildername }}
+        payload:
+            description: "required"
+        metadata:
+            name: "{{ product }} {{ branch }} {{ platform }} l10n repack artifacts {{ chunk }}/{{ platform_info["chunks"] }}"
+            description: "Release Promotion l10n artifacts"
+            owner: "release@mozilla.com"
+            source: https://github.com/mozilla/releasetasks
+
+        {% if running_tests is defined %}
+        extra:
+            task_name: "{{ buildername }}_artifacts_{{ chunk }}"
         {% endif %}
 
 {% endfor %}
