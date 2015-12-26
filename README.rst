@@ -10,3 +10,9 @@ Features
 --------
 
 * TODO
+
+Testing
+-------
+
+Example test invocation using docker:
+  docker run --rm -v `pwd`:/src -ti rail/python-test-runner /bin/sh -c "cd /src && tox"
