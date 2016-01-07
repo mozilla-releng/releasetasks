@@ -389,6 +389,16 @@ class TestMakeTaskGraph(unittest.TestCase):
                     "zh-TW": "default",
                 },
             },
+            partial_updates={
+                "38.0": {
+                    "buildNumber": 1,
+                },
+                "37.0": {
+                    "buildNumber": 2,
+                },
+            },
+            balrog_api_root="https://fake.balrog/api",
+            signing_class="release-signing",
             branch="mozilla-beta",
             product="firefox",
             repo_path="releases/mozilla-beta",
@@ -450,6 +460,16 @@ class TestMakeTaskGraph(unittest.TestCase):
                     "zh-TW": "default",
                 },
             },
+            partial_updates={
+                "38.0": {
+                    "buildNumber": 1,
+                },
+                "37.0": {
+                    "buildNumber": 2,
+                },
+            },
+            signing_class="release-signing",
+            balrog_api_root="https://fake.balrog/api",
             branch="mozilla-beta",
             product="firefox",
             repo_path="releases/mozilla-beta",
@@ -479,6 +499,8 @@ class TestMakeTaskGraph(unittest.TestCase):
         self.assertIsNotNone(get_task_by_name(graph, "release-mozilla-beta_firefox_win32_l10n_repack_artifacts_1"))
         self.assertIsNotNone(get_task_by_name(graph, "release-mozilla-beta_firefox_win32_l10n_repack_artifacts_2"))
         self.assertIsNone(get_task_by_name(graph, "release-mozilla-beta_firefox_win32_l10n_repack_artifacts_3"))
+        # partials
+        self.assertIsNotNone(get_task_by_name(graph, "release-mozilla-beta_firefox_win32_l10n_repack_1_37.0_update_generator"))
 
     def test_encryption(self):
         graph = make_task_graph(

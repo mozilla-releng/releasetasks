@@ -37,11 +37,7 @@
                         # TODO: consider using stable URL for from_mar
                         from_mar: "http://download.mozilla.org/?product={{ product }}-{{ partial_version }}-complete&os={{ buildbot2bouncer(platform) }}&lang={{ locale }}"
                         # en-US: task ID comes from from buildbot via releaserunner
-                        {% if locale == "en-US" %}
                         to_mar: "https://queue.taskcluster.net/v1/task/{{ en_US_config["platforms"][platform]["task_id"] }}/artifacts/public/build/{{ product }}-{{ appVersion }}.{{ locale }}.{{ buildbot2ftp(platform) }}.complete.mar"
-                        {% else %}
-                        to_mar: "TODO: generate mar url using BBB task_id and locale"
-                        {% endif %}
                         platform: {{ platform }}
                         branch: {{ branch }}
                         previousVersion: {{ partial_version }}
@@ -51,7 +47,7 @@
             treeherderEnv:
                 - staging
             treeherder:
-                symbol: {{ locale }}-{{ partial_version }}-1
+                symbol: {{ locale }}-{{ partial_version }}-g
                 groupSymbol: Update
                 collection:
                     opt: true
@@ -118,7 +114,7 @@
             treeherderEnv:
                 - staging
             treeherder:
-                symbol: {{ locale }}-{{ partial_version }}-2
+                symbol: {{ locale }}-{{ partial_version }}-s
                 groupSymbol: Update
                 collection:
                     opt: true
@@ -160,7 +156,7 @@
             treeherderEnv:
                 - staging
             treeherder:
-                symbol: {{ locale }}-{{ partial_version }}-3
+                symbol: {{ locale }}-{{ partial_version }}-u
                 groupSymbol: Update
                 collection:
                     opt: true
