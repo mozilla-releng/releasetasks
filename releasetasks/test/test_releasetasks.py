@@ -1,40 +1,13 @@
 # -*- coding: utf-8 -*-
-import os
+import unittest
+
 from jose import jwt, jws
 from jose.constants import ALGORITHMS
-import unittest
-import mock
-import thclient.client
 
-from releasetasks import make_task_graph as make_task_graph_orig
+from releasetasks.test import do_common_assertions, PVT_KEY_FILE, get_task_by_name, \
+    make_task_graph
 from releasetasks.util import sign_task
 from . import PVT_KEY, PUB_KEY, OTHER_PUB_KEY
-
-DUMMY_PUBLIC_KEY = os.path.join(os.path.dirname(__file__), "public.key")
-
-
-def get_task_by_name(graph, name):
-    for t in graph["tasks"]:
-        if t["task"]["extra"]["task_name"] == name:
-            return t
-    return None
-
-
-def get_task_by_slugid(graph, slugid):
-    for t in graph["tasks"]:
-        if t["taskId"] == slugid:
-            return t
-    return None
-
-
-@mock.patch.object(thclient.client.TreeherderClient, "get_resultsets")
-def make_task_graph(*args, **kwargs):
-    args = list(args)
-    mocked_get_resultsets = args.pop()
-    mocked_get_resultsets.return_value = [{"revision_hash": "abcdefgh1234567"}]
-    return make_task_graph_orig(*args, public_key=DUMMY_PUBLIC_KEY,
-                                balrog_username="fake", balrog_password="fake",
-                                running_tests=True, **kwargs)
 
 
 class TestTaskSigning(unittest.TestCase):
@@ -65,142 +38,16 @@ class TestTaskSigning(unittest.TestCase):
                           [ALGORITHMS.RS512])
 
 
-PVT_KEY_FILE = os.path.join(os.path.dirname(__file__), "id_rsa")
-
-
-class TestMakeTaskGraph(unittest.TestCase):
+class TestMakeGraph(unittest.TestCase):
     """Because of how huge the graph gets, verifying every character of it is
     impossible to maintain. Instead, we verify aspects of it. Eg, making sure
     the correct number of funsize partials are happening, rather than verifying
     the entire funsize tasks."""
     maxDiff = 30000
-
-    def _do_common_assertions(self, graph):
-        _cached_taskIDs = set()
-        if graph["tasks"]:
-            for t in graph["tasks"]:
-                task = t["task"]
-                self.assertEqual(task["priority"], "high")
-                self.assertIn("task_name", task["extra"])
-                properties = task["payload"].get("properties")
-                if properties:
-                    # The following properties are required by log_uploader.py
-                    self.assertIn("version", properties)
-                    self.assertIn("build_number", properties)
-                    self.assertIn("release_promotion", properties)
-                    self.assertIn(
-                        "revision", properties,
-                        "%s: `revision' property is required by QE automation"
-                        % task["extra"]["task_name"]
-                    )
-                self.assertNotIn(t["taskId"], _cached_taskIDs)
-                _cached_taskIDs.add(t["taskId"])
-
-    def test_source_task_definition(self):
-        graph = make_task_graph(
-            version="42.0b2",
-            appVersion="42.0",
-            buildNumber=3,
-            source_enabled=True,
-            en_US_config={"platforms": {
-                "linux": {"task_id": "xyz"},
-                "win32": {"task_id": "xyy"}
-            }},
-            l10n_config={},
-            repo_path="releases/foo",
-            revision="fedcba654321",
-            branch="foo",
-            updates_enabled=False,
-            bouncer_enabled=False,
-            signing_class="release-signing",
-            verifyConfigs={},
-            signing_pvt_key=PVT_KEY_FILE,
-        )
-
-        self._do_common_assertions(graph)
-
-        task_def = get_task_by_name(graph, "foo_source")
-        task = task_def["task"]
-        payload = task["payload"]
-        self.assertEqual(task["provisionerId"], "aws-provisioner-v1")
-        self.assertEqual(task["workerType"], "opt-linux64")
-        self.assertTrue(payload["image"].startswith("taskcluster/desktop-build:"))
-        self.assertTrue("cache" in payload)
-        self.assertTrue("artifacts" in payload)
-        self.assertTrue("env" in payload)
-        self.assertTrue("command" in payload)
-
-        expected_graph_scopes = set([
-            "docker-worker:cache:tc-vcs",
-            "docker-worker:image:taskcluster/builder:*",
-            "queue:define-task:aws-provisioner-v1/opt-linux64",
-            "queue:create-task:aws-provisioner-v1/opt-linux64",
-            "queue:define-task:aws-provisioner-v1/build-c4-2xlarge",
-            "queue:create-task:aws-provisioner-v1/build-c4-2xlarge",
-            "docker-worker:cache:build-foo-release-workspace",
-            "docker-worker:cache:tooltool-cache",
-            "signing:format:gpg",
-            "signing:cert:release-signing",
-            "docker-worker:relengapi-proxy:tooltool.download.public"
-        ])
-        self.assertTrue(expected_graph_scopes.issubset(graph["scopes"]))
-        expected_task_scopes = set([
-            "docker-worker:cache:tc-vcs",
-            "docker-worker:image:taskcluster/builder:0.5.9",
-            "queue:define-task:aws-provisioner-v1/opt-linux64",
-            "queue:create-task:aws-provisioner-v1/opt-linux64",
-            "queue:define-task:aws-provisioner-v1/build-c4-2xlarge",
-            "queue:create-task:aws-provisioner-v1/build-c4-2xlarge",
-            "docker-worker:cache:build-foo-release-workspace",
-            "docker-worker:cache:tooltool-cache",
-            "docker-worker:relengapi-proxy:tooltool.download.public",
-        ])
-        self.assertTrue(expected_task_scopes.issubset(task["scopes"]))
-
-        signing_task_def = get_task_by_name(graph, "foo_source_signing")
-        signing_task = signing_task_def["task"]
-        self.assertEqual(signing_task_def["requires"][0], task_def["taskId"])
-        self.assertEqual(signing_task["provisionerId"],
-                         "signing-provisioner-v1")
-        self.assertEqual(signing_task["workerType"], "signing-worker-v1")
-        expected_task_scopes = set([
-            "signing:format:gpg",
-            "signing:cert:release-signing"
-        ])
-        self.assertTrue(expected_task_scopes.issubset(signing_task["scopes"]))
-        payload = signing_task["payload"]
-        self.assertTrue("signingManifest" in payload)
-        self.assertEqual(len(payload), 1)
-
-    def test_required_graph_scopes(self):
-        graph = make_task_graph(
-            version="42.0b2",
-            appVersion="42.0",
-            buildNumber=3,
-            branch="foo",
-            revision="abcdef123456",
-            updates_enabled=False,
-            bouncer_enabled=False,
-            source_enabled=False,
-            en_US_config={"platforms": {
-                "linux": {"task_id": "xyz"},
-                "win32": {"task_id": "xyy"}
-            }},
-            l10n_config={},
-            verifyConfigs={},
-            signing_pvt_key=PVT_KEY_FILE,
-        )
-
-        self._do_common_assertions(graph)
-        self.assertEqual(graph["tasks"], None)
-
-        expected_scopes = set([
-            "signing:format:gpg",
-            "queue:define-task:buildbot-bridge/buildbot-bridge",
-            "queue:create-task:buildbot-bridge/buildbot-bridge",
-            "queue:task-priority:high",
-        ])
-        self.assertTrue(expected_scopes.issubset(graph["scopes"]))
+    graph = None
+    task_def = None
+    task = None
+    payload = None
 
     def test_funsize_en_US_deps(self):
         graph = make_task_graph(
@@ -234,7 +81,7 @@ class TestMakeTaskGraph(unittest.TestCase):
             signing_pvt_key=PVT_KEY_FILE,
         )
 
-        self._do_common_assertions(graph)
+        do_common_assertions(graph)
 
         for p in ("win32", "macosx64"):
             for v, appV in (("38.0build1", "38.0"), ("37.0build2", "37.0")):
@@ -291,7 +138,7 @@ class TestMakeTaskGraph(unittest.TestCase):
             signing_pvt_key=PVT_KEY_FILE,
         )
 
-        self._do_common_assertions(graph)
+        do_common_assertions(graph)
         expected_scopes = set([
             "queue:*", "docker-worker:*", "scheduler:*",
             "signing:format:gpg", "signing:format:mar",
@@ -341,7 +188,7 @@ class TestMakeTaskGraph(unittest.TestCase):
             signing_pvt_key=PVT_KEY_FILE,
         )
 
-        self._do_common_assertions(graph)
+        do_common_assertions(graph)
         expected_scopes = set([
             "queue:*", "docker-worker:*", "scheduler:*",
             "signing:format:gpg", "signing:format:mar",
@@ -407,7 +254,7 @@ class TestMakeTaskGraph(unittest.TestCase):
             signing_pvt_key=PVT_KEY_FILE,
         )
 
-        self._do_common_assertions(graph)
+        do_common_assertions(graph)
 
         task = get_task_by_name(graph, "release-mozilla-beta_firefox_win32_l10n_repack_1")
 
@@ -478,7 +325,7 @@ class TestMakeTaskGraph(unittest.TestCase):
             signing_pvt_key=PVT_KEY_FILE,
         )
 
-        self._do_common_assertions(graph)
+        do_common_assertions(graph)
 
         chunk1 = get_task_by_name(graph, "release-mozilla-beta_firefox_win32_l10n_repack_1")
         chunk2 = get_task_by_name(graph, "release-mozilla-beta_firefox_win32_l10n_repack_2")
@@ -532,7 +379,7 @@ class TestMakeTaskGraph(unittest.TestCase):
             release_channels=["beta"],
             signing_pvt_key=PVT_KEY_FILE,
         )
-        self._do_common_assertions(graph)
+        do_common_assertions(graph)
         for p in ("win32", "macosx64"):
             for v in ("38.0build1", "37.0build2"):
                 balrog = get_task_by_name(graph, "{}_en-US_{}_funsize_balrog_task".format(p, v))
@@ -563,7 +410,7 @@ class TestMakeTaskGraph(unittest.TestCase):
             enUS_platforms=["linux", "linux64", "win64", "win32", "macosx64"],
             signing_pvt_key=PVT_KEY_FILE,
         )
-        self._do_common_assertions(graph)
+        do_common_assertions(graph)
 
         task_def = get_task_by_name(graph, "foo_final_verify")
         task = task_def["task"]
@@ -609,7 +456,7 @@ class TestMakeTaskGraph(unittest.TestCase):
             enUS_platforms=["linux", "linux64", "win64", "win32", "macosx64"],
             signing_pvt_key=PVT_KEY_FILE,
         )
-        self._do_common_assertions(graph)
+        do_common_assertions(graph)
 
         task = get_task_by_name(graph, "release-foo_firefox_bncr_sub")
 
@@ -649,7 +496,7 @@ class TestMakeTaskGraph(unittest.TestCase):
             enUS_platforms=["linux", "linux64", "win64", "win32", "macosx64"],
             signing_pvt_key=PVT_KEY_FILE,
         )
-        self._do_common_assertions(graph)
+        do_common_assertions(graph)
 
         for chan in ["beta", "release"]:
             task_def = get_task_by_name(graph,
