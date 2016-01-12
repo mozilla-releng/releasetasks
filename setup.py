@@ -16,7 +16,7 @@ requirements = [
     "requests>=2.4.3,<=2.7.0",
     "PyYAML",
     "chunkify",
-    "treeherder-client",
+    "treeherder-client>=2.0.1",
     "PGPy",
     "buildtools",
     "python-jose",
