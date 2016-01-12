@@ -38,16 +38,12 @@ class TestTaskSigning(unittest.TestCase):
                           [ALGORITHMS.RS512])
 
 
-class TestMakeGraph(unittest.TestCase):
+class TestMakeTaskGraph(unittest.TestCase):
     """Because of how huge the graph gets, verifying every character of it is
     impossible to maintain. Instead, we verify aspects of it. Eg, making sure
     the correct number of funsize partials are happening, rather than verifying
     the entire funsize tasks."""
     maxDiff = 30000
-    graph = None
-    task_def = None
-    task = None
-    payload = None
 
     def test_funsize_en_US_deps(self):
         graph = make_task_graph(
