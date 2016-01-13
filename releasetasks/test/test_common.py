@@ -37,10 +37,6 @@ class TestTaskSigning(unittest.TestCase):
 
 
 class TestEncryption(unittest.TestCase):
-    """Because of how huge the graph gets, verifying every character of it is
-    impossible to maintain. Instead, we verify aspects of it. Eg, making sure
-    the correct number of funsize partials are happening, rather than verifying
-    the entire funsize tasks."""
     maxDiff = 30000
 
     def test_encryption(self):
@@ -81,3 +77,42 @@ class TestEncryption(unittest.TestCase):
                 self.assertTrue(
                     balrog["task"]["payload"]["encryptedEnv"][0].startswith("wcB"),
                     "Encrypted string should always start with 'wcB'")
+
+
+class TestGraphScopes(unittest.TestCase):
+    maxDiff = 30000
+    graph = None
+
+    def setUp(self):
+        self.graph = make_task_graph(
+            version="42.0b2",
+            appVersion="42.0",
+            buildNumber=3,
+            branch="foo",
+            revision="abcdef123456",
+            updates_enabled=False,
+            bouncer_enabled=False,
+            source_enabled=False,
+            en_US_config={"platforms": {
+                "linux": {"task_id": "xyz"},
+                "win32": {"task_id": "xyy"}
+            }},
+            l10n_config={},
+            verifyConfigs={},
+            signing_pvt_key=PVT_KEY_FILE,
+        )
+
+    def test_common_assertions(self):
+        do_common_assertions(self.graph)
+
+    def test_no_tasks(self):
+        self.assertIsNone(self.graph["tasks"])
+
+    def test_scopes(self):
+        expected_scopes = set([
+            "signing:format:gpg",
+            "queue:define-task:buildbot-bridge/buildbot-bridge",
+            "queue:create-task:buildbot-bridge/buildbot-bridge",
+            "queue:task-priority:high",
+        ])
+        self.assertTrue(expected_scopes.issubset(self.graph["scopes"]))

@@ -114,33 +114,3 @@ class TestSourceBuilder(unittest.TestCase):
 
     def test_signing_task_payload_length(self):
         assert len(self.signing_task["payload"]) == 1
-
-    def test_required_graph_scopes(self):
-        graph = make_task_graph(
-            version="42.0b2",
-            appVersion="42.0",
-            buildNumber=3,
-            branch="foo",
-            revision="abcdef123456",
-            updates_enabled=False,
-            bouncer_enabled=False,
-            source_enabled=False,
-            en_US_config={"platforms": {
-                "linux": {"task_id": "xyz"},
-                "win32": {"task_id": "xyy"}
-            }},
-            l10n_config={},
-            verifyConfigs={},
-            signing_pvt_key=PVT_KEY_FILE,
-        )
-
-        do_common_assertions(graph)
-        self.assertEqual(graph["tasks"], None)
-
-        expected_scopes = set([
-            "signing:format:gpg",
-            "queue:define-task:buildbot-bridge/buildbot-bridge",
-            "queue:create-task:buildbot-bridge/buildbot-bridge",
-            "queue:task-priority:high",
-        ])
-        self.assertTrue(expected_scopes.issubset(graph["scopes"]))
