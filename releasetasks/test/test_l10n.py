@@ -31,6 +31,12 @@ class TestL10NSingleChunk(unittest.TestCase):
                         "locales": ["de", "en-GB", "zh-TW"],
                         "chunks": 1,
                     },
+                    "linux64": {
+                        "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.tar.xz",
+                        "locales": ["de", "en-GB", "zh-TW"],
+                        "chunks": 1,
+                    },
+
                 },
                 "changesets": {
                     "de": "default",
@@ -103,12 +109,25 @@ class TestL10NSingleChunk(unittest.TestCase):
         art_task = get_task_by_name(self.graph, "release-mozilla-beta_firefox_win32_l10n_repack_artifacts_1")
         self.assertEqual(art_task["task"]["workerType"], "buildbot")
 
+    def test_partials_present(self):
+        for pl in ["win32", "linux64"]:
+            for part in ["37.0", "38.0"]:
+                task_name = "release-mozilla-beta_firefox_{pl}_l10n_repack_1_{part}_update_generator".format(
+                    pl=pl, part=part)
+                self.assertIsNotNone(get_task_by_name(
+                    self.graph, task_name))
+
 
 class TestL10NMultipleChunks(unittest.TestCase):
     maxDiff = 30000
+    graph = None
+    chunk1 = None
+    chunk2 = None
+    chunk1_properties = None
+    chunk2_properties = None
 
-    def test_l10n_multiple_chunks(self):
-        graph = make_task_graph(
+    def setUp(self):
+        self.graph = make_task_graph(
             version="42.0b2",
             appVersion="42.0",
             buildNumber=3,
@@ -123,6 +142,11 @@ class TestL10NMultipleChunks(unittest.TestCase):
                 "platforms": {
                     "win32": {
                         "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.exe",
+                        "locales": ["de", "en-GB", "ru", "uk", "zh-TW"],
+                        "chunks": 2,
+                    },
+                    "linux64": {
+                        "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.tar.xz",
                         "locales": ["de", "en-GB", "ru", "uk", "zh-TW"],
                         "chunks": 2,
                     },
@@ -152,27 +176,73 @@ class TestL10NMultipleChunks(unittest.TestCase):
             release_channels=["beta"],
             signing_pvt_key=PVT_KEY_FILE,
         )
+        self.chunk1 = get_task_by_name(
+            self.graph, "release-mozilla-beta_firefox_win32_l10n_repack_1")
+        self.chunk2 = get_task_by_name(
+            self.graph, "release-mozilla-beta_firefox_win32_l10n_repack_2")
+        self.chunk1_properties = self.chunk1["task"]["payload"]["properties"]
+        self.chunk2_properties = self.chunk2["task"]["payload"]["properties"]
 
-        do_common_assertions(graph)
+    def test_common_assertions(self):
+        do_common_assertions(self.graph)
 
-        chunk1 = get_task_by_name(graph, "release-mozilla-beta_firefox_win32_l10n_repack_1")
-        chunk2 = get_task_by_name(graph, "release-mozilla-beta_firefox_win32_l10n_repack_2")
+    def test_chunk1_buildername(self):
+        self.assertEqual(
+            self.chunk1["task"]["payload"]["buildername"],
+            "release-mozilla-beta_firefox_win32_l10n_repack")
 
-        chunk1_properties = chunk1["task"]["payload"]["properties"]
-        chunk2_properties = chunk2["task"]["payload"]["properties"]
+    def test_chunk1_locales(self):
+        self.assertEqual(self.chunk1_properties["locales"],
+                         "de:default en-GB:default ru:default")
 
-        self.assertEqual(chunk1["task"]["payload"]["buildername"], "release-mozilla-beta_firefox_win32_l10n_repack")
-        self.assertEqual(chunk1_properties["locales"], "de:default en-GB:default ru:default")
-        self.assertEqual(chunk1_properties["en_us_binary_url"], "https://queue.taskcluster.net/something/firefox.exe")
-        self.assertEqual(chunk2["task"]["payload"]["buildername"], "release-mozilla-beta_firefox_win32_l10n_repack")
-        self.assertEqual(chunk2_properties["locales"], "uk:default zh-TW:default")
-        self.assertEqual(chunk2_properties["en_us_binary_url"], "https://queue.taskcluster.net/something/firefox.exe")
+    def test_chunk1_en_us_binary_url(self):
+        self.assertEqual(
+            self.chunk1_properties["en_us_binary_url"],
+            "https://queue.taskcluster.net/something/firefox.exe")
 
-        self.assertIsNone(get_task_by_name(graph, "release-mozilla-beta_firefox_win32_l10n_repack_3"))
+    def test_chunk2_buildername(self):
+        self.assertEqual(
+            self.chunk2["task"]["payload"]["buildername"],
+            "release-mozilla-beta_firefox_win32_l10n_repack")
 
+    def test_chunk2_locales(self):
+        self.assertEqual(self.chunk2_properties["locales"],
+                         "uk:default zh-TW:default")
+
+    def test_chunk2_en_us_binary_url(self):
+        self.assertEqual(
+            self.chunk2_properties["en_us_binary_url"],
+            "https://queue.taskcluster.net/something/firefox.exe")
+
+    def test_no_chunk3(self):
+        self.assertIsNone(get_task_by_name(
+            self.graph, "release-mozilla-beta_firefox_win32_l10n_repack_3"))
+
+    def test_chunk1_artifacts_task_present(self):
         # make sure artifacts tasks are present
-        self.assertIsNotNone(get_task_by_name(graph, "release-mozilla-beta_firefox_win32_l10n_repack_artifacts_1"))
-        self.assertIsNotNone(get_task_by_name(graph, "release-mozilla-beta_firefox_win32_l10n_repack_artifacts_2"))
-        self.assertIsNone(get_task_by_name(graph, "release-mozilla-beta_firefox_win32_l10n_repack_artifacts_3"))
-        # partials
-        self.assertIsNotNone(get_task_by_name(graph, "release-mozilla-beta_firefox_win32_l10n_repack_1_37.0_update_generator"))
+        self.assertIsNotNone(get_task_by_name(
+            self.graph,
+            "release-mozilla-beta_firefox_win32_l10n_repack_artifacts_1"))
+
+    def test_chunk2_artifacts_task_present(self):
+        self.assertIsNotNone(get_task_by_name(
+            self.graph,
+            "release-mozilla-beta_firefox_win32_l10n_repack_artifacts_2"))
+
+    def test_no_chunk3_artifacts(self):
+        self.assertIsNone(get_task_by_name(
+            self.graph,
+            "release-mozilla-beta_firefox_win32_l10n_repack_artifacts_3"))
+
+    def test_partials_present(self):
+        for pl in ["win32", "linux64"]:
+            for part in ["37.0", "38.0"]:
+                for chunk in [1, 2]:
+                    task_name1 = "release-mozilla-beta_firefox_{pl}_l10n_repack_{chunk}_{part}_update_generator".format(
+                        pl=pl, part=part, chunk=chunk)
+                    task_name2 = "release-mozilla-beta_firefox_{pl}_l10n_repack_{chunk}_{part}_signing_task".format(
+                        pl=pl, part=part, chunk=chunk)
+                    self.assertIsNotNone(get_task_by_name(
+                        self.graph, task_name1))
+                    self.assertIsNotNone(get_task_by_name(
+                        self.graph, task_name2))
