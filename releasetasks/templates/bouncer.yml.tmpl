@@ -27,7 +27,7 @@
                 build_number: {{ buildNumber }}
                 release_promotion: true
                 revision: "{{ revision }}"
-                partial_versions: "{{ ",".join(sorted(partial_updates.keys())) }}"
+                partial_versions: "{{ ", ".join(sorted(partial_updates.keys())) }}"
         metadata:
             name: "{{ product }} {{ branch }} bncr sub"
             description: "Release Promotion bouncer submission job"
