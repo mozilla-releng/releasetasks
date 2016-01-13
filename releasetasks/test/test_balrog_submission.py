@@ -5,14 +5,13 @@ from releasetasks.test import make_task_graph, PVT_KEY_FILE, \
 
 
 class TestBalrogSubmission(unittest.TestCase):
-    """Because of how huge the graph gets, verifying every character of it is
-    impossible to maintain. Instead, we verify aspects of it. Eg, making sure
-    the correct number of funsize partials are happening, rather than verifying
-    the entire funsize tasks."""
     maxDiff = 30000
+    graph = None
+    task = None
+    payload = None
 
-    def test_bouncer_submission_task_definition(self):
-        graph = make_task_graph(
+    def setUp(self):
+        self.graph = make_task_graph(
             version="42.0b2",
             appVersion="42.0",
             buildNumber=3,
@@ -37,20 +36,31 @@ class TestBalrogSubmission(unittest.TestCase):
             enUS_platforms=["linux", "linux64", "win64", "win32", "macosx64"],
             signing_pvt_key=PVT_KEY_FILE,
         )
-        do_common_assertions(graph)
+        self.task = get_task_by_name(self.graph,
+                                     "release-foo_firefox_bncr_sub")
+        self.payload = self.task["task"]["payload"]
 
-        task = get_task_by_name(graph, "release-foo_firefox_bncr_sub")
+    def test_common_assertions(self):
+        do_common_assertions(self.graph)
 
-        payload = task["task"]["payload"]
+    def test_provisioner(self):
+        self.assertEqual(self.task["task"]["provisionerId"], "buildbot-bridge")
 
-        self.assertEqual(task["task"]["provisionerId"], "buildbot-bridge")
-        self.assertEqual(task["task"]["workerType"], "buildbot-bridge")
-        self.assertFalse("scopes" in task)
-        # XXX: Change the image name once it's in-tree.
-        self.assertEqual(payload["properties"]["partial_versions"], "37.0, 38.0,")
-        self.assertEqual(payload["properties"]["build_number"], 3)
+    def test_worker_type(self):
+        self.assertEqual(self.task["task"]["workerType"], "buildbot-bridge")
 
+    def test_scopes_present(self):
+        self.assertFalse("scopes" in self.task)
+
+    def test_partials(self):
+        self.assertEqual(self.payload["properties"]["partial_versions"],
+                         "37.0, 38.0,")
+
+    def test_build_number(self):
+        self.assertEqual(self.payload["properties"]["build_number"], 3)
+
+    def test_graph_scopes(self):
         expected_graph_scopes = set([
             "queue:task-priority:high",
         ])
-        self.assertTrue(expected_graph_scopes.issubset(graph["scopes"]))
+        self.assertTrue(expected_graph_scopes.issubset(self.graph["scopes"]))

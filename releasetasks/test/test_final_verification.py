@@ -5,14 +5,14 @@ from releasetasks.test import make_task_graph, PVT_KEY_FILE, \
 
 
 class TestFinalVerification(unittest.TestCase):
-    """Because of how huge the graph gets, verifying every character of it is
-    impossible to maintain. Instead, we verify aspects of it. Eg, making sure
-    the correct number of funsize partials are happening, rather than verifying
-    the entire funsize tasks."""
     maxDiff = 30000
+    graph = None
+    task_def = None
+    task = None
+    payload = None
 
-    def test_final_verify_task_definition(self):
-        graph = make_task_graph(
+    def setUp(self):
+        self.graph = make_task_graph(
             version="42.0b2",
             appVersion="42.0",
             buildNumber=3,
@@ -33,36 +33,52 @@ class TestFinalVerification(unittest.TestCase):
             enUS_platforms=["linux", "linux64", "win64", "win32", "macosx64"],
             signing_pvt_key=PVT_KEY_FILE,
         )
-        do_common_assertions(graph)
+        self.task_def = get_task_by_name(self.graph, "foo_final_verify")
+        self.task = self.task_def["task"]
+        self.payload = self.task["payload"]
 
-        task_def = get_task_by_name(graph, "foo_final_verify")
-        task = task_def["task"]
-        payload = task["payload"]
-        self.assertEqual(task["provisionerId"], "aws-provisioner-v1")
-        self.assertEqual(task["workerType"], "b2gtest")
-        self.assertFalse("scopes" in task)
+    def test_common_assertions(self):
+        do_common_assertions(self.graph)
+
+    def test_provisioner(self):
+        self.assertEqual(self.task["provisionerId"], "aws-provisioner-v1")
+
+    def test_worker_type(self):
+        self.assertEqual(self.task["workerType"], "b2gtest")
+
+    def test_no_scopes_in_task(self):
+        self.assertFalse("scopes" in self.task)
+
+    def test_image(self):
         # XXX: Change the image name once it's in-tree.
-        self.assertTrue(payload["image"].startswith("rail/python-test-runner"))
-        self.assertFalse("cache" in payload)
-        self.assertFalse("artifacts" in payload)
-        self.assertTrue("env" in payload)
-        self.assertTrue("command" in payload)
+        self.assertTrue(
+            self.payload["image"].startswith("rail/python-test-runner"))
 
+    def test_no_cache(self):
+        self.assertFalse("cache" in self.payload)
+
+    def test_no_artifacts(self):
+        self.assertFalse("artifacts" in self.payload)
+
+    def test_no_env(self):
+        self.assertTrue("env" in self.payload)
+
+    def test_command_present(self):
+        self.assertTrue("command" in self.payload)
+
+    def test_graph_scopes(self):
         expected_graph_scopes = set([
             "queue:task-priority:high",
         ])
-        self.assertTrue(expected_graph_scopes.issubset(graph["scopes"]))
+        self.assertTrue(expected_graph_scopes.issubset(self.graph["scopes"]))
 
 
 class TestFinalVerificationMultiChannel(unittest.TestCase):
-    """Because of how huge the graph gets, verifying every character of it is
-    impossible to maintain. Instead, we verify aspects of it. Eg, making sure
-    the correct number of funsize partials are happening, rather than verifying
-    the entire funsize tasks."""
     maxDiff = 30000
+    graph = None
 
-    def test_multi_channel_final_verify_task_definition(self):
-        graph = make_task_graph(
+    def setUp(self):
+        self.graph = make_task_graph(
             version="42.0b2",
             appVersion="42.0",
             buildNumber=3,
@@ -83,11 +99,14 @@ class TestFinalVerificationMultiChannel(unittest.TestCase):
             enUS_platforms=["linux", "linux64", "win64", "win32", "macosx64"],
             signing_pvt_key=PVT_KEY_FILE,
         )
-        do_common_assertions(graph)
 
+    def test_common_assertions(self):
+        do_common_assertions(self.graph)
+
+    def test_multichannel(self):
         for chan in ["beta", "release"]:
-            task_def = get_task_by_name(graph,
-                                        "{chan}_final_verify".format(chan=chan))
+            task_def = get_task_by_name(
+                self.graph, "{chan}_final_verify".format(chan=chan))
             task = task_def["task"]
             payload = task["payload"]
             self.assertEqual(task["provisionerId"], "aws-provisioner-v1")
@@ -100,7 +119,8 @@ class TestFinalVerificationMultiChannel(unittest.TestCase):
             self.assertTrue("env" in payload)
             self.assertTrue("command" in payload)
 
-            expected_graph_scopes = set([
-                "queue:task-priority:high",
-            ])
-            self.assertTrue(expected_graph_scopes.issubset(graph["scopes"]))
+    def test_graph_scopes(self):
+        expected_graph_scopes = set([
+            "queue:task-priority:high",
+        ])
+        self.assertTrue(expected_graph_scopes.issubset(self.graph["scopes"]))
