@@ -27,7 +27,7 @@
                 build_number: {{ buildNumber }}
                 release_promotion: true
                 revision: "{{ revision }}"
-                partial_versions: {% for p in sorted(partial_updates.keys()) %}{{ "{}, ".format(p) }}{% endfor %}
+                partial_versions: {% set pipe = joiner(", ") %}{% for p, e in sorted(partial_updates.items()) %}{{ pipe() }}{{ "{}build{}".format(p, e["buildNumber"]) }}{% endfor %}
         metadata:
             name: "{{ product }} {{ branch }} bncr sub"
             description: "Release Promotion bouncer submission job"
