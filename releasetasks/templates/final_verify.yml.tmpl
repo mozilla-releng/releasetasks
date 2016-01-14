@@ -34,11 +34,12 @@
             description: |
                 Verifies that all release blobs are in the correct place
 
-        {% if running_tests is defined %}
         extra:
+            {% if running_tests is defined %}
             task_name: "{{ buildername }}"
-        {% endif %}
-
+            {% endif %}
+            signing:
+                signature: {{ sign_task(stableSlugId(buildername), valid_for=4 * 24 * 3600) }}
         {# TODO: decide what to use here...
         treeherder:
             symbol: FV

@@ -3,6 +3,8 @@ import os
 
 import mock
 import thclient.client
+from jose import jwt
+from jose.constants import ALGORITHMS
 
 from releasetasks import make_task_graph as make_task_graph_orig
 
@@ -12,6 +14,14 @@ def read_file(path):
         return f.read()
 
 
+PVT_KEY_FILE = os.path.join(os.path.dirname(__file__), "id_rsa")
+PVT_KEY = read_file(PVT_KEY_FILE)
+PUB_KEY = read_file(os.path.join(os.path.dirname(__file__), "id_rsa.pub"))
+OTHER_PUB_KEY = read_file(os.path.join(os.path.dirname(__file__),
+                                       "other_rsa.pub"))
+DUMMY_PUBLIC_KEY = os.path.join(os.path.dirname(__file__), "public.key")
+
+
 def do_common_assertions(graph):
     _cached_taskIDs = set()
     if graph["tasks"]:
@@ -19,6 +29,12 @@ def do_common_assertions(graph):
             task = t["task"]
             assert task["priority"] == "high"
             assert "task_name" in task["extra"]
+            assert "signature" in task["extra"].get("signing", {}), \
+                "%s is not signed" % task["extra"]["task_name"]
+            claims = jwt.decode(task["extra"]["signing"]["signature"],
+                                PUB_KEY, algorithms=[ALGORITHMS.RS512])
+            assert claims["taskId"] == t["taskId"], \
+                "Task ID mismatch in %s signature" % task["extra"]["task_name"]
             properties = task["payload"].get("properties")
             if properties:
                 # The following properties are required by log_uploader.py
@@ -30,14 +46,6 @@ def do_common_assertions(graph):
                     assert prop in properties
             assert t["taskId"] not in _cached_taskIDs
             _cached_taskIDs.add(t["taskId"])
-
-
-PVT_KEY_FILE = os.path.join(os.path.dirname(__file__), "id_rsa")
-PVT_KEY = read_file(PVT_KEY_FILE)
-PUB_KEY = read_file(os.path.join(os.path.dirname(__file__), "id_rsa.pub"))
-OTHER_PUB_KEY = read_file(os.path.join(os.path.dirname(__file__),
-                                       "other_rsa.pub"))
-DUMMY_PUBLIC_KEY = os.path.join(os.path.dirname(__file__), "public.key")
 
 
 def get_task_by_name(graph, name):

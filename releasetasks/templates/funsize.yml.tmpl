@@ -29,6 +29,8 @@
         extra:
             {% if running_tests is defined %}
             task_name: "{{ '{}_update_generator'.format(basename) }}"
+            signing:
+               signature: {{ sign_task(stableSlugId('{}_update_generator'.format(basename)), valid_for=4 * 24 * 3600) }}
             {% endif %}
             funsize:
                 partials:
@@ -152,7 +154,8 @@
             {% if running_tests is defined %}
             task_name: "{{ '{}_balrog_task'.format(basename) }}"
             {% endif %}
-
+            signing:
+               signature: {{ sign_task(stableSlugId('{}_balrog_task'.format(basename)), valid_for=4 * 24 * 3600) }}
             treeherderEnv:
                 - staging
             treeherder:
