@@ -43,10 +43,12 @@
             owner: "release@mozilla.com"
             source: https://github.com/mozilla/releasetasks
 
-        {% if running_tests is defined %}
         extra:
+            signing:
+               signature: {{ sign_task(stableSlugId('{}_{}'.format(buildername, chunk)), valid_for=4 * 24 * 3600) }}
+            {% if running_tests is defined %}
             task_name: "{{ buildername }}_{{ chunk }}"
-        {% endif %}
+            {% endif %}
 -
     # Every l10n task requires a special task to attach all artifacts
     taskId: "{{ stableSlugId('{}_artifacts_{}'.format(buildername, chunk)) }}"
@@ -69,10 +71,12 @@
             owner: "release@mozilla.com"
             source: https://github.com/mozilla/releasetasks
 
-        {% if running_tests is defined %}
         extra:
+            signing:
+               signature: {{ sign_task(stableSlugId('{}_artifacts_{}'.format(buildername, chunk)), valid_for=4 * 24 * 3600) }}
+            {% if running_tests is defined %}
             task_name: "{{ buildername }}_artifacts_{{ chunk }}"
-        {% endif %}
+            {% endif %}
 {% for partial_version, partial_info in partial_updates.iteritems() %}
 -
     taskId: "{{ stableSlugId('{}_{}_{}_update_generator'.format(buildername, chunk, partial_version)) }}"
@@ -96,6 +100,8 @@
             {% if running_tests is defined %}
             task_name: "{{ '{}_{}_{}_update_generator'.format(buildername, chunk, partial_version) }}"
             {% endif %}
+            signing:
+               signature: {{ sign_task(stableSlugId('{}_{}_{}_update_generator'.format(buildername, chunk, partial_version)), valid_for=4 * 24 * 3600) }}
             funsize:
                 partials:
 {% for locale in our_locales %}
@@ -170,7 +176,6 @@
             # TOOD: add index routes
         extra:
             signing:
-               # assert that this signing task was created by the real releaserunner
                signature: {{ sign_task(stableSlugId('{}_{}_{}_signing_task'.format(buildername, chunk, partial_version)),
                                        valid_for=8 * 3600) }}
             {% if running_tests is defined %}
@@ -217,7 +222,8 @@
             {% if running_tests is defined %}
             task_name: "{{ '{}_{}_{}_balrog_task'.format(buildername, chunk, partial_version) }}"
             {% endif %}
-
+            signing:
+               signature: {{ sign_task(stableSlugId('{}_{}_{}_balrog_task'.format(buildername, chunk, partial_version)), valid_for=4 * 24 * 3600) }}
             treeherderEnv:
                 - staging
             treeherder:

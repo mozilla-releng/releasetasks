@@ -19,6 +19,8 @@ def do_common_assertions(graph):
             task = t["task"]
             assert task["priority"] == "high"
             assert "task_name" in task["extra"]
+            assert "signature" in task["extra"].get("signing", {}), \
+                "%s is not signed" % task["extra"]["task_name"]
             properties = task["payload"].get("properties")
             if properties:
                 # The following properties are required by log_uploader.py

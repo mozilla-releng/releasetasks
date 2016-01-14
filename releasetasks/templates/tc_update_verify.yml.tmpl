@@ -36,10 +36,12 @@
             description: |
                 Verifies updates for {{ platform }}
 
-        {% if running_tests is defined %}
         extra:
+            signing:
+               signature: {{ sign_task(stableSlugId(uv_buildername), valid_for=4 * 24 * 3600) }}
+            {% if running_tests is defined %}
             task_name: "{{ uv_buildername }}"
-        {% endif %}
+            {% endif %}
 
         {# TODO: decide what to use here...
         treeherder:
