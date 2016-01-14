@@ -54,7 +54,7 @@ class TestBalrogSubmission(unittest.TestCase):
 
     def test_partials(self):
         self.assertEqual(self.payload["properties"]["partial_versions"],
-                         "37.0, 38.0")
+                         "37.0build2, 38.0build1, ")
 
     def test_build_number(self):
         self.assertEqual(self.payload["properties"]["build_number"], 3)
