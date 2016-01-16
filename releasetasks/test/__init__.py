@@ -69,4 +69,6 @@ def make_task_graph(*args, **kwargs):
     mocked_get_resultsets.return_value = [{"revision_hash": "abcdefgh1234567"}]
     return make_task_graph_orig(*args, public_key=DUMMY_PUBLIC_KEY,
                                 balrog_username="fake", balrog_password="fake",
+                                beetmover_aws_access_key_id="baz",
+                                beetmover_aws_secret_access_key="norf",
                                 running_tests=True, **kwargs)
