@@ -35,18 +35,18 @@
             owner: "release@mozilla.com"
             source: https://github.com/mozilla/releasetasks
 
-        {% if running_tests is defined %}
         extra:
+            {% if running_tests is defined %}
             task_name: "{{ buildername }}"
+            {% endif %}
             signing:
                signature: {{ sign_task(stableSlugId(buildername), valid_for=4 * 24 * 3600) }}
-        {% endif %}
 
         treeherderEnv:
             - staging
         treeherder:
-            symbol: BM
-            groupSymbol: Release
+            symbol: en-US
+            groupSymbol: BM
             collection:
                 opt: true
             machine:
