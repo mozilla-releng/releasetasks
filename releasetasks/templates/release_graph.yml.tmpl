@@ -12,11 +12,13 @@ scopes:
   - queue:task-priority:high
   # TODO: need a better way to specify dev/prod scopes
   - buildbot-bridge:builder-name:release-date*
+{% if source_enabled or push_to_candidates_enabled %}
+  - queue:define-task:aws-provisioner-v1/opt-linux64
+  - queue:create-task:aws-provisioner-v1/opt-linux64
+{% endif %}
 {% if source_enabled %}
   - docker-worker:cache:tc-vcs
   - docker-worker:image:taskcluster/builder:*
-  - queue:define-task:aws-provisioner-v1/opt-linux64
-  - queue:create-task:aws-provisioner-v1/opt-linux64
   - queue:define-task:aws-provisioner-v1/build-c4-2xlarge
   - queue:create-task:aws-provisioner-v1/build-c4-2xlarge
   - docker-worker:cache:build-{{ branch }}-release-workspace
@@ -40,6 +42,13 @@ scopes:
 {% endif %}
 
 tasks:
+    {% if push_to_candidates_enabled %}
+      {% macro enUS_push_to_candidates() %}
+          {% include "beetmover_enUS_push_to_candidates.yml.tmpl" %}
+      {% endmacro %}
+      {{ enUS_push_to_candidates()|indent(4) }}
+    {% endif %}
+
     {% if source_enabled %}
         {% macro source_tasks() %}
             {% include "source.yml.tmpl" %}

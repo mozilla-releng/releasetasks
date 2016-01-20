@@ -20,6 +20,7 @@ class TestL10NSingleChunk(unittest.TestCase):
             source_enabled=False,
             updates_enabled=False,
             bouncer_enabled=False,
+            push_to_candidates_enabled=False,
             enUS_platforms=["win32"],
             en_US_config={"platforms": {
                 "win32": {"task_id": "xyy"}
@@ -134,6 +135,7 @@ class TestL10NMultipleChunks(unittest.TestCase):
             source_enabled=False,
             updates_enabled=False,
             bouncer_enabled=False,
+            push_to_candidates_enabled=False,
             enUS_platforms=["win32"],
             en_US_config={"platforms": {
                 "win32": {"task_id": "xyy"}
