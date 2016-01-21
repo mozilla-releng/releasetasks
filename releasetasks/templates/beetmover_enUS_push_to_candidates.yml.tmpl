@@ -42,16 +42,16 @@
             signing:
                signature: {{ sign_task(stableSlugId(buildername), valid_for=4 * 24 * 3600) }}
 
-        treeherderEnv:
-            - staging
-        treeherder:
-            symbol: en-US
-            groupSymbol: BM
-            collection:
-                opt: true
-            machine:
-                platform: {{ platform }}
-            build:
-                platform: none
+            treeherderEnv:
+                - staging
+            treeherder:
+                symbol: en-US
+                groupSymbol: BM
+                collection:
+                    opt: true
+                machine:
+                    platform: {{ platform }}
+                build:
+                    platform: none
 
 {% endfor %} # platforms
