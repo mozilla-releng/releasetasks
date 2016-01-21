@@ -13,6 +13,7 @@ class TestSourceBuilder(unittest.TestCase):
 
     def setUp(self):
         self.graph = make_task_graph(
+            product="firefox",
             version="42.0b2",
             appVersion="42.0",
             buildNumber=3,

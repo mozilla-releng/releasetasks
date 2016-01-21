@@ -69,6 +69,7 @@ class TestEncryption(unittest.TestCase):
             signing_class="dep-signing",
             release_channels=["beta"],
             signing_pvt_key=PVT_KEY_FILE,
+            repo_path="foo/bar",
         )
         do_common_assertions(graph)
         for p in ("win32", "macosx64"):
@@ -86,6 +87,7 @@ class TestGraphScopes(unittest.TestCase):
 
     def setUp(self):
         self.graph = make_task_graph(
+            product="firefox",
             version="42.0b2",
             appVersion="42.0",
             buildNumber=3,
@@ -102,13 +104,11 @@ class TestGraphScopes(unittest.TestCase):
             l10n_config={},
             verifyConfigs={},
             signing_pvt_key=PVT_KEY_FILE,
+            repo_path="foo/bar",
         )
 
     def test_common_assertions(self):
         do_common_assertions(self.graph)
-
-    def test_no_tasks(self):
-        self.assertIsNone(self.graph["tasks"])
 
     def test_scopes(self):
         expected_scopes = set([
