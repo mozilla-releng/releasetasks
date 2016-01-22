@@ -42,6 +42,7 @@ class TestEncryption(unittest.TestCase):
     def test_encryption(self):
         graph = make_task_graph(
             version="42.0b2",
+            next_version="42.0b3",
             appVersion="42.0",
             buildNumber=3,
             source_enabled=False,
@@ -89,6 +90,7 @@ class TestGraphScopes(unittest.TestCase):
     def setUp(self):
         self.graph = make_task_graph(
             version="42.0b2",
+            next_version="42.0b3",
             appVersion="42.0",
             buildNumber=3,
             branch="foo",

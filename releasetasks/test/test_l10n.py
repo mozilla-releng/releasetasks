@@ -15,6 +15,7 @@ class TestL10NSingleChunk(unittest.TestCase):
     def setUp(self):
         self.graph = make_task_graph(
             version="42.0b2",
+            next_version="42.0b3",
             appVersion="42.0",
             buildNumber=3,
             source_enabled=False,
@@ -131,6 +132,7 @@ class TestL10NMultipleChunks(unittest.TestCase):
     def setUp(self):
         self.graph = make_task_graph(
             version="42.0b2",
+            next_version="42.0b3",
             appVersion="42.0",
             buildNumber=3,
             source_enabled=False,
