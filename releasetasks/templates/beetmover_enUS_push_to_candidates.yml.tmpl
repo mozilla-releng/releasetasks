@@ -32,8 +32,8 @@
                                    now_ms + 24 * 3600 * 1000, 'AWS_SECRET_ACCESS_KEY',
                                    beetmover_aws_secret_access_key) }}
         metadata:
-            name: "{{ product }} {{ branch }} {{ platform }} en_US beetmover"
-            description: "Release Promotion en_US beetmover job"
+            name: "[beetmover] {{ product }} {{ branch }} {{ platform }} en_US completes candidates"
+            description: "moves artifacts for en_US based builds to candidates dir"
             owner: "release@mozilla.com"
             source: https://github.com/mozilla/releasetasks
 
