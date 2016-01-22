@@ -22,6 +22,8 @@
                   wget -O mozharness.tar.bz2 https://hg.mozilla.org/{{ repo_path }}/archive/{{ revision }}.tar.bz2/testing/mozharness &&
                   mkdir mozharness && tar xvfj mozharness.tar.bz2 -C mozharness --strip-components 3 && cd mozharness &&
                   python scripts/release/beet_mover.py --template configs/beetmover/en_us.yml.tmpl --platform {{ buildbot2ftp(platform) }} --version {{ version }} --app-version {{ appVersion }} --locale en-US --taskid {{ platform_info['task_id'] }} --build-num build{{ buildNumber }}
+            env:
+                DUMMY_ENV_FOR_ENCRYPT: "fake"
             encryptedEnv:
                 - {{ encrypt_env_var(stableSlugId(buildername), now_ms,
                                    now_ms + 24 * 3600 * 1000, 'AWS_ACCESS_KEY_ID',
@@ -50,8 +52,8 @@
                 collection:
                     opt: true
                 machine:
-                    platform: {{ platform }}
+                    platform: {{ get_treeherder_platform(platform) }}
                 build:
-                    platform: none
+                    platform: {{ get_treeherder_platform(platform) }}
 
 {% endfor %} # platforms
