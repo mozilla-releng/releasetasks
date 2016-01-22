@@ -29,6 +29,7 @@ class TestSourceBuilder(unittest.TestCase):
             updates_enabled=False,
             bouncer_enabled=False,
             push_to_candidates_enabled=False,
+            postrelease_version_bump_enabled=True,
             signing_class="release-signing",
             verifyConfigs={},
             signing_pvt_key=PVT_KEY_FILE,

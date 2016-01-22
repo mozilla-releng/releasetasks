@@ -32,6 +32,7 @@ class TestBalrogSubmission(unittest.TestCase):
             updates_enabled=False,
             bouncer_enabled=True,
             push_to_candidates_enabled=False,
+            postrelease_version_bump_enabled=True,
             signing_class="release-signing",
             release_channels=["foo"],
             enUS_platforms=["linux", "linux64", "win64", "win32", "macosx64"],

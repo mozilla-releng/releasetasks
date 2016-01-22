@@ -100,8 +100,9 @@ tasks:
         {{ finalVerify_tasks()|indent(4) }}
     {% endif %}
 
-    # Post release version bump is enabled unconditionally
-    {% macro version_bump_tasks() %}
-        {% include "version_bump.yml.tmpl" %}
-    {% endmacro %}
-    {{ version_bump_tasks()|indent(4) }}
+    {% if postrelease_version_bump_enabled %}
+        {% macro version_bump_tasks() %}
+            {% include "version_bump.yml.tmpl" %}
+        {% endmacro %}
+        {{ version_bump_tasks()|indent(4) }}
+    {% endif %}

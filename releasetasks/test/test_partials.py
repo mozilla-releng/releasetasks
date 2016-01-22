@@ -16,6 +16,7 @@ class TestEnUSPartials(unittest.TestCase):
             updates_enabled=True,
             bouncer_enabled=False,
             push_to_candidates_enabled=False,
+            postrelease_version_bump_enabled=True,
             en_US_config={"platforms": {
                 "macosx64": {"task_id": "xyz"},
                 "win32": {"task_id": "xyy"}

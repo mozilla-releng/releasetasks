@@ -48,6 +48,7 @@ class TestEncryption(unittest.TestCase):
             updates_enabled=True,
             bouncer_enabled=False,
             push_to_candidates_enabled=False,
+            postrelease_version_bump_enabled=True,
             en_US_config={"platforms": {
                 "macosx64": {"task_id": "xyz"},
                 "win32": {"task_id": "xyy"}
@@ -87,7 +88,6 @@ class TestGraphScopes(unittest.TestCase):
 
     def setUp(self):
         self.graph = make_task_graph(
-            product="firefox",
             version="42.0b2",
             appVersion="42.0",
             buildNumber=3,
@@ -97,6 +97,7 @@ class TestGraphScopes(unittest.TestCase):
             bouncer_enabled=False,
             source_enabled=False,
             push_to_candidates_enabled=False,
+            postrelease_version_bump_enabled=False,
             en_US_config={"platforms": {
                 "linux": {"task_id": "xyz"},
                 "win32": {"task_id": "xyy"}
@@ -104,11 +105,13 @@ class TestGraphScopes(unittest.TestCase):
             l10n_config={},
             verifyConfigs={},
             signing_pvt_key=PVT_KEY_FILE,
-            repo_path="foo/bar",
         )
 
     def test_common_assertions(self):
         do_common_assertions(self.graph)
+
+    def test_no_tasks(self):
+        self.assertIsNone(self.graph["tasks"])
 
     def test_scopes(self):
         expected_scopes = set([
