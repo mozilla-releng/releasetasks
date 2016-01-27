@@ -15,12 +15,14 @@ class TestL10NSingleChunk(unittest.TestCase):
     def setUp(self):
         self.graph = make_task_graph(
             version="42.0b2",
+            next_version="42.0b3",
             appVersion="42.0",
             buildNumber=3,
             source_enabled=False,
             updates_enabled=False,
             bouncer_enabled=False,
             push_to_candidates_enabled=False,
+            postrelease_version_bump_enabled=False,
             enUS_platforms=["win32"],
             en_US_config={"platforms": {
                 "win32": {"task_id": "xyy"}
@@ -130,12 +132,14 @@ class TestL10NMultipleChunks(unittest.TestCase):
     def setUp(self):
         self.graph = make_task_graph(
             version="42.0b2",
+            next_version="42.0b3",
             appVersion="42.0",
             buildNumber=3,
             source_enabled=False,
             updates_enabled=False,
             bouncer_enabled=False,
             push_to_candidates_enabled=False,
+            postrelease_version_bump_enabled=False,
             enUS_platforms=["win32"],
             en_US_config={"platforms": {
                 "win32": {"task_id": "xyy"}

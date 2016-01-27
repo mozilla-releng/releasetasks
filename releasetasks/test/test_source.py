@@ -13,7 +13,9 @@ class TestSourceBuilder(unittest.TestCase):
 
     def setUp(self):
         self.graph = make_task_graph(
+            product="firefox",
             version="42.0b2",
+            next_version="42.0b3",
             appVersion="42.0",
             buildNumber=3,
             source_enabled=True,
@@ -28,6 +30,7 @@ class TestSourceBuilder(unittest.TestCase):
             updates_enabled=False,
             bouncer_enabled=False,
             push_to_candidates_enabled=False,
+            postrelease_version_bump_enabled=False,
             signing_class="release-signing",
             verifyConfigs={},
             signing_pvt_key=PVT_KEY_FILE,

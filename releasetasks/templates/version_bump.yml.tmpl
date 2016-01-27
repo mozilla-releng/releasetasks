@@ -1,0 +1,68 @@
+{% set buildername = "release-{}_{}_version_bump".format(branch, product) %}
+-
+    taskId: "{{ stableSlugId('{}_human_decision'.format(buildername)) }}"
+    reruns: 5
+    task:
+        provisionerId: "null-provisioner"
+        workerType: "human-decision"
+        created: "{{ now }}"
+        deadline: "{{ now.replace(days=14) }}"
+        expires: "{{ never }}"
+        priority: "high"
+        retries: 5
+        payload:
+            description: "required"
+        metadata:
+            name: "{{ product }} {{ branch }} version bump human decision task"
+            description: "Release Promotion version bump human decision task"
+            owner: "release@mozilla.com"
+            source: https://github.com/mozilla/releasetasks
+
+        extra:
+            signing:
+               signature: {{ sign_task(stableSlugId('{}_human_decision'.format(buildername)), valid_for=14 * 24 * 3600) }}
+            {% if running_tests is defined %}
+            task_name: "{{ buildername }}_human_decision"
+            {% endif %}
+
+-
+    taskId: "{{ stableSlugId(buildername) }}"
+    requires:
+        - "{{ stableSlugId('{}_human_decision'.format(buildername)) }}"
+    reruns: 5
+    task:
+        provisionerId: "buildbot-bridge"
+        workerType: "buildbot-bridge"
+        created: "{{ now }}"
+        deadline: "{{ now.replace(days=14) }}"
+        expires: "{{ never }}"
+        priority: "high"
+        retries: 5
+        scopes:
+            - buildbot-bridge:builder-name:{{ buildername }}
+
+        payload:
+            buildername: "{{ buildername }}"
+            sourcestamp:
+                branch: "{{ repo_path }}"
+                revision: "{{ revision }}"
+            properties:
+                product: "{{ product }}"
+                version: "{{ version }}"
+                next_version: "{{ next_version }}"
+                build_number: {{ buildNumber }}
+                release_promotion: true
+                revision: "{{ revision }}"
+
+        metadata:
+            name: "{{ product }} {{ branch }} version bump"
+            description: "Release Promotion version bump"
+            owner: "release@mozilla.com"
+            source: https://github.com/mozilla/releasetasks
+
+        extra:
+            signing:
+               signature: {{ sign_task(stableSlugId(buildername), valid_for=14 * 24 * 3600) }}
+            {% if running_tests is defined %}
+            task_name: "{{ buildername }}"
+            {% endif %}

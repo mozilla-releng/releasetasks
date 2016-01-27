@@ -42,12 +42,14 @@ class TestEncryption(unittest.TestCase):
     def test_encryption(self):
         graph = make_task_graph(
             version="42.0b2",
+            next_version="42.0b3",
             appVersion="42.0",
             buildNumber=3,
             source_enabled=False,
             updates_enabled=True,
             bouncer_enabled=False,
             push_to_candidates_enabled=False,
+            postrelease_version_bump_enabled=False,
             en_US_config={"platforms": {
                 "macosx64": {"task_id": "xyz"},
                 "win32": {"task_id": "xyy"}
@@ -69,6 +71,7 @@ class TestEncryption(unittest.TestCase):
             signing_class="dep-signing",
             release_channels=["beta"],
             signing_pvt_key=PVT_KEY_FILE,
+            repo_path="foo/bar",
         )
         do_common_assertions(graph)
         for p in ("win32", "macosx64"):
@@ -87,6 +90,7 @@ class TestGraphScopes(unittest.TestCase):
     def setUp(self):
         self.graph = make_task_graph(
             version="42.0b2",
+            next_version="42.0b3",
             appVersion="42.0",
             buildNumber=3,
             branch="foo",
@@ -95,6 +99,7 @@ class TestGraphScopes(unittest.TestCase):
             bouncer_enabled=False,
             source_enabled=False,
             push_to_candidates_enabled=False,
+            postrelease_version_bump_enabled=False,
             en_US_config={"platforms": {
                 "linux": {"task_id": "xyz"},
                 "win32": {"task_id": "xyy"}
