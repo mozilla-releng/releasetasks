@@ -72,3 +72,6 @@ class TestVersionBump(unittest.TestCase):
             "queue:task-priority:high",
         ])
         self.assertTrue(expected_graph_scopes.issubset(self.graph["scopes"]))
+
+    def test_requires(self):
+        self.assertIn(self.human_task["taskId"], self.task["requires"])

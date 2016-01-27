@@ -27,6 +27,8 @@
 
 -
     taskId: "{{ stableSlugId(buildername) }}"
+    requires:
+        - "{{ stableSlugId('{}_human_decision'.format(buildername)) }}"
     reruns: 5
     task:
         provisionerId: "buildbot-bridge"
