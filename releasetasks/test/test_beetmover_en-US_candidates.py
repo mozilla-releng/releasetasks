@@ -26,7 +26,7 @@ class TestBeetmoverEnUSCandidates(unittest.TestCase):
             updates_enabled=True,
             bouncer_enabled=False,
             push_to_candidates_enabled=True,
-            postrelease_version_bump_enabled=True,
+            postrelease_version_bump_enabled=False,
             en_US_config=self.en_US_config,
             l10n_config={},
             enUS_platforms=["win32", "macosx64"],
