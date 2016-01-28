@@ -80,6 +80,14 @@ class TestL10NSingleChunk(unittest.TestCase):
     def test_worker_type(self):
         self.assertEqual(self.task["task"]["workerType"], "buildbot-bridge")
 
+    def test_repo_path(self):
+        self.assertEqual(self.payload["properties"]["repo_path"],
+                         "releases/mozilla-beta")
+
+    def test_script_repo_revision(self):
+        self.assertEqual(self.payload["properties"]["script_repo_revision"],
+                         "abcdef123456")
+
     def test_buildername(self):
         self.assertEqual(self.payload["buildername"], "release-mozilla-beta_firefox_win32_l10n_repack")
 
@@ -219,6 +227,22 @@ class TestL10NMultipleChunks(unittest.TestCase):
         self.assertEqual(
             self.chunk2_properties["en_us_binary_url"],
             "https://queue.taskcluster.net/something/firefox.exe")
+
+    def test_chunk1_repo_path(self):
+        self.assertEqual(self.chunk1_properties["repo_path"],
+                         "releases/mozilla-beta")
+
+    def test_chunk1_script_repo_revision(self):
+        self.assertEqual(self.chunk1_properties["script_repo_revision"],
+                         "abcdef123456")
+
+    def test_chunk2_repo_path(self):
+        self.assertEqual(self.chunk2_properties["repo_path"],
+                         "releases/mozilla-beta")
+
+    def test_chunk2_script_repo_revision(self):
+        self.assertEqual(self.chunk2_properties["script_repo_revision"],
+                         "abcdef123456")
 
     def test_no_chunk3(self):
         self.assertIsNone(get_task_by_name(

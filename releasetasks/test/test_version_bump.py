@@ -75,3 +75,11 @@ class TestVersionBump(unittest.TestCase):
 
     def test_requires(self):
         self.assertIn(self.human_task["taskId"], self.task["requires"])
+
+    def test_repo_path(self):
+        self.assertEqual(self.payload["properties"]["repo_path"],
+                         "releases/foo")
+
+    def test_script_repo_revision(self):
+        self.assertEqual(self.payload["properties"]["script_repo_revision"],
+                         "fedcba654321")
