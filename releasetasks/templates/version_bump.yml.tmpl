@@ -1,4 +1,4 @@
-{% set buildername = "release-{}_{}_version_bump".format(branch, product) %}
+{% set buildername = "release-{}-{}_version_bump".format(branch, product) %}
 -
     taskId: "{{ stableSlugId('{}_human_decision'.format(buildername)) }}"
     reruns: 5
