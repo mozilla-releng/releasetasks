@@ -41,9 +41,9 @@ class TestVersionBump(unittest.TestCase):
             signing_pvt_key=PVT_KEY_FILE,
         )
         self.task = get_task_by_name(
-            self.graph, "release-foo_firefox_version_bump")
+            self.graph, "release-foo-firefox_version_bump")
         self.human_task = get_task_by_name(
-            self.graph, "release-foo_firefox_version_bump_human_decision")
+            self.graph, "release-foo-firefox_version_bump_human_decision")
         self.payload = self.task["task"]["payload"]
 
     def test_common_assertions(self):
