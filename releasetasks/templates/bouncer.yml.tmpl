@@ -25,6 +25,8 @@
                 # (which gets stripped by the yaml parser when unquoted). Kindof hacky.
                 version: {{ version }}
                 build_number: {{ buildNumber }}
+                repo_path: "{{ repo_path }}"
+                script_repo_revision: "{{ revision }}"
                 release_promotion: true
                 revision: "{{ revision }}"
                 partial_versions: {% set pipe = joiner(", ") %}{% for p, e in sorted(partial_updates.items()) %}{{ pipe() }}{{ "{}build{}".format(p, e["buildNumber"]) }}{% endfor %}

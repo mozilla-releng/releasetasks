@@ -33,6 +33,8 @@
                 locales: {% for l in our_locales %}{{ "{}:{} ".format(l, l10n_config["changesets"][l]) }}{% endfor %}
                 version: {{ version }}
                 build_number: {{ buildNumber }}
+                repo_path: "{{ repo_path }}"
+                script_repo_revision: "{{ revision }}"
                 release_promotion: true
                 revision: "{{ revision }}"
                 artifactsTaskId: "{{ stableSlugId('{}_artifacts_{}'.format(buildername, chunk)) }}"

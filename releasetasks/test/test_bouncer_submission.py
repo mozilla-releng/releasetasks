@@ -67,3 +67,11 @@ class TestBalrogSubmission(unittest.TestCase):
             "queue:task-priority:high",
         ])
         self.assertTrue(expected_graph_scopes.issubset(self.graph["scopes"]))
+
+    def test_repo_path(self):
+        self.assertEqual(self.payload["properties"]["repo_path"],
+                         "releases/foo")
+
+    def test_script_repo_revision(self):
+        self.assertEqual(self.payload["properties"]["script_repo_revision"],
+                         "fedcba654321")
