@@ -18,10 +18,15 @@ class TestFinalVerification(unittest.TestCase):
             appVersion="42.0",
             buildNumber=3,
             source_enabled=False,
-            en_US_config={"platforms": {
-                "linux": {"task_id": "xyz"},
-                "win32": {"task_id": "xyy"}
-            }},
+            en_US_config={
+                "platforms": {
+                    "macosx64": {},
+                    "win32": {},
+                    "win64": {},
+                    "linux": {},
+                    "linux64": {},
+                }
+            },
             l10n_config={},
             repo_path="releases/foo",
             revision="fedcba654321",
@@ -87,10 +92,15 @@ class TestFinalVerificationMultiChannel(unittest.TestCase):
             appVersion="42.0",
             buildNumber=3,
             source_enabled=False,
-            en_US_config={"platforms": {
-                "linux": {"task_id": "xyz"},
-                "win32": {"task_id": "xyy"}
-            }},
+            en_US_config={
+                "platforms": {
+                    "macosx64": {},
+                    "win32": {},
+                    "win64": {},
+                    "linux": {},
+                    "linux64": {},
+                }
+            },
             l10n_config={},
             repo_path="releases/foo",
             revision="fedcba654321",
@@ -102,7 +112,6 @@ class TestFinalVerificationMultiChannel(unittest.TestCase):
             product="firefox",
             signing_class="release-signing",
             release_channels=["beta", "release"],
-            enUS_platforms=["linux", "linux64", "win64", "win32", "macosx64"],
             signing_pvt_key=PVT_KEY_FILE,
         )
 

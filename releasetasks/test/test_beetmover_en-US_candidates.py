@@ -2,6 +2,7 @@ import unittest
 
 from releasetasks.test import make_task_graph, PVT_KEY_FILE, \
     do_common_assertions, get_task_by_name
+from release.platforms import buildbot2ftp
 
 
 class TestBeetmoverEnUSCandidates(unittest.TestCase):
@@ -11,8 +12,8 @@ class TestBeetmoverEnUSCandidates(unittest.TestCase):
     tasks = None
     en_US_config = {
         "platforms": {
-            "macosx64": {"task_id": "xyz", "upload_platform": "mac"},
-            "win32": {"task_id": "xyy", "upload_platform": "win32"}
+            "macosx64": {"task_id": "xyz"},
+            "win32": {"task_id": "xyy"}
         }
     }
 
@@ -29,7 +30,6 @@ class TestBeetmoverEnUSCandidates(unittest.TestCase):
             postrelease_version_bump_enabled=False,
             en_US_config=self.en_US_config,
             l10n_config={},
-            enUS_platforms=["win32", "macosx64"],
             partial_updates={
                 "38.0": {
                     "buildNumber": 1,
@@ -77,9 +77,8 @@ class TestBeetmoverEnUSCandidates(unittest.TestCase):
 
     def test_platform_in_command(self):
         for platform, task in self.tasks.iteritems():
-            upload_platform = self.en_US_config['platforms'][platform]['upload_platform']
             command = task['task']['payload']['command']
-            self.assertTrue("--platform {}".format(upload_platform) in "".join(command))
+            self.assertTrue("--platform {}".format(buildbot2ftp(platform)) in "".join(command))
 
     def test_version_in_command(self):
         for platform, task in self.tasks.iteritems():

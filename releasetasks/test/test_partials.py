@@ -23,7 +23,6 @@ class TestEnUSPartials(unittest.TestCase):
                 "win32": {"task_id": "xyy"}
             }},
             l10n_config={},
-            enUS_platforms=["win32", "macosx64"],
             partial_updates={
                 "38.0": {
                     "buildNumber": 1,

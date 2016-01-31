@@ -18,6 +18,15 @@ class TestVersionBump(unittest.TestCase):
             appVersion="42.0",
             buildNumber=3,
             source_enabled=False,
+            en_US_config={
+                "platforms": {
+                    "macosx64": {},
+                    "win32": {},
+                    "win64": {},
+                    "linux": {},
+                    "linux64": {},
+                }
+            },
             l10n_config={},
             repo_path="releases/foo",
             product="firefox",
@@ -37,7 +46,6 @@ class TestVersionBump(unittest.TestCase):
             postrelease_version_bump_enabled=True,
             signing_class="release-signing",
             release_channels=["foo"],
-            enUS_platforms=["linux", "linux64", "win64", "win32", "macosx64"],
             signing_pvt_key=PVT_KEY_FILE,
         )
         self.task = get_task_by_name(
