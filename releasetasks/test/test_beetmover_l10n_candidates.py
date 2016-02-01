@@ -5,7 +5,7 @@ from releasetasks.test import make_task_graph, PVT_KEY_FILE, \
 from release.platforms import buildbot2ftp
 
 
-class TestBeetmoverEnUSCandidates(unittest.TestCase):
+class TestBeetmover110nCandidates(unittest.TestCase):
     maxDiff = 30000
     graph = None
     # we will end up with one task for each platform
@@ -15,6 +15,26 @@ class TestBeetmoverEnUSCandidates(unittest.TestCase):
             "macosx64": {"task_id": "xyz"},
             "win32": {"task_id": "xyy"}
         }
+    }
+    l10n_config = {
+        "platforms": {
+            "win32": {
+                "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.exe",
+                "locales": ["de", "en-GB", "zh-TW"],
+                "chunks": 1,
+            },
+            "macosx64": {
+                "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.tar.xz",
+                "locales": ["de", "en-GB", "zh-TW"],
+                "chunks": 1,
+            },
+
+        },
+        "changesets": {
+            "de": "default",
+            "en-GB": "default",
+            "zh-TW": "default",
+        },
     }
 
     def setUp(self):
@@ -29,7 +49,7 @@ class TestBeetmoverEnUSCandidates(unittest.TestCase):
             push_to_candidates_enabled=True,
             postrelease_version_bump_enabled=False,
             en_US_config=self.en_US_config,
-            l10n_config={},
+            l10n_config=self.l10n_config,
             partial_updates={
                 "38.0": {
                     "buildNumber": 1,
@@ -38,25 +58,25 @@ class TestBeetmoverEnUSCandidates(unittest.TestCase):
                     "buildNumber": 2,
                 },
             },
-            branch="mozilla-beta",
-            repo_path="releases/mozilla-beta",
-            product="firefox",
-            revision="abcdef123456",
             balrog_api_root="https://fake.balrog/api",
             signing_class="release-signing",
-            verifyConfigs={},
+            branch="mozilla-beta",
+            product="firefox",
+            repo_path="releases/mozilla-beta",
+            revision="abcdef123456",
+            release_channels=["beta"],
             signing_pvt_key=PVT_KEY_FILE,
         )
         self.tasks = {
             'win32': get_task_by_name(
-                self.graph, "release-{}_{}_{}_en-US_beetmover_candidates".format("mozilla-beta",
-                                                                                 "firefox",
-                                                                                 'win32')
+                self.graph, "release-{}_{}_{}_l10n_repack_beetmover_candidates_1".format("mozilla-beta",
+                                                                                         "firefox",
+                                                                                         'win32')
             ),
             'macosx64': get_task_by_name(
-                self.graph, "release-{}_{}_{}_en-US_beetmover_candidates".format("mozilla-beta",
-                                                                                 "firefox",
-                                                                                 'macosx64')
+                self.graph, "release-{}_{}_{}_l10n_repack_beetmover_candidates_1".format("mozilla-beta",
+                                                                                         "firefox",
+                                                                                         'macosx64')
             ),
         }
 
@@ -93,13 +113,16 @@ class TestBeetmoverEnUSCandidates(unittest.TestCase):
     def test_locale_in_command(self):
         for platform, task in self.tasks.iteritems():
             command = task['task']['payload']['command']
-            self.assertTrue("--locale en-US" in "".join(command))
+            self.assertTrue("--locale de --locale en-GB --locale zh-TW" in "".join(command))
 
     def test_taskid_in_command(self):
         for platform, task in self.tasks.iteritems():
-            en_US_taskid = self.en_US_config['platforms'][platform]['task_id']
+            l10n_artifact_task = get_task_by_name(
+                self.graph,
+                "release-mozilla-beta_firefox_{}_l10n_repack_artifacts_1".format(platform)
+            )
             command = task['task']['payload']['command']
-            self.assertTrue("--taskid {}".format(en_US_taskid) in "".join(command))
+            self.assertTrue("--taskid {}".format(l10n_artifact_task['taskId']) in "".join(command))
 
     def test_graph_scopes(self):
         expected_graph_scopes = set([

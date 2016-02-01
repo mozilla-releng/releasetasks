@@ -7,7 +7,7 @@
         provisionerId: aws-provisioner-v1
         workerType: opt-linux64
         created: "{{ now }}"
-        deadline: "{{ now.replace(hours=6) }}"
+        deadline: "{{ now.replace(days=4) }}"
         expires: "{{ never }}"
         priority: "high"
         retries: 5
@@ -83,7 +83,7 @@
         provisionerId: signing-provisioner-v1
         workerType: signing-worker-v1
         created: "{{ now }}"
-        deadline: "{{ now.replace(hours=6) }}"
+        deadline: "{{ now.replace(days=4) }}"
         expires: "{{ never }}"
         priority: "high"
         retries: 5
@@ -104,7 +104,7 @@
             signing:
                # assert that this signing task was created by the real releaserunner
                signature: {{ sign_task(stableSlugId(buildername_signing),
-                                       valid_for=8 * 3600) }}
+                                       valid_for=4 * 24 * 3600) }}
             {% if running_tests is defined %}
             task_name: "{{ buildername_signing }}"
             {% endif %}
