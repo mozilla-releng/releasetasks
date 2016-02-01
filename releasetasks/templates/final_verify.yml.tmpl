@@ -21,7 +21,7 @@
             env:
                 TAG: "default"
                 RELEASE_CONFIGS: {#
-                    #}{% for platform in enUS_platforms %}{#
+                    #}{% for platform in en_US_config["platforms"].keys() %}{#
                         #}{{ "{channel}-{product}-{platform}.cfg".format(
                                platform=platform,
                                channel=channel,

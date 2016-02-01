@@ -79,6 +79,9 @@
             {% if running_tests is defined %}
             task_name: "{{ buildername }}_artifacts_{{ chunk }}"
             {% endif %}
+
+
+{% if updates_enabled %}  # funsize
 {% for partial_version, partial_info in partial_updates.iteritems() %}
 -
     taskId: "{{ stableSlugId('{}_{}_{}_update_generator'.format(buildername, chunk, partial_version)) }}"
@@ -285,5 +288,7 @@
                 balrogVPNProxy: true
             {% endif %}
 {% endfor %} # partials
+{% endif %} # funsize
+
 {% endfor %} # l10n chunks
 {% endfor %} # platforms

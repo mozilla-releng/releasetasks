@@ -19,11 +19,10 @@ class TestL10NSingleChunk(unittest.TestCase):
             appVersion="42.0",
             buildNumber=3,
             source_enabled=False,
-            updates_enabled=False,
+            updates_enabled=True,
             bouncer_enabled=False,
             push_to_candidates_enabled=False,
             postrelease_version_bump_enabled=False,
-            enUS_platforms=["win32"],
             en_US_config={"platforms": {
                 "win32": {"task_id": "xyy"}
             }},
@@ -144,7 +143,7 @@ class TestL10NMultipleChunks(unittest.TestCase):
             appVersion="42.0",
             buildNumber=3,
             source_enabled=False,
-            updates_enabled=False,
+            updates_enabled=True,
             bouncer_enabled=False,
             push_to_candidates_enabled=False,
             postrelease_version_bump_enabled=False,
