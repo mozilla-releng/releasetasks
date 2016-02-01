@@ -9,7 +9,7 @@
         provisionerId: aws-provisioner-v1
         workerType: opt-linux64
         created: "{{ now }}"
-        deadline: "{{ now.replace(hours=6) }}"
+        deadline: "{{ now.replace(days=4) }}"
         expires: "{{ never }}"
         priority: "high"
         retries: 5
@@ -75,7 +75,7 @@
     taskId: "{{ stableSlugId('{}_update_generator'.format(basename)) }}"
     task:
         created: "{{ now }}"
-        deadline: "{{ now.replace(hours=24) }}"
+        deadline: "{{ now.replace(days=4) }}"
         expires: "{{ never }}"
         priority: "high"
         metadata:
@@ -153,7 +153,7 @@
         - "{{ stableSlugId('{}_update_generator'.format(basename)) }}"
     task:
         created: "{{ now }}"
-        deadline: "{{ now.replace(hours=24) }}"
+        deadline: "{{ now.replace(days=4) }}"
         expires: "{{ never }}"
         priority: "high"
         metadata:
@@ -171,7 +171,7 @@
             signing:
                # assert that this signing task was created by the real releaserunner
                signature: {{ sign_task(stableSlugId('{}_signing_task'.format(basename)),
-                                       valid_for=8 * 3600) }}
+                                       valid_for=4 * 24 * 3600) }}
             {% if running_tests is defined %}
             task_name: "{{ '{}_signing_task'.format(basename) }}"
             {% endif %}
@@ -206,7 +206,7 @@
         - "{{ stableSlugId('{}_signing_task'.format(basename)) }}"
     task:
         created: "{{ now }}"
-        deadline: "{{ now.replace(hours=24) }}"
+        deadline: "{{ now.replace(days=4) }}"
         expires: "{{ never }}"
         priority: "high"
         routes:

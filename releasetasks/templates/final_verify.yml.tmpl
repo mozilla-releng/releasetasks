@@ -7,7 +7,7 @@
         provisionerId: aws-provisioner-v1
         workerType: b2gtest
         created: "{{ now }}"
-        deadline: "{{ now.replace(hours=6) }}"
+        deadline: "{{ now.replace(days=4) }}"
         expires: "{{ never }}"
         priority: "high"
         retries: 5

@@ -13,7 +13,7 @@
         provisionerId: "buildbot-bridge"
         workerType: "buildbot-bridge"
         created: "{{ now }}"
-        deadline: "{{ now.replace(hours=36) }}"
+        deadline: "{{ now.replace(days=4) }}"
         expires: "{{ never }}"
         priority: "high"
         retries: 5
@@ -59,7 +59,7 @@
         provisionerId: "null-provisioner"
         workerType: "buildbot"
         created: "{{ now }}"
-        deadline: "{{ now.replace(hours=36) }}"
+        deadline: "{{ now.replace(days=4) }}"
         expires: "{{ never }}"
         priority: "high"
         retries: 5
@@ -89,7 +89,7 @@
         provisionerId: aws-provisioner-v1
         workerType: opt-linux64
         created: "{{ now }}"
-        deadline: "{{ now.replace(hours=6) }}"
+        deadline: "{{ now.replace(days=4) }}"
         expires: "{{ never }}"
         priority: "high"
         retries: 5
@@ -147,7 +147,7 @@
         - "{{ stableSlugId('{}_artifacts_{}'.format(buildername, chunk)) }}"
     task:
         created: "{{ now }}"
-        deadline: "{{ now.replace(hours=24) }}"
+        deadline: "{{ now.replace(days=4) }}"
         expires: "{{ never }}"
         priority: "high"
         metadata:
@@ -224,7 +224,7 @@
         - "{{ stableSlugId('{}_{}_{}_update_generator'.format(buildername, chunk, partial_version)) }}"
     task:
         created: "{{ now }}"
-        deadline: "{{ now.replace(hours=24) }}"
+        deadline: "{{ now.replace(days=4) }}"
         expires: "{{ never }}"
         priority: "high"
         metadata:
@@ -240,7 +240,7 @@
         extra:
             signing:
                signature: {{ sign_task(stableSlugId('{}_{}_{}_signing_task'.format(buildername, chunk, partial_version)),
-                                       valid_for=8 * 3600) }}
+                                       valid_for=4 * 24 * 3600) }}
             {% if running_tests is defined %}
             task_name: "{{ '{}_{}_{}_signing_task'.format(buildername, chunk, partial_version) }}"
             {% endif %}
@@ -275,7 +275,7 @@
         - "{{ stableSlugId('{}_{}_{}_signing_task'.format(buildername, chunk, partial_version)) }}"
     task:
         created: "{{ now }}"
-        deadline: "{{ now.replace(hours=24) }}"
+        deadline: "{{ now.replace(days=4) }}"
         expires: "{{ never }}"
         priority: "high"
         routes:

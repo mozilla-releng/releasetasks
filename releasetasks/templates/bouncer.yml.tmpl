@@ -7,7 +7,7 @@
         provisionerId: "buildbot-bridge"
         workerType: "buildbot-bridge"
         created: "{{ now }}"
-        deadline: "{{ now.replace(hours=36) }}"
+        deadline: "{{ now.replace(days=4) }}"
         expires: "{{ never }}"
         priority: "high"
         retries: 5
