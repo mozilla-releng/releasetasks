@@ -109,10 +109,10 @@
             env:
                 DUMMY_ENV_FOR_ENCRYPT: "fake"
             encryptedEnv:
-                - {{ encrypt_env_var(stableSlugId(buildername), now_ms,
+                - {{ encrypt_env_var(stableSlugId({{ stableSlugId('{}_update_generator'.format(basename)) }}), now_ms,
                                    now_ms + 24 * 3600 * 1000, 'AWS_ACCESS_KEY_ID',
                                    beetmover_aws_access_key_id) }}
-                - {{ encrypt_env_var(stableSlugId(buildername), now_ms,
+                - {{ encrypt_env_var(stableSlugId({{ stableSlugId('{}_update_generator'.format(basename)) }}), now_ms,
                                    now_ms + 24 * 3600 * 1000, 'AWS_SECRET_ACCESS_KEY',
                                    beetmover_aws_secret_access_key) }}
         metadata:
