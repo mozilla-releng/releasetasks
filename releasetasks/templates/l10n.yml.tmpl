@@ -84,6 +84,8 @@
 {% if push_to_candidates_enabled %}
 -
     taskId: "{{ stableSlugId('{}_beetmover_candidates_{}'.format(buildername, chunk)) }}"
+    requires:
+        - "{{ stableSlugId('{}_artifacts_{}'.format(buildername, chunk)) }}"
     reruns: 5
     task:
         provisionerId: aws-provisioner-v1
