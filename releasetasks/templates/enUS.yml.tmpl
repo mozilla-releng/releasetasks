@@ -1,9 +1,9 @@
 {% for platform, platform_info in en_US_config["platforms"].iteritems() %}
 
 {% if push_to_candidates_enabled %}  # beetmover
-{% set buildername = "release-{}_{}_{}_en-US_beetmover_candidates".format(branch, product, platform) %}
+{% set complete_beetmover_basename = "release-{}_{}_{}_complete_en-US_beetmover_candidates".format(branch, product, platform) %}
 -
-    taskId: "{{ stableSlugId(buildername) }}"
+    taskId: "{{ stableSlugId(complete_beetmover_basename) }}"
     reruns: 5
     task:
         provisionerId: aws-provisioner-v1
@@ -27,10 +27,10 @@
             env:
                 DUMMY_ENV_FOR_ENCRYPT: "fake"
             encryptedEnv:
-                - {{ encrypt_env_var(stableSlugId(buildername), now_ms,
+                - {{ encrypt_env_var(stableSlugId(complete_beetmover_basename), now_ms,
                                    now_ms + 24 * 3600 * 1000, 'AWS_ACCESS_KEY_ID',
                                    beetmover_aws_access_key_id) }}
-                - {{ encrypt_env_var(stableSlugId(buildername), now_ms,
+                - {{ encrypt_env_var(stableSlugId(complete_beetmover_basename), now_ms,
                                    now_ms + 24 * 3600 * 1000, 'AWS_SECRET_ACCESS_KEY',
                                    beetmover_aws_secret_access_key) }}
         metadata:
@@ -41,10 +41,10 @@
 
         extra:
             {% if running_tests is defined %}
-            task_name: "{{ buildername }}"
+            task_name: "{{ complete_beetmover_basename }}"
             {% endif %}
             signing:
-               signature: {{ sign_task(stableSlugId(buildername), valid_for=4 * 24 * 3600) }}
+               signature: {{ sign_task(stableSlugId(complete_beetmover_basename), valid_for=4 * 24 * 3600) }}
 
             treeherderEnv:
                 - staging
@@ -70,9 +70,9 @@
                        need any sort of "builder name" (that's what taskId and
                        taskGraphId are for!)
 #}
-{% set basename = "{}_{}_{}build{}_funsize".format(platform, locale, partial_version, partial_info["buildNumber"]) %}
+{% set funsize_basename = "{}_{}_{}build{}_funsize".format(platform, locale, partial_version, partial_info["buildNumber"]) %}
 -
-    taskId: "{{ stableSlugId('{}_update_generator'.format(basename)) }}"
+    taskId: "{{ stableSlugId('{}_update_generator'.format(funsize_basename)) }}"
     task:
         created: "{{ now }}"
         deadline: "{{ now.replace(days=4) }}"
@@ -91,9 +91,9 @@
             - index.funsize.v1.{{ branch }}.latest.{{ platform }}.{{ locale }}.{{ partial_version }}.updates
         extra:
             {% if running_tests is defined %}
-            task_name: "{{ '{}_update_generator'.format(basename) }}"
+            task_name: "{{ '{}_update_generator'.format(funsize_basename) }}"
             signing:
-               signature: {{ sign_task(stableSlugId('{}_update_generator'.format(basename)), valid_for=4 * 24 * 3600) }}
+               signature: {{ sign_task(stableSlugId('{}_update_generator'.format(funsize_basename)), valid_for=4 * 24 * 3600) }}
             {% endif %}
             funsize:
                 partials:
@@ -149,9 +149,9 @@
                     expires: "{{ never }}"
 
 -
-    taskId: "{{ stableSlugId('{}_signing_task'.format(basename)) }}"
+    taskId: "{{ stableSlugId('{}_signing_task'.format(funsize_basename)) }}"
     requires:
-        - "{{ stableSlugId('{}_update_generator'.format(basename)) }}"
+        - "{{ stableSlugId('{}_update_generator'.format(funsize_basename)) }}"
     task:
         created: "{{ now }}"
         deadline: "{{ now.replace(days=4) }}"
@@ -171,10 +171,10 @@
         extra:
             signing:
                # assert that this signing task was created by the real releaserunner
-               signature: {{ sign_task(stableSlugId('{}_signing_task'.format(basename)),
+               signature: {{ sign_task(stableSlugId('{}_signing_task'.format(funsize_basename)),
                                        valid_for=4 * 24 * 3600) }}
             {% if running_tests is defined %}
-            task_name: "{{ '{}_signing_task'.format(basename) }}"
+            task_name: "{{ '{}_signing_task'.format(funsize_basename) }}"
             {% endif %}
 
             treeherderEnv:
@@ -199,12 +199,12 @@
             createdForUser: release+funsize@mozilla.com
 
         payload:
-            signingManifest: "https://queue.taskcluster.net/v1/task/{{ stableSlugId('{}_update_generator'.format(basename)) }}/artifacts/public/env/manifest.json"
+            signingManifest: "https://queue.taskcluster.net/v1/task/{{ stableSlugId('{}_update_generator'.format(funsize_basename)) }}/artifacts/public/env/manifest.json"
 
 -
-    taskId: "{{ stableSlugId('{}_balrog_task'.format(basename)) }}"
+    taskId: "{{ stableSlugId('{}_balrog_task'.format(funsize_basename)) }}"
     requires:
-        - "{{ stableSlugId('{}_signing_task'.format(basename)) }}"
+        - "{{ stableSlugId('{}_signing_task'.format(funsize_basename)) }}"
     task:
         created: "{{ now }}"
         deadline: "{{ now.replace(days=4) }}"
@@ -216,10 +216,10 @@
             - index.funsize.v1.{{ branch }}.latest.{{ platform }}.{{ locale }}.{{ partial_version }}.balrog
         extra:
             {% if running_tests is defined %}
-            task_name: "{{ '{}_balrog_task'.format(basename) }}"
+            task_name: "{{ '{}_balrog_task'.format(funsize_basename) }}"
             {% endif %}
             signing:
-               signature: {{ sign_task(stableSlugId('{}_balrog_task'.format(basename)), valid_for=4 * 24 * 3600) }}
+               signature: {{ sign_task(stableSlugId('{}_balrog_task'.format(funsize_basename)), valid_for=4 * 24 * 3600) }}
             treeherderEnv:
                 - staging
             treeherder:
@@ -261,23 +261,84 @@
                 {% else %}
                 SIGNING_CERT: "release"
                 {% endif %}
-                PARENT_TASK_ARTIFACTS_URL_PREFIX: "https://queue.taskcluster.net/v1/task/{{ stableSlugId('{}_signing_task'.format(basename)) }}/artifacts/public/env"
+                PARENT_TASK_ARTIFACTS_URL_PREFIX: "https://queue.taskcluster.net/v1/task/{{ stableSlugId('{}_signing_task'.format(funsize_basename)) }}/artifacts/public/env"
                 BALROG_API_ROOT: {{ balrog_api_root }}
                 # TODO: should funsize be publishing to an s3 bucket? or will beetmover do that?
                 {% if extra_balrog_submitter_params is defined %}
                 EXTRA_BALROG_SUBMITTER_PARAMS: "{{ extra_balrog_submitter_params }}"
                 {% endif %}
             encryptedEnv:
-                - {{ encrypt_env_var(stableSlugId('{}_balrog_task'.format(basename)), now_ms,
+                - {{ encrypt_env_var(stableSlugId('{}_balrog_task'.format(funsize_basename)), now_ms,
                                     now_ms + 24 * 3600 * 1000, "BALROG_USERNAME",
                                     balrog_username) }}
-                - {{ encrypt_env_var(stableSlugId('{}_balrog_task'.format(basename)), now_ms,
+                - {{ encrypt_env_var(stableSlugId('{}_balrog_task'.format(funsize_basename)), now_ms,
                                     now_ms + 24 * 3600 * 1000, "BALROG_PASSWORD",
                                     balrog_password) }}
             {% if signing_class != "dep-signing" %}
             features:
                 balrogVPNProxy: true
             {% endif %}
+
+{% if push_to_candidates_enabled %}  # beetmover partials
+{% set partial_beetmover_basename = "release-{}_{}_{}_partial_en-US_{}build{}_beetmover_candidates".format(branch, product, platform, partial_version, partial_info["buildNumber"]) %}
+-
+    taskId: "{{ stableSlugId(partial_beetmover_basename) }}"
+    requires:
+        - "{{ stableSlugId('{}_signing_task'.format(funsize_basename)) }}"
+    reruns: 5
+    task:
+        provisionerId: aws-provisioner-v1
+        workerType: opt-linux64
+        created: "{{ now }}"
+        deadline: "{{ now.replace(days=4) }}"
+        expires: "{{ never }}"
+        priority: "high"
+        retries: 5
+        payload:
+            maxRunTime: 7200
+            # TODO - create specific image for this
+            image: rail/python-test-runner
+            command:
+                - /bin/bash
+                - -c
+                - >
+                  wget -O mozharness.tar.bz2 https://hg.mozilla.org/{{ repo_path }}/archive/{{ revision }}.tar.bz2/testing/mozharness &&
+                  mkdir mozharness && tar xvfj mozharness.tar.bz2 -C mozharness --strip-components 3 && cd mozharness &&
+                  python scripts/release/beet_mover.py --template configs/beetmover/partials.yml.tmpl --platform {{ buildbot2ftp(platform) }} --version {{ version }} --partial-version {{ partial_version }} --locale en-US --taskid {{ stableSlugId('{}_signing_task'.format(funsize_basename)) }} --build-num build{{ buildNumber }}
+            env:
+                DUMMY_ENV_FOR_ENCRYPT: "fake"
+            encryptedEnv:
+                - {{ encrypt_env_var(stableSlugId(partial_beetmover_basename), now_ms,
+                                   now_ms + 24 * 3600 * 1000, 'AWS_ACCESS_KEY_ID',
+                                   beetmover_aws_access_key_id) }}
+                - {{ encrypt_env_var(stableSlugId(partial_beetmover_basename), now_ms,
+                                   now_ms + 24 * 3600 * 1000, 'AWS_SECRET_ACCESS_KEY',
+                                   beetmover_aws_secret_access_key) }}
+        metadata:
+            name: "[beetmover] {{ product }} {{ branch }} {{ platform }} en_US partials candidates"
+            description: "moves partial artifacts for en_US based builds to candidates dir"
+            owner: "release@mozilla.com"
+            source: https://github.com/mozilla/releasetasks
+
+        extra:
+            {% if running_tests is defined %}
+            task_name: "{{ partial_beetmover_basename }}"
+            {% endif %}
+            signing:
+               signature: {{ sign_task(stableSlugId(partial_beetmover_basename), valid_for=4 * 24 * 3600) }}
+
+            treeherderEnv:
+                - staging
+            treeherder:
+                symbol: en-US-{{ partial_version }}
+                groupSymbol: BM
+                collection:
+                    opt: true
+                machine:
+                    platform: {{ get_treeherder_platform(platform) }}
+                build:
+                    platform: {{ get_treeherder_platform(platform) }}
+{% endif %}  # push_to_candidates_enabled
 
 {% endfor %} # partials
 {% endif %}  # updates_enabled

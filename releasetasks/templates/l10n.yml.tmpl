@@ -349,6 +349,69 @@
             features:
                 balrogVPNProxy: true
             {% endif %}
+
+# repacks beetmover
+{% if push_to_candidates_enabled %}
+{% set partial_beetmover_buildername = "{}_partial_{}build{}_beetmover_candidates_{}".format(buildername, chunk, partial_version, partial_info["buildNumber"]) %}
+-
+    taskId: "{{ stableSlugId(partial_beetmover_buildername) }}"
+    requires:
+        - "{{ stableSlugId('{}_{}_{}_signing_task'.format(buildername, chunk, partial_version)) }}"
+    reruns: 5
+    task:
+        provisionerId: aws-provisioner-v1
+        workerType: opt-linux64
+        created: "{{ now }}"
+        deadline: "{{ now.replace(days=4) }}"
+        expires: "{{ never }}"
+        priority: "high"
+        retries: 5
+        payload:
+            maxRunTime: 7200
+            # TODO - create specific image for this
+            image: rail/python-test-runner
+            command:
+                - /bin/bash
+                - -c
+                - >
+                  wget -O mozharness.tar.bz2 https://hg.mozilla.org/{{ repo_path }}/archive/{{ revision }}.tar.bz2/testing/mozharness &&
+                  mkdir mozharness && tar xvfj mozharness.tar.bz2 -C mozharness --strip-components 3 && cd mozharness &&
+                  python scripts/release/beet_mover.py --template configs/beetmover/partials.yml.tmpl --platform {{ buildbot2ftp(platform) }} --version {{ version }} --partial-version {{ partial_version }} {% for l in our_locales %}{{ "--locale {} ".format(l) }}{% endfor %} --taskid {{ stableSlugId('{}_{}_{}_signing_task'.format(buildername, chunk, partial_version)) }} --build-num build{{ buildNumber }}
+            env:
+                DUMMY_ENV_FOR_ENCRYPT: "fake"
+            encryptedEnv:
+                - {{ encrypt_env_var(stableSlugId(partial_beetmover_buildername), now_ms,
+                                   now_ms + 24 * 3600 * 1000, 'AWS_ACCESS_KEY_ID',
+                                   beetmover_aws_access_key_id) }}
+                - {{ encrypt_env_var(stableSlugId(partial_beetmover_buildername), now_ms,
+                                   now_ms + 24 * 3600 * 1000, 'AWS_SECRET_ACCESS_KEY',
+                                   beetmover_aws_secret_access_key) }}
+        metadata:
+            name: "[beetmover] {{ product }} {{ branch }} {{ platform }} locales partials candidates {{ chunk }}/{{ platform_info["chunks"] }}"
+            description: "moves partial artifacts for locale based builds to candidates dir"
+            owner: "release@mozilla.com"
+            source: https://github.com/mozilla/releasetasks
+
+        extra:
+            {% if running_tests is defined %}
+            task_name: "{{ partial_beetmover_buildername }}"
+            {% endif %}
+            signing:
+               signature: {{ sign_task(stableSlugId(partial_beetmover_buildername), valid_for=4 * 24 * 3600) }}
+
+            treeherderEnv:
+                - staging
+            treeherder:
+                symbol: l10n-{{ chunk }}-{{ partial_version }}
+                groupSymbol: BM
+                collection:
+                    opt: true
+                machine:
+                    platform: {{ get_treeherder_platform(platform) }}
+                build:
+                    platform: {{ get_treeherder_platform(platform) }}
+{% endif %}
+
 {% endfor %} # partials
 {% endif %} # funsize
 
