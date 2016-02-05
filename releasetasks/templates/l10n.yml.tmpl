@@ -18,7 +18,7 @@
         priority: "high"
         retries: 5
         scopes:
-            - buildbot-bridge:builder-name:{{ buildername }}
+            - project:releng:buildbot-bridge:builder-name:{{ buildername }}
 
         payload:
             buildername: "{{ buildername }}"
@@ -64,7 +64,7 @@
         priority: "high"
         retries: 5
         scopes:
-            - buildbot-bridge:builder-name:{{ buildername }}
+            - project:releng:buildbot-bridge:builder-name:{{ buildername }}
         payload:
             description: "required"
         metadata:
