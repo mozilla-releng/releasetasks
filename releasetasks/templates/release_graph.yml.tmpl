@@ -11,7 +11,7 @@ scopes:
   - queue:create-task:buildbot-bridge/buildbot-bridge
   - queue:task-priority:high
   # TODO: need a better way to specify dev/prod scopes
-  - buildbot-bridge:builder-name:release-date*
+  - project:releng:buildbot-bridge:builder-name:release-date*
 {% if source_enabled or push_to_candidates_enabled %}
   - queue:define-task:aws-provisioner-v1/opt-linux64
   - queue:create-task:aws-provisioner-v1/opt-linux64
