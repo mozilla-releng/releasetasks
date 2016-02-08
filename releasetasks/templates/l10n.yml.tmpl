@@ -208,7 +208,7 @@
 
             env:
                 # {locale} is interpreted by funsize, don't use double brackets
-                FILENAME_TEMPLATE: "{{ product }}-{{ partial_version }}-{{ appVersion }}.{locale}.{{ buildbot2ftp(platform) }}.partial.mar"
+                FILENAME_TEMPLATE: "{{ product }}-{{ partial_version }}-{{ version }}.{locale}.{{ buildbot2ftp(platform) }}.partial.mar"
                 {% if signing_class == "dep-signing" %}
                 MOZ_DISABLE_MAR_CERT_VERIFICATION: true
                 SIGNING_CERT: "dep"

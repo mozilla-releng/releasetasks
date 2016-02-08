@@ -134,7 +134,7 @@
                 - /runme.sh
 
             env:
-                FILENAME_TEMPLATE: "{{ product }}-{{ partial_version }}-{{ appVersion }}.en-US.{{ buildbot2ftp(platform) }}.partial.mar"
+                FILENAME_TEMPLATE: "{{ product }}-{{ partial_version }}-{{ version }}.en-US.{{ buildbot2ftp(platform) }}.partial.mar"
                 {% if signing_class == "dep-signing" %}
                 MOZ_DISABLE_MAR_CERT_VERIFICATION: true
                 SIGNING_CERT: "dep"
