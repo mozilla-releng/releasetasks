@@ -82,6 +82,7 @@
 
 # repacks beetmover
 {% if push_to_candidates_enabled %}
+{% do artifact_completes_builders.append('{}_beetmover_candidates_{}'.format(buildername, chunk)) %}
 -
     taskId: "{{ stableSlugId('{}_beetmover_candidates_{}'.format(buildername, chunk)) }}"
     requires:
@@ -353,6 +354,7 @@
 # repacks beetmover
 {% if push_to_candidates_enabled %}
 {% set partial_beetmover_buildername = "{}_partial_{}build{}_beetmover_candidates_{}".format(buildername, partial_version, partial_info["buildNumber"], chunk) %}
+{% do artifact_partials_builders.append(partial_beetmover_buildername) %}
 -
     taskId: "{{ stableSlugId(partial_beetmover_buildername) }}"
     requires:

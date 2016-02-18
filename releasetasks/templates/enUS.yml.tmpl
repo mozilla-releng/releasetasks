@@ -2,6 +2,7 @@
 
 {% if push_to_candidates_enabled %}  # beetmover
 {% set complete_beetmover_basename = "release-{}_{}_{}_complete_en-US_beetmover_candidates".format(branch, product, platform) %}
+{% do artifact_completes_builders.append(complete_beetmover_basename) %}
 -
     taskId: "{{ stableSlugId(complete_beetmover_basename) }}"
     reruns: 5
@@ -281,6 +282,7 @@
 
 {% if push_to_candidates_enabled %}  # beetmover partials
 {% set partial_beetmover_basename = "release-{}_{}_{}_partial_en-US_{}build{}_beetmover_candidates".format(branch, product, platform, partial_version, partial_info["buildNumber"]) %}
+{% do artifact_partials_builders.append(partial_beetmover_basename) %}
 -
     taskId: "{{ stableSlugId(partial_beetmover_basename) }}"
     requires:
@@ -342,6 +344,5 @@
 
 {% endfor %} # partials
 {% endif %}  # updates_enabled
-
 
 {% endfor %} # platforms
