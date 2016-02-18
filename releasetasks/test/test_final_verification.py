@@ -27,6 +27,14 @@ class TestFinalVerification(unittest.TestCase):
                     "linux64": {},
                 }
             },
+            partial_updates={
+                "38.0": {
+                    "buildNumber": 1,
+                },
+                "37.0": {
+                    "buildNumber": 2,
+                },
+            },
             l10n_config={},
             repo_path="releases/foo",
             revision="fedcba654321",
@@ -38,6 +46,7 @@ class TestFinalVerification(unittest.TestCase):
             product="firefox",
             signing_class="release-signing",
             release_channels=["foo"],
+            balrog_api_root="http://balrog/api",
             enUS_platforms=["linux", "linux64", "win64", "win32", "macosx64"],
             signing_pvt_key=PVT_KEY_FILE,
         )
@@ -101,6 +110,14 @@ class TestFinalVerificationMultiChannel(unittest.TestCase):
                     "linux64": {},
                 }
             },
+            partial_updates={
+                "38.0": {
+                    "buildNumber": 1,
+                },
+                "37.0": {
+                    "buildNumber": 2,
+                },
+            },
             l10n_config={},
             repo_path="releases/foo",
             revision="fedcba654321",
@@ -112,6 +129,7 @@ class TestFinalVerificationMultiChannel(unittest.TestCase):
             product="firefox",
             signing_class="release-signing",
             release_channels=["beta", "release"],
+            balrog_api_root="http://balrog/api",
             signing_pvt_key=PVT_KEY_FILE,
         )
 

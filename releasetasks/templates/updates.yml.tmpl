@@ -1,0 +1,47 @@
+{% set buildername = "release-{}-{}_updates".format(branch, product) %}
+-
+    taskId: "{{ stableSlugId(buildername) }}"
+    reruns: 5
+    task:
+        provisionerId: "buildbot-bridge"
+        workerType: "buildbot-bridge"
+        created: "{{ now }}"
+        deadline: "{{ now.replace(days=4) }}"
+        expires: "{{ never }}"
+        priority: "high"
+        retries: 5
+        scopes:
+            - project:releng:buildbot-bridge:builder-name:{{ buildername }}
+
+        payload:
+            buildername: "{{ buildername }}"
+            sourcestamp:
+                branch: "{{ repo_path }}"
+                revision: "{{ revision }}"
+            properties:
+                product: "{{ product }}"
+                version: "{{ version }}"
+                appVersion: "{{ appVersion }}"
+                next_version: "{{ next_version }}"
+                build_number: {{ buildNumber }}
+                repo_path: "{{ repo_path }}"
+                script_repo_revision: "{{ revision }}"
+                release_promotion: true
+                revision: "{{ revision }}"
+                partial_versions: {% set pipe = joiner(", ") %}{% for p, e in sorted(partial_updates.items()) %}{{ pipe() }}{{ "{}build{}".format(p, e["buildNumber"]) }}{% endfor %}
+                balrog_api_root: {{ balrog_api_root }}
+                platforms: {{ en_US_config["platforms"] | join(", ") }}
+                channels: {{ release_channels | join(", ") }}
+
+        metadata:
+            name: "{{ product }} {{ branch }} updates"
+            description: "Release Promotion updates"
+            owner: "release@mozilla.com"
+            source: https://github.com/mozilla/releasetasks
+
+        extra:
+            signing:
+               signature: {{ sign_task(stableSlugId(buildername), valid_for=4 * 24 * 3600) }}
+            {% if running_tests is defined %}
+            task_name: "{{ buildername }}"
+            {% endif %}
