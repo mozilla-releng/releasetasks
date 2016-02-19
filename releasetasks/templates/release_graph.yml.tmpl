@@ -77,6 +77,11 @@ tasks:
     {% endif %}
 
     {% if release_channels is defined %}
+        {% macro updates_task() %}
+            {% include "updates.yml.tmpl" %}
+        {% endmacro %}
+        {{ updates_task()|indent(4) }}
+
         {% macro updateVerify_task(platform) %}
             {% if platform in ["linux", "linux64"] %}
                 {% include "tc_update_verify.yml.tmpl" %}

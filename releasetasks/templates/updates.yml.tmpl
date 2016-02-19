@@ -1,0 +1,50 @@
+{% set buildername = "release-{}-{}_updates".format(branch, product) %}
+-
+    taskId: "{{ stableSlugId(buildername) }}"
+    requires:
+        {% for platform, platform_info in en_US_config["platforms"].iteritems() %}
+        - {{ stableSlugId("release-{}_{}_{}_complete_en-US_beetmover_candidates".format(branch, product, platform)) }}
+        {% endfor %}
+    reruns: 5
+    task:
+        provisionerId: "buildbot-bridge"
+        workerType: "buildbot-bridge"
+        created: "{{ now }}"
+        deadline: "{{ now.replace(days=4) }}"
+        expires: "{{ never }}"
+        priority: "high"
+        retries: 5
+        scopes:
+            - project:releng:buildbot-bridge:builder-name:{{ buildername }}
+
+        payload:
+            buildername: "{{ buildername }}"
+            sourcestamp:
+                branch: "{{ repo_path }}"
+                revision: "{{ revision }}"
+            properties:
+                product: "{{ product }}"
+                version: "{{ version }}"
+                appVersion: "{{ appVersion }}"
+                build_number: {{ buildNumber }}
+                repo_path: "{{ repo_path }}"
+                script_repo_revision: "{{ revision }}"
+                release_promotion: true
+                revision: "{{ revision }}"
+                partial_versions: {% set pipe = joiner(", ") %}{% for p, e in sorted(partial_updates.items()) %}{{ pipe() }}{{ "{}build{}".format(p, e["buildNumber"]) }}{% endfor %}
+                balrog_api_root: {{ balrog_api_root }}
+                platforms: {{ en_US_config["platforms"] | sort() | join(", ") }}
+                channels: {{ release_channels | sort() | join(", ") }}
+
+        metadata:
+            name: "{{ product }} {{ branch }} updates"
+            description: "Release Promotion updates"
+            owner: "release@mozilla.com"
+            source: https://github.com/mozilla/releasetasks
+
+        extra:
+            signing:
+               signature: {{ sign_task(stableSlugId(buildername), valid_for=4 * 24 * 3600) }}
+            {% if running_tests is defined %}
+            task_name: "{{ buildername }}"
+            {% endif %}
