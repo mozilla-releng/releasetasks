@@ -1,6 +1,10 @@
 {% set buildername = "release-{}-{}_updates".format(branch, product) %}
 -
     taskId: "{{ stableSlugId(buildername) }}"
+    requires:
+        {% for platform, platform_info in en_US_config["platforms"].iteritems() %}
+        - {{ stableSlugId("release-{}_{}_{}_complete_en-US_beetmover_candidates".format(branch, product, platform)) }}
+        {% endfor %}
     reruns: 5
     task:
         provisionerId: "buildbot-bridge"

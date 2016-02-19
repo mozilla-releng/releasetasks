@@ -8,7 +8,7 @@ class TestUpdates(unittest.TestCase):
     maxDiff = 30000
     graph = None
     task = None
-    payload = None
+    props = None
 
     def setUp(self):
         self.graph = make_task_graph(
@@ -19,11 +19,11 @@ class TestUpdates(unittest.TestCase):
             source_enabled=False,
             en_US_config={
                 "platforms": {
-                    "macosx64": {},
-                    "win32": {},
-                    "win64": {},
-                    "linux": {},
-                    "linux64": {},
+                    "macosx64": {"task_id": "abc"},
+                    "win32": {"task_id": "def"},
+                    "win64": {"task_id": "jgh"},
+                    "linux": {"task_id": "ijk"},
+                    "linux64": {"task_id": "lmn"},
                 }
             },
             l10n_config={},
@@ -39,9 +39,9 @@ class TestUpdates(unittest.TestCase):
                 },
             },
             branch="foo",
-            updates_enabled=False,
+            updates_enabled=True,
             bouncer_enabled=True,
-            push_to_candidates_enabled=False,
+            push_to_candidates_enabled=True,
             postrelease_version_bump_enabled=True,
             signing_class="release-signing",
             release_channels=["foo", "bar"],
@@ -69,7 +69,12 @@ class TestUpdates(unittest.TestCase):
         self.assertTrue(expected_graph_scopes.issubset(self.graph["scopes"]))
 
     def test_requires(self):
-        self.assertIsNone(self.task.get("requires"))
+        tmpl = "release-foo_firefox_{}_complete_en-US_beetmover_candidates"
+        requires = [
+            get_task_by_name(self.graph, tmpl.format(p))["taskId"]
+            for p in ("linux", "linux64", "macosx64", "win32", "win64")
+        ]
+        self.assertEqual(sorted(self.task["requires"]), sorted(requires))
 
     def test_repo_path(self):
         self.assertEqual(self.props["repo_path"], "releases/foo")
