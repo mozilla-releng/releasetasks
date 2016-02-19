@@ -21,7 +21,8 @@ def make_task_graph(public_key, signing_pvt_key,
                     **template_kwargs):
     # TODO: some validation of template_kwargs + defaults
     env = Environment(loader=FileSystemLoader(template_dir),
-                      undefined=StrictUndefined)
+                      undefined=StrictUndefined,
+                      extensions=['jinja2.ext.do'])
     th = TreeherderClient()
 
     now = arrow.now()
