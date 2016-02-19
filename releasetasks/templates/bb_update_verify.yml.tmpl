@@ -1,0 +1,59 @@
+{% for channel in release_channels %}
+{% set uv_totalchunks = 6 %}
+{% for chunk in range(1, uv_totalchunks + 1) %}
+{% set uv_buildername = "release-{}_{}_update_verify_{}_{}".format(branch, platform, channel, chunk) %}
+-
+    taskId: "{{ stableSlugId(uv_buildername) }}"
+    reruns: 5
+    task:
+        provisionerId: buildbot-bridge
+        workerType: buildbot-bridge
+        created: "{{ now }}"
+        deadline: "{{ now.replace(days=4) }}"
+        expires: "{{ never }}"
+        priority: "high"
+        retries: 5
+        scopes:
+            - project:releng:buildbot-bridge:builder-name:{{ uv_buildername }}
+
+        payload:
+            buildername: "{{ uv_buildername }}"
+            sourcestamp:
+                branch: "{{ repo_path }}"
+                revision: "{{ revision }}"
+            properties:
+                product: "{{ product }}"
+                version: {{ version }}
+                build_number: {{ buildNumber }}
+                revision: "{{ revision }}"
+                release_promotion: true
+                NO_BBCONFIG: "1"
+                VERIFY_CONFIG: "{{ channel }}-{{ product }}-{{ platform }}.cfg"
+
+        metadata:
+            owner: release@mozilla.com
+            source: https://github.com/mozilla/releasetasks
+            name: "{{ platform }} {{ channel }} update verification"
+            description: |
+                Verifies updates for {{ platform }}
+
+        extra:
+            signing:
+               signature: {{ sign_task(stableSlugId(uv_buildername), valid_for=4 * 24 * 3600) }}
+            {% if running_tests is defined %}
+            task_name: "{{ uv_buildername }}"
+            {% endif %}
+
+        {# TODO: decide what to use here...
+        treeherder:
+            symbol: UV
+            groupSymbol: Release
+            collection:
+                opt: true
+            machine:
+                platform: {{ platform }}
+            build:
+                platform: none
+        #}
+{% endfor %}
+{% endfor %}
