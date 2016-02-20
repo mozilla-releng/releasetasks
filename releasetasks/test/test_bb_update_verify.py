@@ -41,6 +41,7 @@ class TestBB_UpdateVerify(unittest.TestCase):
             updates_enabled=False,
             bouncer_enabled=False,
             push_to_candidates_enabled=False,
+            checksums_enabled=False,
             postrelease_version_bump_enabled=False,
             product="firefox",
             signing_class="release-signing",

@@ -1,0 +1,41 @@
+{% set buildername = "release-{}-{}_chcksms".format(branch, product) %}
+-
+    taskId: "{{ stableSlugId(buildername) }}"
+    requires:
+        {% for upstream_builder in artifact_completes_builders %}
+        - {{ stableSlugId(upstream_builder) }}
+        {% endfor %}
+    reruns: 5
+    task:
+        provisionerId: "buildbot-bridge"
+        workerType: "buildbot-bridge"
+        created: "{{ now }}"
+        deadline: "{{ now.replace(days=4) }}"
+        expires: "{{ never }}"
+        priority: "high"
+        retries: 5
+        scopes:
+            - project:releng:buildbot-bridge:builder-name:{{ buildername }}
+
+        payload:
+            buildername: "{{ buildername }}"
+            sourcestamp:
+                branch: "{{ repo_path }}"
+                revision: "{{ revision }}"
+            properties:
+                version: "{{ version }}"
+                build_number: "{{ buildNumber }}"
+                release_promotion: true
+                revision: "{{ revision }}"
+        metadata:
+            name: "{{ product }} {{ branch }} checksums builder"
+            description: "Release Promotion checksums job"
+            owner: "release@mozilla.com"
+            source: https://github.com/mozilla/releasetasks
+
+        extra:
+            signing:
+               signature: {{ sign_task(stableSlugId(buildername), valid_for=4 * 24 * 3600) }}
+            {% if running_tests is defined %}
+            task_name: "{{ buildername }}"
+            {% endif %}

@@ -19,6 +19,7 @@ class TestSourceBuilder(unittest.TestCase):
             appVersion="42.0",
             buildNumber=3,
             source_enabled=True,
+            checksums_enabled=False,
             en_US_config={"platforms": {
                 "linux": {"task_id": "xyz"},
                 "win32": {"task_id": "xyy"}
