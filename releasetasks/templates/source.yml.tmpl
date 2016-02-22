@@ -111,12 +111,14 @@
             task_name: "{{ buildername_signing }}"
             {% endif %}
 
-        treeherder:
-            symbol: Src-S
-            groupSymbol: Release
-            collection:
-                opt: true
-            machine:
-                platform: linux64
-            build:
-                platform: all
+            treeherderEnv:
+                - staging
+            treeherder:
+                symbol: Src-S
+                groupSymbol: Release
+                collection:
+                    opt: true
+                machine:
+                    platform: linux64
+                build:
+                    platform: all
