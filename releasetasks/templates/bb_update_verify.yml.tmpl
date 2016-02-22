@@ -1,34 +1,35 @@
 {% for channel in release_channels %}
-{% set uv_totalchunks = 12 %}
+{% set uv_totalchunks = 6 %}
 {% for chunk in range(1, uv_totalchunks + 1) %}
-{% set uv_buildername = "{}_{}_update_verify_{}".format(platform, channel, chunk) %}
+{% set uv_buildername = "release-{}_{}_update_verify_{}_{}".format(branch, platform, channel, chunk) %}
 -
     taskId: "{{ stableSlugId(uv_buildername) }}"
     reruns: 5
     task:
-        provisionerId: aws-provisioner-v1
-        workerType: opt-linux64
+        provisionerId: buildbot-bridge
+        workerType: buildbot-bridge
         created: "{{ now }}"
         deadline: "{{ now.replace(days=4) }}"
         expires: "{{ never }}"
         priority: "high"
         retries: 5
+        scopes:
+            - project:releng:buildbot-bridge:builder-name:{{ uv_buildername }}
+
         payload:
-            maxRunTime: 7200
-            image: callek/update-test-runner2
-            command:
-                - /bin/bash
-                - -c
-                - hg clone https://hg.mozilla.org/build/tools && cd tools && hg up -r $TAG && cd .. && /tools/scripts/release/updates/chunked-verify.sh UNUSED UNUSED $TOTAL_CHUNKS $THIS_CHUNK
-            env:
-                TAG: "default"
-                TOTAL_CHUNKS: "{{ uv_totalchunks }}"
-                THIS_CHUNK: "{{ chunk }}"
+            buildername: "{{ uv_buildername }}"
+            sourcestamp:
+                branch: "{{ repo_path }}"
+                revision: "{{ revision }}"
+            properties:
+                product: "{{ product }}"
+                version: {{ version }}
+                build_number: {{ buildNumber }}
+                revision: "{{ revision }}"
+                release_promotion: true
                 NO_BBCONFIG: "1"
-                VERIFY_CONFIG: "{{ "{channel}-{product}-{platform}.cfg".format(
-                                   platform=platform,
-                                   channel=channel,
-                                   product=product) }}"
+                VERIFY_CONFIG: "{{ channel }}-{{ product }}-{{ platform }}.cfg"
+
         metadata:
             owner: release@mozilla.com
             source: https://github.com/mozilla/releasetasks

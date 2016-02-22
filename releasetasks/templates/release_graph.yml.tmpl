@@ -85,10 +85,8 @@ tasks:
         {% macro updateVerify_task(platform) %}
             {% if platform in ["linux", "linux64"] %}
                 {% include "tc_update_verify.yml.tmpl" %}
-            {# Commented Out until I create the bridge template
             {% else %}
                 {% include "bb_update_verify.yml.tmpl" %}
-            # End comment #}
             {% endif %}
         {% endmacro %}
         {% for plat in en_US_config["platforms"].keys() %}
