@@ -14,6 +14,8 @@
         expires: "{{ never }}"
         priority: "high"
         retries: 5
+        routes:
+            - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
         payload:
             maxRunTime: 7200
             # TODO - create specific image for this
@@ -296,6 +298,8 @@
         expires: "{{ never }}"
         priority: "high"
         retries: 5
+        routes:
+            - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
         payload:
             maxRunTime: 7200
             # TODO - create specific image for this

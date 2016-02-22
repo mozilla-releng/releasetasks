@@ -14,6 +14,8 @@
         expires: "{{ never }}"
         priority: "high"
         retries: 5
+        routes:
+            - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
         scopes:
             - project:releng:buildbot-bridge:builder-name:{{ buildername }}
 
@@ -39,3 +41,15 @@
             {% if running_tests is defined %}
             task_name: "{{ buildername }}"
             {% endif %}
+            treeherderEnv:
+                - staging
+            treeherder:
+                symbol: CS
+                groupSymbol: Release
+                collection:
+                    opt: true
+                machine:
+                    platform: linux64
+                build:
+                    platform: all
+
