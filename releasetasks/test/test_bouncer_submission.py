@@ -4,7 +4,7 @@ from releasetasks.test import make_task_graph, PVT_KEY_FILE, \
     do_common_assertions, get_task_by_name
 
 
-class TestBalrogSubmission(unittest.TestCase):
+class TestBouncerSubmission(unittest.TestCase):
     maxDiff = 30000
     graph = None
     task = None
