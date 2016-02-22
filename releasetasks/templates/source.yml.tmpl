@@ -47,8 +47,6 @@
                 MH_BUILD_POOL: "taskcluster"
                 # Don't clone mozharness, use the in-tree version
                 MOZHARNESS_DISABLE: "true"
-                TOOLTOOL_CACHE: "/home/worker/tooltool-cache"
-                DIST_TARGET_UPLOADS: "source.tar.xz bundle"
         metadata:
             owner: release@mozilla.com
             source: https://github.com/mozilla/releasetasks
@@ -56,6 +54,8 @@
             description: |
                 Generates a source tarball
 
+        routes:
+            - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
         extra:
             signing:
                signature: {{ sign_task(stableSlugId(buildername), valid_for=4 * 24 * 3600) }}
@@ -63,17 +63,17 @@
             task_name: "{{ buildername }}"
             {% endif %}
 
-        {# TODO: decide what to use here...
-        treeherder:
-            symbol: S
-            groupSymbol: Release
-            collection:
-                opt: true
-            machine:
-                platform: none
-            build:
-                platform: none
-        #}
+            treeherderEnv:
+                - staging
+            treeherder:
+                symbol: Src
+                groupSymbol: Release
+                collection:
+                    opt: true
+                machine:
+                    platform: linux64
+                build:
+                    platform: all
 -
     taskId: "{{ stableSlugId(buildername_signing) }}"
     requires:
@@ -91,7 +91,7 @@
             - signing:format:gpg
             - signing:cert:{{ signing_class }}
         payload:
-            signingManifest: https://queue.taskcluster.net/v1/task/{{ stableSlugId(buildername) }}/artifacts/public/env/manifest.json
+            signingManifest: https://queue.taskcluster.net/v1/task/{{ stableSlugId(buildername) }}/artifacts/public/build/signing_manifest.json
         metadata:
             owner: release@mozilla.com
             source: https://github.com/mozillla/releasetasks
@@ -99,6 +99,8 @@
             description: |
                 Sign source tarball
 
+        routes:
+            - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
 
         extra:
             signing:
@@ -108,3 +110,15 @@
             {% if running_tests is defined %}
             task_name: "{{ buildername_signing }}"
             {% endif %}
+
+            treeherderEnv:
+                - staging
+            treeherder:
+                symbol: Src-S
+                groupSymbol: Release
+                collection:
+                    opt: true
+                machine:
+                    platform: linux64
+                build:
+                    platform: all
