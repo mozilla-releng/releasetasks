@@ -34,6 +34,7 @@ class TestSourceBuilder(unittest.TestCase):
             signing_class="release-signing",
             verifyConfigs={},
             signing_pvt_key=PVT_KEY_FILE,
+            build_tools_repo_path='build/tools',
         )
         self.task_def = get_task_by_name(self.graph, "foo_source")
         self.task = self.task_def["task"]

@@ -82,6 +82,7 @@ class TestBeetmoverEnUSCandidates(unittest.TestCase, BaseTestBeetmoverCandidates
             signing_class="release-signing",
             verifyConfigs={},
             signing_pvt_key=PVT_KEY_FILE,
+            build_tools_repo_path='build/tools',
         )
         self.tasks = {
             'win32': get_task_by_name(
@@ -174,6 +175,7 @@ class TestBeetmover110nCandidates(unittest.TestCase, BaseTestBeetmoverCandidates
             revision="abcdef123456",
             release_channels=["beta"],
             signing_pvt_key=PVT_KEY_FILE,
+            build_tools_repo_path='build/tools',
         )
         self.tasks = {
             'win32': get_task_by_name(
@@ -249,6 +251,7 @@ class TestBeetmoverEnUSPartialsCandidates(unittest.TestCase, BaseTestBeetmoverCa
             signing_class="release-signing",
             verifyConfigs={},
             signing_pvt_key=PVT_KEY_FILE,
+            build_tools_repo_path='build/tools',
         )
         self.tasks = {
             'win32': get_task_by_name(
@@ -348,6 +351,7 @@ class TestBeetmoverl10nPartialsCandidates(unittest.TestCase, BaseTestBeetmoverCa
             revision="abcdef123456",
             release_channels=["beta"],
             signing_pvt_key=PVT_KEY_FILE,
+            build_tools_repo_path='build/tools',
         )
         self.tasks = {
             'win32': get_task_by_name(

@@ -19,7 +19,7 @@
             command:
                 - /bin/bash
                 - -c
-                - hg clone https://hg.mozilla.org/build/tools && cd tools && hg up -r $TAG && cd .. && /tools/scripts/release/updates/chunked-verify.sh UNUSED UNUSED $TOTAL_CHUNKS $THIS_CHUNK
+                - hg clone https://hg.mozilla.org/{{ build_tools_repo_path }} tools && cd tools && hg up -r $TAG && cd .. && /tools/scripts/release/updates/chunked-verify.sh UNUSED UNUSED $TOTAL_CHUNKS $THIS_CHUNK
             env:
                 TAG: "default"
                 TOTAL_CHUNKS: "{{ uv_totalchunks }}"

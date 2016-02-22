@@ -71,6 +71,7 @@ class TestEncryption(unittest.TestCase):
             release_channels=["beta"],
             signing_pvt_key=PVT_KEY_FILE,
             repo_path="foo/bar",
+            build_tools_repo_path='build/tools',
         )
         do_common_assertions(graph)
         for p in ("win32", "macosx64"):

@@ -62,6 +62,7 @@ class TestL10NSingleChunk(unittest.TestCase):
             revision="abcdef123456",
             release_channels=["beta"],
             signing_pvt_key=PVT_KEY_FILE,
+            build_tools_repo_path='build/tools',
         )
         self.task = get_task_by_name(self.graph, "release-mozilla-beta_firefox_win32_l10n_repack_1")
         self.payload = self.task["task"]["payload"]
@@ -188,6 +189,7 @@ class TestL10NMultipleChunks(unittest.TestCase):
             revision="abcdef123456",
             release_channels=["beta"],
             signing_pvt_key=PVT_KEY_FILE,
+            build_tools_repo_path='build/tools',
         )
         self.chunk1 = get_task_by_name(
             self.graph, "release-mozilla-beta_firefox_win32_l10n_repack_1")

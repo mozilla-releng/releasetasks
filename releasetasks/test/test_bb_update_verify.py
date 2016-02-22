@@ -45,6 +45,7 @@ class TestBB_UpdateVerify(unittest.TestCase):
             product="firefox",
             signing_class="release-signing",
             release_channels=["beta"],
+            build_tools_repo_path='build/tools',
             balrog_api_root="http://balrog/api",
             enUS_platforms=["linux", "linux64", "win64", "win32", "macosx64"],
             signing_pvt_key=PVT_KEY_FILE,
