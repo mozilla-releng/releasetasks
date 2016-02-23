@@ -21,7 +21,10 @@
                 - -c
                 - hg clone https://hg.mozilla.org/{{ build_tools_repo_path }} tools && cd tools && hg up -r $TAG && cd .. && /tools/scripts/release/updates/chunked-verify.sh UNUSED UNUSED $TOTAL_CHUNKS $THIS_CHUNK
             env:
-                TAG: "default"
+                TAG: "{{ "{product}_{version}_BUILD{buildNumber}_RUNTIME".format(
+                    product=product.upper(),
+                    version=version.replace('.', '_'),
+                    buildNumber=buildNumber ) }}"
                 TOTAL_CHUNKS: "{{ uv_totalchunks }}"
                 THIS_CHUNK: "{{ chunk }}"
                 NO_BBCONFIG: "1"

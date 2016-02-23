@@ -27,6 +27,10 @@
                 build_number: {{ buildNumber }}
                 revision: "{{ revision }}"
                 release_promotion: true
+                script_repo_revision: "{{ "{product}_{version}_BUILD{buildNumber}_RUNTIME".format(
+                    product=product.upper(),
+                    version=version.replace('.', '_'),
+                    buildNumber=buildNumber ) }}"
                 NO_BBCONFIG: "1"
                 VERIFY_CONFIG: "{{ channel }}-{{ product }}-{{ platform }}.cfg"
 
