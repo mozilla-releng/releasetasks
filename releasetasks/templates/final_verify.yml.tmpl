@@ -17,7 +17,7 @@
             command:
                 - /bin/bash
                 - -c
-                - hg clone https://hg.mozilla.org/build/tools && cd tools && hg up -r $TAG && cd release/ && ./final-verification.sh $RELEASE_CONFIGS
+                - hg clone https://hg.mozilla.org/{{ build_tools_repo_path }} tools && cd tools && hg up -r $TAG && cd release/ && ./final-verification.sh $RELEASE_CONFIGS
             env:
                 TAG: "default"
                 RELEASE_CONFIGS: {#

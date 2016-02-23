@@ -47,6 +47,7 @@ class TestUpdates(unittest.TestCase):
             release_channels=["foo", "bar"],
             balrog_api_root="http://balrog/api",
             signing_pvt_key=PVT_KEY_FILE,
+            build_tools_repo_path='build/tools',
         )
         self.task = get_task_by_name(
             self.graph, "release-foo-firefox_updates")

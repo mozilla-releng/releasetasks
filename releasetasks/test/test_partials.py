@@ -40,6 +40,7 @@ class TestEnUSPartials(unittest.TestCase):
             verifyConfigs={},
             release_channels=["beta"],
             signing_pvt_key=PVT_KEY_FILE,
+            build_tools_repo_path='build/tools',
         )
 
     def test_common_assertions(self):
