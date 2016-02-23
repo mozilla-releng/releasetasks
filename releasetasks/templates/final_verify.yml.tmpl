@@ -19,7 +19,10 @@
                 - -c
                 - hg clone https://hg.mozilla.org/{{ build_tools_repo_path }} tools && cd tools && hg up -r $TAG && cd release/ && ./final-verification.sh $RELEASE_CONFIGS
             env:
-                TAG: "default"
+                TAG: "{{ "{product}_{version}_BUILD{buildNumber}_RUNTIME".format(
+                    product=product.upper(),
+                    version=version.replace('.', '_'),
+                    buildNumber=buildNumber ) }}"
                 RELEASE_CONFIGS: {#
                     #}{% for platform in en_US_config["platforms"].keys() %}{#
                         #}{{ "{channel}-{product}-{platform}.cfg".format(
