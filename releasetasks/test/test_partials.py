@@ -14,6 +14,7 @@ class TestEnUSPartials(unittest.TestCase):
             appVersion="42.0",
             buildNumber=3,
             source_enabled=False,
+            checksums_enabled=False,
             updates_enabled=True,
             bouncer_enabled=False,
             push_to_candidates_enabled=False,

@@ -46,6 +46,7 @@ class TestEncryption(unittest.TestCase):
             appVersion="42.0",
             buildNumber=3,
             source_enabled=False,
+            checksums_enabled=False,
             updates_enabled=True,
             bouncer_enabled=False,
             push_to_candidates_enabled=False,
@@ -98,6 +99,7 @@ class TestGraphScopes(unittest.TestCase):
             updates_enabled=False,
             bouncer_enabled=False,
             source_enabled=False,
+            checksums_enabled=False,
             push_to_candidates_enabled=False,
             postrelease_version_bump_enabled=False,
             en_US_config={"platforms": {

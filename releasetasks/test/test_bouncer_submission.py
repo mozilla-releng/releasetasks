@@ -41,6 +41,7 @@ class TestBouncerSubmission(unittest.TestCase):
             branch="foo",
             updates_enabled=False,
             bouncer_enabled=True,
+            checksums_enabled=False,
             push_to_candidates_enabled=False,
             postrelease_version_bump_enabled=False,
             signing_class="release-signing",
