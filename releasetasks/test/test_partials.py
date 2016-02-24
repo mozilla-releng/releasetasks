@@ -18,6 +18,7 @@ class TestEnUSPartials(unittest.TestCase):
             updates_enabled=True,
             bouncer_enabled=False,
             push_to_candidates_enabled=False,
+            push_to_releases_enabled=False,
             postrelease_version_bump_enabled=False,
             en_US_config={"platforms": {
                 "macosx64": {"task_id": "xyz"},
