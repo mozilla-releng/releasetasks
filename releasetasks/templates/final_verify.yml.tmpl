@@ -2,6 +2,9 @@
 {% set buildername = "{}_final_verify".format(channel) %}
 -
     taskId: "{{ stableSlugId(buildername) }}"
+    requires:
+        # tests will catch if this buildername changes
+        - {{ stableSlugId("release-{}-{}_uptake_monitoring".format(branch, product)) }}
     reruns: 5
     task:
         provisionerId: aws-provisioner-v1
