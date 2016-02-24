@@ -69,6 +69,8 @@ class TestPushToMirrors(unittest.TestCase):
             signing_class="release-signing",
             verifyConfigs={},
             signing_pvt_key=PVT_KEY_FILE,
+            release_channels=["beta", "release"],
+            build_tools_repo_path='build/tools',
         )
         self.task = get_task_by_name(
                 self.graph, "release-{}_{}_push_to_releases".format("mozilla-beta", "firefox")

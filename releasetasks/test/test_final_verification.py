@@ -43,7 +43,9 @@ class TestFinalVerification(unittest.TestCase):
             updates_enabled=False,
             bouncer_enabled=False,
             push_to_candidates_enabled=False,
-            push_to_releases_enabled=False,
+            push_to_releases_enabled=True,
+            push_to_releases_automatic=False,
+            beetmover_candidates_bucket='fake_bucket',
             postrelease_version_bump_enabled=False,
             product="firefox",
             signing_class="release-signing",
@@ -92,6 +94,10 @@ class TestFinalVerification(unittest.TestCase):
         ])
         self.assertTrue(expected_graph_scopes.issubset(self.graph["scopes"]))
 
+    def test_requires(self):
+        requires = [get_task_by_name(self.graph, "release-foo-firefox_uptake_monitoring")["taskId"]]
+        self.assertEqual(sorted(self.task_def["requires"]), sorted(requires))
+
 
 class TestFinalVerificationMultiChannel(unittest.TestCase):
     maxDiff = 30000
@@ -129,7 +135,9 @@ class TestFinalVerificationMultiChannel(unittest.TestCase):
             checksums_enabled=False,
             bouncer_enabled=False,
             push_to_candidates_enabled=False,
-            push_to_releases_enabled=False,
+            push_to_releases_enabled=True,
+            push_to_releases_automatic=False,
+            beetmover_candidates_bucket='fake_bucket',
             postrelease_version_bump_enabled=False,
             product="firefox",
             signing_class="release-signing",
