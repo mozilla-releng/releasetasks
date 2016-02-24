@@ -1,5 +1,7 @@
 {% set buildername = "{}_source".format(branch) %}
 {% set buildername_signing = "{}_signing".format(buildername) %}
+{% set buildername_beet = "{}_beet".format(buildername) %}
+{% set buildername_beet_signing = "{}_beet".format(buildername_signing) %}
 -
     taskId: "{{ stableSlugId(buildername) }}"
     reruns: 5
@@ -120,5 +122,119 @@
                     opt: true
                 machine:
                     platform: linux64
+                build:
+                    platform: all
+
+-
+    taskId: "{{ stableSlugId(buildername_beet) }}"
+    requires:
+        - "{{ stableSlugId(buildername) }}"
+    reruns: 5
+    task:
+        provisionerId: aws-provisioner-v1
+        workerType: opt-linux64
+        created: "{{ now }}"
+        deadline: "{{ now.replace(days=4) }}"
+        expires: "{{ never }}"
+        priority: "high"
+        retries: 5
+        payload:
+            maxRunTime: 7200
+            image: kmoir/python-beet-runner
+            command:
+                - /bin/bash
+                - -c
+                - >
+                  wget -O mozharness.tar.bz2 https://hg.mozilla.org/{{ repo_path }}/archive/{{ revision }}.tar.bz2/testing/mozharness &&
+                  mkdir mozharness && tar xvfj mozharness.tar.bz2 -C mozharness --strip-components 3 && cd mozharness &&
+                  python scripts/release/beet_mover.py --template configs/beetmover/source.yml.tmpl --platform linux64 --version {{ version }} --app-version {{ appVersion }} --locale en-US --taskid {{ stableSlugId(buildername) }} --build-num build{{ buildNumber }}
+            env:
+                DUMMY_ENV_FOR_ENCRYPT: "fake"
+            encryptedEnv:
+                - {{ encrypt_env_var(stableSlugId(buildername_beet), now_ms,
+                                   now_ms + 24 * 3600 * 1000, 'AWS_ACCESS_KEY_ID',
+                                   beetmover_aws_access_key_id) }}
+                - {{ encrypt_env_var(stableSlugId(buildername_beet), now_ms,
+                                   now_ms + 24 * 3600 * 1000, 'AWS_SECRET_ACCESS_KEY',
+                                   beetmover_aws_secret_access_key) }}
+        metadata:
+            name: "[beetmover] {{ product }} {{ branch }} move source bundles"
+            description: "moves source artifacts to candidates dir"
+            owner: "release@mozilla.com"
+            source: https://github.com/mozilla/releasetasks
+
+        extra:
+            {% if running_tests is defined %}
+            task_name: "{{ buildername_beet}}"
+            {% endif %}
+            signing:
+               signature: {{ sign_task(stableSlugId(buildername_beet), valid_for=4 * 24 * 3600) }}
+
+            treeherderEnv:
+                - staging
+            treeherder:
+                symbol: Src
+                groupSymbol: BM
+                collection:
+                    opt: true
+                machine:
+                    platform: Linux64
+                build:
+                    platform: all
+
+-
+    taskId: "{{ stableSlugId(buildername_beet_signing) }}"
+    requires:
+        - "{{ stableSlugId(buildername_signing) }}"
+    reruns: 5
+    task:
+        provisionerId: aws-provisioner-v1
+        workerType: opt-linux64
+        created: "{{ now }}"
+        deadline: "{{ now.replace(days=4) }}"
+        expires: "{{ never }}"
+        priority: "high"
+        retries: 5
+        payload:
+            maxRunTime: 7200
+            image: kmoir/python-beet-runner
+            command:
+                - /bin/bash
+                - -c
+                - >
+                  wget -O mozharness.tar.bz2 https://hg.mozilla.org/{{ repo_path }}/archive/{{ revision }}.tar.bz2/testing/mozharness &&
+                  mkdir mozharness && tar xvfj mozharness.tar.bz2 -C mozharness --strip-components 3 && cd mozharness &&
+                  python scripts/release/beet_mover.py --template configs/beetmover/source_checksums.yml.tmpl --platform linux64 --version {{ version }} --app-version {{ appVersion }} --locale en-US --taskid "{{ stableSlugId(buildername_signing) }}" --build-num build{{ buildNumber }}
+            env:
+                DUMMY_ENV_FOR_ENCRYPT: "fake"
+            encryptedEnv:
+                - {{ encrypt_env_var(stableSlugId(buildername_beet_signing), now_ms,
+                                   now_ms + 24 * 3600 * 1000, 'AWS_ACCESS_KEY_ID',
+                                   beetmover_aws_access_key_id) }}
+                - {{ encrypt_env_var(stableSlugId(buildername_beet_signing), now_ms,
+                                   now_ms + 24 * 3600 * 1000, 'AWS_SECRET_ACCESS_KEY',
+                                   beetmover_aws_secret_access_key) }}
+        metadata:
+            name: "[beetmover] {{ product }} {{ branch }} move source bundle checksums"
+            description: "moves source artifact checksums to candidates dir"
+            owner: "release@mozilla.com"
+            source: https://github.com/mozilla/releasetasks
+
+        extra:
+            {% if running_tests is defined %}
+            task_name: "{{ buildername_beet_signing }}"
+            {% endif %}
+            signing:
+               signature: {{ sign_task(stableSlugId(buildername_beet_signing), valid_for=4 * 24 * 3600) }}
+
+            treeherderEnv:
+                - staging
+            treeherder:
+                symbol: Src
+                groupSymbol: BM
+                collection:
+                    opt: true
+                machine:
+                    platform: Linux64
                 build:
                     platform: all
