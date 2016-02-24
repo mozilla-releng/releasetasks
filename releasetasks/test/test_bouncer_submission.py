@@ -43,6 +43,7 @@ class TestBouncerSubmission(unittest.TestCase):
             bouncer_enabled=True,
             checksums_enabled=False,
             push_to_candidates_enabled=False,
+            push_to_releases_enabled=False,
             postrelease_version_bump_enabled=False,
             signing_class="release-signing",
             release_channels=["foo"],
