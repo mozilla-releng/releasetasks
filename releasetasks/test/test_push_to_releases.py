@@ -104,10 +104,6 @@ class TestPushToMirrors(unittest.TestCase):
         command = self.task['task']['payload']['command']
         self.assertTrue("--build-number 3" in "".join(command))
 
-    def test_bucket_in_command(self):
-        command = self.task['task']['payload']['command']
-        self.assertTrue("--bucket fake_bucket" in "".join(command))
-
     def test_requires(self):
         en_US_tmpl = "release-mozilla-beta_firefox_{}_complete_en-US_beetmover_candidates"
         en_US_partials_tmpl = "release-mozilla-beta_firefox_{}_partial_en-US_{}build{}_beetmover_candidates"
