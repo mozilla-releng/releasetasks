@@ -64,6 +64,7 @@ class TestBeetmoverEnUSCandidates(unittest.TestCase, BaseTestBeetmoverCandidates
             updates_enabled=False,
             bouncer_enabled=False,
             push_to_candidates_enabled=True,
+            beetmover_candidates_bucket='mozilla-releng-beet-mover-dev',
             push_to_releases_enabled=False,
             postrelease_version_bump_enabled=False,
             en_US_config=self.en_US_config,
@@ -115,6 +116,11 @@ class TestBeetmoverEnUSCandidates(unittest.TestCase, BaseTestBeetmoverCandidates
             command = task['task']['payload']['command']
             self.assertTrue("--taskid {}".format(en_US_taskid) in "".join(command))
 
+    def test_bucket_in_command(self):
+        for platform, task in self.tasks.iteritems():
+            command = task['task']['payload']['command']
+            self.assertTrue("--bucket {}".format("mozilla-releng-beet-mover-dev") in "".join(command))
+
 
 class TestBeetmover110nCandidates(unittest.TestCase, BaseTestBeetmoverCandidates):
     maxDiff = 30000
@@ -159,6 +165,7 @@ class TestBeetmover110nCandidates(unittest.TestCase, BaseTestBeetmoverCandidates
             updates_enabled=False,
             bouncer_enabled=False,
             push_to_candidates_enabled=True,
+            beetmover_candidates_bucket='mozilla-releng-beet-mover-dev',
             push_to_releases_enabled=False,
             postrelease_version_bump_enabled=False,
             en_US_config=self.en_US_config,
@@ -204,6 +211,11 @@ class TestBeetmover110nCandidates(unittest.TestCase, BaseTestBeetmoverCandidates
             command = task['task']['payload']['command']
             self.assertTrue("--locale de --locale en-GB --locale zh-TW" in "".join(command))
 
+    def test_bucket_in_command(self):
+        for platform, task in self.tasks.iteritems():
+            command = task['task']['payload']['command']
+            self.assertTrue("--bucket {}".format("mozilla-releng-beet-mover-dev") in "".join(command))
+
     def test_taskid_in_command(self):
         for platform, task in self.tasks.iteritems():
             l10n_artifact_task = get_task_by_name(
@@ -237,6 +249,7 @@ class TestBeetmoverEnUSPartialsCandidates(unittest.TestCase, BaseTestBeetmoverCa
             updates_enabled=True,
             bouncer_enabled=False,
             push_to_candidates_enabled=True,
+            beetmover_candidates_bucket='mozilla-releng-beet-mover-dev',
             push_to_releases_enabled=False,
             postrelease_version_bump_enabled=False,
             en_US_config=self.en_US_config,
@@ -339,6 +352,7 @@ class TestBeetmoverl10nPartialsCandidates(unittest.TestCase, BaseTestBeetmoverCa
             updates_enabled=True,
             bouncer_enabled=False,
             push_to_candidates_enabled=True,
+            beetmover_candidates_bucket='mozilla-releng-beet-mover-dev',
             push_to_releases_enabled=False,
             postrelease_version_bump_enabled=False,
             en_US_config=self.en_US_config,

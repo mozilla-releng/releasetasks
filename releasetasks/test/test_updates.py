@@ -43,6 +43,7 @@ class TestUpdates(unittest.TestCase):
             updates_enabled=True,
             bouncer_enabled=True,
             push_to_candidates_enabled=True,
+            beetmover_candidates_bucket='mozilla-releng-beet-mover-dev',
             push_to_releases_enabled=False,
             postrelease_version_bump_enabled=True,
             signing_class="release-signing",
