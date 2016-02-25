@@ -19,11 +19,9 @@ class TestBB_UpdateVerify(unittest.TestCase):
             source_enabled=False,
             en_US_config={
                 "platforms": {
-                    "macosx64": {},
-                    "win32": {},
-                    "win64": {},
-                    "linux": {},
-                    "linux64": {},
+                    "macosx64": {"task_id": "xyz"},
+                    "win32": {"task_id": "xyy"},
+                    "win64": {"task_id": "xyw"}
                 }
             },
             partial_updates={
@@ -34,14 +32,39 @@ class TestBB_UpdateVerify(unittest.TestCase):
                     "buildNumber": 2,
                 },
             },
-            l10n_config={},
+            l10n_config={
+                "platforms": {
+                    "win32": {
+                        "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.exe",
+                        "locales": ["de", "en-GB", "zh-TW"],
+                        "chunks": 1,
+                    },
+                    "win64": {
+                        "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.exe",
+                        "locales": ["de", "en-GB", "zh-TW"],
+                        "chunks": 1,
+                    },
+                    "macosx64": {
+                        "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.tar.xz",
+                        "locales": ["de", "en-GB", "zh-TW"],
+                        "chunks": 1,
+                    },
+
+                },
+                "changesets": {
+                    "de": "default",
+                    "en-GB": "default",
+                    "zh-TW": "default",
+                },
+            },
             repo_path="releases/mozilla-beta",
             revision="fedcba654321",
             branch="beta",
-            updates_enabled=False,
+            updates_enabled=True,
             bouncer_enabled=False,
-            push_to_candidates_enabled=False,
+            push_to_candidates_enabled=True,
             push_to_releases_enabled=False,
+            beetmover_candidates_bucket='fake_bucket',
             checksums_enabled=False,
             postrelease_version_bump_enabled=False,
             product="firefox",
@@ -88,3 +111,23 @@ class TestBB_UpdateVerify(unittest.TestCase):
                         "release-beta_%s_update_verify_beta_%s" % (p, i)
                     )
                 )
+
+    def test_requires(self):
+        en_US_tmpl = "release-beta_firefox_{}_complete_en-US_beetmover_candidates"
+        en_US_partials_tmpl = "release-beta_firefox_{}_partial_en-US_{}build{}_beetmover_candidates"
+        l10n_tmpl = "release-beta_firefox_{}_l10n_repack_beetmover_candidates_1"
+        l10n_partials_tmpl = "release-beta_firefox_{}_l10n_repack_partial_{}build{}_beetmover_candidates_1"
+        requires = []
+        for completes in (en_US_tmpl, l10n_tmpl):
+            requires.extend([
+                get_task_by_name(self.graph, completes.format(p))["taskId"]
+                for p in ("macosx64", "win32", "win64")
+            ])
+        for partials in (en_US_partials_tmpl, l10n_partials_tmpl):
+            requires.extend([
+                get_task_by_name(self.graph, partials.format(platform, p_version, p_build_num))["taskId"]
+                for platform in ("macosx64", "win32", "win64")
+                for p_version, p_build_num in (('38.0', '1'), ('37.0', '2'))
+            ])
+        requires.append(get_task_by_name(self.graph, "release-beta-firefox_updates")["taskId"])
+        self.assertEqual(sorted(self.task["requires"]), sorted(requires))

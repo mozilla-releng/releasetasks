@@ -4,6 +4,11 @@
 {% set uv_buildername = "release-{}_{}_update_verify_{}_{}".format(branch, platform, channel, chunk) %}
 -
     taskId: "{{ stableSlugId(uv_buildername) }}"
+    requires:
+        {% for upstream_builder in artifact_completes_builders + artifact_partials_builders %}
+        - {{ stableSlugId(upstream_builder) }}
+        {% endfor %}
+        - {{ stableSlugId("release-{}-{}_updates".format(branch, product)) }}
     reruns: 5
     task:
         provisionerId: buildbot-bridge
