@@ -73,7 +73,7 @@ class TestPushToMirrors(unittest.TestCase):
             build_tools_repo_path='build/tools',
         )
         self.task = get_task_by_name(
-                self.graph, "release-{}_{}_push_to_releases".format("mozilla-beta", "firefox")
+            self.graph, "release-{}_{}_push_to_releases".format("mozilla-beta", "firefox")
         )
 
     def test_common_assertions(self):
