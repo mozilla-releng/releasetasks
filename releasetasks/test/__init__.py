@@ -41,7 +41,7 @@ def do_common_assertions(graph):
                 # and QE automation
                 required_properties = (
                     "version", "build_number", "release_promotion",
-                    "revision")
+                    "revision", "product")
                 for prop in required_properties:
                     assert prop in properties
             assert t["taskId"] not in _cached_taskIDs
