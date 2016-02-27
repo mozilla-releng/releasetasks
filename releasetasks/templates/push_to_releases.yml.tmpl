@@ -5,6 +5,7 @@
         {% for upstream_builder in artifact_completes_builders + artifact_partials_builders %}
         - {{ stableSlugId(upstream_builder) }}
         {% endfor %}
+        - {{ stableSlugId("release-{}-{}_chcksms".format(branch, product)) }}
     reruns: 5
     task:
         provisionerId: aws-provisioner-v1
