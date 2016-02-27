@@ -43,7 +43,7 @@ class TestPushToMirrors(unittest.TestCase):
             appVersion="42.0",
             buildNumber=3,
             source_enabled=False,
-            checksums_enabled=False,
+            checksums_enabled=True,
             updates_enabled=True,
             bouncer_enabled=False,
             push_to_candidates_enabled=True,
@@ -121,4 +121,5 @@ class TestPushToMirrors(unittest.TestCase):
                 for platform in ("macosx64", "win32")
                 for p_version, p_build_num in (('38.0', '1'), ('37.0', '2'))
             ])
+        requires.append(get_task_by_name(self.graph, "release-mozilla-beta-firefox_chcksms")["taskId"])
         self.assertEqual(sorted(self.task["requires"]), sorted(requires))
