@@ -257,6 +257,11 @@
             command:
                 - /runme.sh
 
+            artifacts:
+                "public/env":
+                    path: /home/worker/artifacts/
+                    type: directory
+                    expires: "{{ never }}"
             env:
                 {% if signing_class == "dep-signing" %}
                 MOZ_DISABLE_MAR_CERT_VERIFICATION: true
