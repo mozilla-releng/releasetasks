@@ -10,7 +10,7 @@ metadata:
     source: "https://github.com/rail/releasetasks"
 
 scopes:
-  - signing:format:gpg
+  - project:releng:signing:format:gpg
   - queue:define-task:buildbot-bridge/buildbot-bridge
   - queue:create-task:buildbot-bridge/buildbot-bridge
   - queue:task-priority:high
@@ -27,16 +27,16 @@ scopes:
   - queue:create-task:aws-provisioner-v1/build-c4-2xlarge
   - docker-worker:cache:build-{{ branch }}-release-workspace
   - docker-worker:cache:tooltool-cache
-  - signing:cert:{{ signing_class }}
-  - signing:format:gpg
+  - project:releng:signing:cert:{{ signing_class }}
+  - project:releng:signing:format:gpg
   - docker-worker:relengapi-proxy:tooltool.download.public
 {% endif %}
 {% if updates_enabled %}
   - queue:*
   - docker-worker:*
   - scheduler:*
-  - signing:format:mar
-  - signing:cert:{{ signing_class }}
+  - project:releng:signing:format:mar
+  - project:releng:signing:cert:{{ signing_class }}
 {# dep signing uses Balrog dev environment, which is publicly available and
    this doesn't need to use the proxy
 #}

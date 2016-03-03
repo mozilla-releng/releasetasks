@@ -90,8 +90,8 @@
         priority: "high"
         retries: 5
         scopes:
-            - signing:format:gpg
-            - signing:cert:{{ signing_class }}
+            - project:releng:signing:format:gpg
+            - project:releng:signing:cert:{{ signing_class }}
         payload:
             signingManifest: https://queue.taskcluster.net/v1/task/{{ stableSlugId(buildername) }}/artifacts/public/build/signing_manifest.json
         metadata:
