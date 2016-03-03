@@ -121,7 +121,7 @@ class TestGraphScopes(unittest.TestCase):
 
     def test_scopes(self):
         expected_scopes = set([
-            "signing:format:gpg",
+            "project:releng:signing:format:gpg",
             "queue:define-task:buildbot-bridge/buildbot-bridge",
             "queue:create-task:buildbot-bridge/buildbot-bridge",
             "queue:task-priority:high",

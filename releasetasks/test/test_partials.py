@@ -72,8 +72,8 @@ class TestEnUSPartials(unittest.TestCase):
     def test_funsize_en_US_scopes(self):
         expected_scopes = set([
             "queue:*", "docker-worker:*", "scheduler:*",
-            "signing:format:gpg", "signing:format:mar",
-            "signing:cert:release-signing",
+            "project:releng:signing:format:gpg", "project:releng:signing:format:mar",
+            "project:releng:signing:cert:release-signing",
             "docker-worker:feature:balrogVPNProxy"
         ])
         self.assertTrue(expected_scopes.issubset(self.graph["scopes"]))
@@ -86,14 +86,18 @@ class TestEnUSPartials(unittest.TestCase):
                 balrog = get_task_by_name(self.graph, "{}_en-US_{}_funsize_balrog_task".format(p, v))
 
                 self.assertIsNone(generator["task"].get("scopes"))
-                self.assertItemsEqual(signing["task"]["scopes"], ["signing:cert:release-signing", "signing:format:mar", "signing:format:gpg"])
+                self.assertItemsEqual(
+                    signing["task"]["scopes"],
+                    ["project:releng:signing:cert:release-signing",
+                     "project:releng:signing:format:mar",
+                     "project:releng:signing:format:gpg"])
                 self.assertItemsEqual(balrog["task"]["scopes"], ["docker-worker:feature:balrogVPNProxy"])
 
     def test_funsize_en_US_scopes_dep_signing(self):
         expected_scopes = set([
             "queue:*", "docker-worker:*", "scheduler:*",
-            "signing:format:gpg", "signing:format:mar",
-            "signing:cert:release-signing",
+            "project:releng:signing:format:gpg", "project:releng:signing:format:mar",
+            "project:releng:signing:cert:release-signing",
         ])
         self.assertTrue(expected_scopes.issubset(self.graph["scopes"]))
 
@@ -108,7 +112,10 @@ class TestEnUSPartials(unittest.TestCase):
                 balrog = get_task_by_name(self.graph, "{}_en-US_{}_funsize_balrog_task".format(p, v))
 
                 self.assertIsNone(generator["task"].get("scopes"))
-                self.assertItemsEqual(signing["task"]["scopes"], ["signing:cert:release-signing", "signing:format:mar", "signing:format:gpg"])
+                self.assertItemsEqual(signing["task"]["scopes"],
+                                      ["project:releng:signing:cert:release-signing",
+                                       "project:releng:signing:format:mar",
+                                       "project:releng:signing:format:gpg"])
                 self.assertIsNotNone(balrog["task"].get("scopes"))
                 self.assertEqual(
                     signing["task"]["payload"]["signingManifest"],

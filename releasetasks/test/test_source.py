@@ -81,8 +81,8 @@ class TestSourceBuilder(unittest.TestCase):
             "queue:create-task:aws-provisioner-v1/build-c4-2xlarge",
             "docker-worker:cache:build-foo-release-workspace",
             "docker-worker:cache:tooltool-cache",
-            "signing:format:gpg",
-            "signing:cert:release-signing",
+            "project:releng:signing:format:gpg",
+            "project:releng:signing:cert:release-signing",
             "docker-worker:relengapi-proxy:tooltool.download.public"
         ])
         assert expected_graph_scopes.issubset(self.graph["scopes"])
@@ -112,8 +112,8 @@ class TestSourceBuilder(unittest.TestCase):
 
     def test_signing_task_scopes(self):
         expected_task_scopes = set([
-            "signing:format:gpg",
-            "signing:cert:release-signing"
+            "project:releng:signing:format:gpg",
+            "project:releng:signing:cert:release-signing"
         ])
         assert expected_task_scopes.issubset(self.signing_task["scopes"])
 
