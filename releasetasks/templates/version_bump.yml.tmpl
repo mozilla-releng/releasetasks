@@ -11,8 +11,8 @@
         priority: "high"
         retries: 5
         routes:
-            - index.releases.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.version_bump_human
-            - index.releases.{{ branch }}.latest.{{ product }}.latest.version_bump_human
+            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.version_bump_human
+            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.version_bump_human
         payload:
             description: "required"
         metadata:
@@ -44,8 +44,8 @@
         scopes:
             - project:releng:buildbot-bridge:builder-name:{{ buildername }}
         routes:
-            - index.releases.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.version_bump
-            - index.releases.{{ branch }}.latest.{{ product }}.latest.version_bump
+            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.version_bump
+            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.version_bump
 
         payload:
             buildername: "{{ buildername }}"

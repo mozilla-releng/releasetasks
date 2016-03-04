@@ -19,8 +19,8 @@
 
         routes:
             - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
-            - index.releases.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.checksums
-            - index.releases.{{ branch }}.latest.{{ product }}.latest.checksums
+            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.checksums
+            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.checksums
 
         payload:
             buildername: "{{ buildername }}"

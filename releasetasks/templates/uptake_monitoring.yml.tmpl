@@ -14,8 +14,8 @@
         priority: "high"
         retries: 5
         routes:
-            - index.releases.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.uptake_human
-            - index.releases.{{ branch }}.latest.{{ product }}.latest.uptake_human
+            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.uptake_human
+            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.uptake_human
 
         payload:
             description: "required"
@@ -48,8 +48,8 @@
         retries: 5
         routes:
             - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
-            - index.releases.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.uptake
-            - index.releases.{{ branch }}.latest.{{ product }}.latest.uptake
+            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.uptake
+            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.uptake
         payload:
             maxRunTime: 7200
             image: ubuntu

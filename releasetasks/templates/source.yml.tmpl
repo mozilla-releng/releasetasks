@@ -58,8 +58,8 @@
 
         routes:
             - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
-            - index.releases.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.source_tarball
-            - index.releases.{{ branch }}.latest.{{ product }}.latest.source_tarball
+            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.source_tarball
+            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.source_tarball
         extra:
             signing:
                signature: {{ sign_task(stableSlugId(buildername), valid_for=4 * 24 * 3600) }}
@@ -105,8 +105,8 @@
 
         routes:
             - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
-            - index.releases.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.source_tarball_signing
-            - index.releases.{{ branch }}.latest.{{ product }}.latest.source_tarball_signing
+            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.source_tarball_signing
+            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.source_tarball_signing
 
         extra:
             signing:
@@ -143,8 +143,8 @@
         priority: "high"
         retries: 5
         routes:
-            - index.releases.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.source_tarball_beetmover
-            - index.releases.{{ branch }}.latest.{{ product }}.latest.source_tarball_beetmover
+            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.source_tarball_beetmover
+            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.source_tarball_beetmover
 
         payload:
             maxRunTime: 7200
@@ -204,8 +204,8 @@
         priority: "high"
         retries: 5
         routes:
-            - index.releases.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.source_tarball_sigs_beetmover
-            - index.releases.{{ branch }}.latest.{{ product }}.latest.source_tarball_sigs_beetmover
+            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.source_tarball_sigs_beetmover
+            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.source_tarball_sigs_beetmover
         payload:
             maxRunTime: 7200
             image: "kmoir/python-beet-runner@sha256:4f6dc84c4386406090a9c72b976be03dea647f01fe45a023d63ce0e479eb3497"
