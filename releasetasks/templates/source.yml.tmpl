@@ -143,8 +143,8 @@
         priority: "high"
         retries: 5
         routes:
-            - index.releases.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.source_tarball_beetmove
-            - index.releases.{{ branch }}.latest.{{ product }}.latest.source_tarball_beetmove
+            - index.releases.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.source_tarball_beetmover
+            - index.releases.{{ branch }}.latest.{{ product }}.latest.source_tarball_beetmover
 
         payload:
             maxRunTime: 7200
@@ -204,8 +204,8 @@
         priority: "high"
         retries: 5
         routes:
-            - index.releases.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.source_tarball_sigs_beetmove
-            - index.releases.{{ branch }}.latest.{{ product }}.latest.source_tarball_sigs_beetmove
+            - index.releases.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.source_tarball_sigs_beetmover
+            - index.releases.{{ branch }}.latest.{{ product }}.latest.source_tarball_sigs_beetmover
         payload:
             maxRunTime: 7200
             image: "kmoir/python-beet-runner@sha256:4f6dc84c4386406090a9c72b976be03dea647f01fe45a023d63ce0e479eb3497"
