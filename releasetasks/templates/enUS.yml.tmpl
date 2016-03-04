@@ -16,6 +16,8 @@
         retries: 5
         routes:
             - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
+            - index.releases.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.beetmover.en_US.{{ platform }}
+            - index.releases.{{ branch }}.latest.{{ product }}.latest.beetmover.en_US.{{ platform }}
         payload:
             maxRunTime: 7200
             # TODO - create specific image for this
@@ -90,8 +92,8 @@
 
         routes:
             - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
-            - index.funsize.v1.{{ branch }}.revision.{{ platform }}.{{ revision }}.{{ locale }}.{{ partial_version }}.updates
-            - index.funsize.v1.{{ branch }}.latest.{{ platform }}.{{ locale }}.{{ partial_version }}.updates
+            - index.releases.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.partials.{{ partial_version | replace(".", "_") }}.{{ platform }}.{{ locale }}
+            - index.releases.{{ branch }}.latest.{{ product }}.latest.partials.{{ partial_version | replace(".", "_") }}.{{ platform }}.{{ locale }}
         extra:
             {% if running_tests is defined %}
             task_name: "{{ '{}_update_generator'.format(funsize_basename) }}"
@@ -169,8 +171,8 @@
 
         routes:
             - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
-            - index.funsize.v1.{{ branch }}.revision.{{ platform }}.{{ revision }}.{{ locale }}.{{ partial_version }}.signing
-            - index.funsize.v1.{{ branch }}.latest.{{ platform }}.{{ locale }}.{{ partial_version }}.signing
+            - index.releases.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.partials_signing.{{ partial_version | replace(".", "_") }}.{{ platform }}.{{ locale }}
+            - index.releases.{{ branch }}.latest.{{ product }}.latest.partials_signing.{{ partial_version | replace(".", "_") }}.{{ platform }}.{{ locale }}
         extra:
             signing:
                # assert that this signing task was created by the real releaserunner
@@ -215,8 +217,8 @@
         priority: "high"
         routes:
             - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
-            - index.funsize.v1.{{ branch }}.revision.{{ platform }}.{{ revision }}.{{ locale }}.{{ partial_version }}.balrog
-            - index.funsize.v1.{{ branch }}.latest.{{ platform }}.{{ locale }}.{{ partial_version }}.balrog
+            - index.releases.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.partials_balrog.{{ partial_version | replace(".", "_") }}.{{ platform }}.{{ locale }}
+            - index.releases.{{ branch }}.latest.{{ product }}.latest.partials_balrog.{{ partial_version | replace(".", "_") }}.{{ platform }}.{{ locale }}
         extra:
             {% if running_tests is defined %}
             task_name: "{{ '{}_balrog_task'.format(funsize_basename) }}"
@@ -305,6 +307,8 @@
         retries: 5
         routes:
             - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
+            - index.releases.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.partials_beetmove.{{ partial_version | replace(".", "_") }}.{{ platform }}.{{ locale }}
+            - index.releases.{{ branch }}.latest.{{ product }}.latest.partials_beetmove.{{ partial_version | replace(".", "_") }}.{{ platform }}.{{ locale }}
         payload:
             maxRunTime: 7200
             # TODO - create specific image for this

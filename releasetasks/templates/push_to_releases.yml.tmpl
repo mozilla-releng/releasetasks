@@ -17,6 +17,8 @@
         retries: 5
         routes:
             - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
+            - index.releases.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.push_to_cdn
+            - index.releases.{{ branch }}.latest.{{ product }}.latest.push_to_cdn
         payload:
             maxRunTime: 7200
             # TODO - create specific image for this

@@ -14,6 +14,10 @@
         scopes:
             - project:releng:buildbot-bridge:builder-name:{{ buildername }}
 
+        routes:
+            - index.releases.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.bouncer_submitter
+            - index.releases.{{ branch }}.latest.{{ product }}.latest.bouncer_submitter
+
         payload:
             buildername: "{{ buildername }}"
             sourcestamp:

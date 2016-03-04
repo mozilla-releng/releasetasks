@@ -19,7 +19,9 @@
         retries: 5
         scopes:
             - project:releng:buildbot-bridge:builder-name:{{ buildername }}
-
+        routes:
+            - index.releases.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.l10n.{{ platform }}.{{ chunk }}
+            - index.releases.{{ branch }}.latest.{{ product }}.latest.l10n.{{ platform }}.{{ chunk }}
         payload:
             buildername: "{{ buildername }}"
             sourcestamp:
@@ -65,6 +67,9 @@
         retries: 5
         scopes:
             - project:releng:buildbot-bridge:builder-name:{{ buildername }}
+        routes:
+            - index.releases.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.l10n_artifacts.{{ platform }}.{{ chunk }}
+            - index.releases.{{ branch }}.latest.{{ product }}.latest.l10n_artifacts.{{ platform }}.{{ chunk }}
         payload:
             description: "required"
         metadata:
@@ -98,6 +103,8 @@
         retries: 5
         routes:
             - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
+            - index.releases.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.beetmover.{{ chunk }}.{{ platform }}
+            - index.releases.{{ branch }}.latest.{{ product }}.latest.beetmover.{{ chunk }}.{{ platform }}
         payload:
             maxRunTime: 7200
             # TODO - create specific image for this
@@ -163,7 +170,8 @@
                 This task generates MAR files and publishes unsigned bits.
         routes:
             - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
-            # TODO: add index routes
+            - index.releases.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.partials.{{ partial_version | replace(".", "_") }}.{{ platform }}.{{ chunk }}
+            - index.releases.{{ branch }}.latest.{{ product }}.latest.partials.{{ partial_version | replace(".", "_") }}.{{ platform }}.{{ chunk }}
         extra:
             {% if running_tests is defined %}
             task_name: "{{ '{}_{}_{}_update_generator'.format(buildername, chunk, partial_version) }}"
@@ -243,7 +251,8 @@
 
         routes:
             - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
-            # TOOD: add index routes
+            - index.releases.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.partials_signing.{{ partial_version | replace(".", "_") }}.{{ platform }}.{{ chunk }}
+            - index.releases.{{ branch }}.latest.{{ product }}.latest.partials_signing.{{ partial_version | replace(".", "_") }}.{{ platform }}.{{ chunk }}
         extra:
             signing:
                signature: {{ sign_task(stableSlugId('{}_{}_{}_signing_task'.format(buildername, chunk, partial_version)),
@@ -287,7 +296,8 @@
         priority: "high"
         routes:
             - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
-            # TODO: add index routes
+            - index.releases.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.partials_balrog.{{ partial_version | replace(".", "_") }}.{{ platform }}.{{ chunk }}
+            - index.releases.{{ branch }}.latest.{{ product }}.latest.partials_balrog.{{ partial_version | replace(".", "_") }}.{{ platform }}.{{ chunk }}
         extra:
             {% if running_tests is defined %}
             task_name: "{{ '{}_{}_{}_balrog_task'.format(buildername, chunk, partial_version) }}"
@@ -378,9 +388,10 @@
         retries: 5
         routes:
             - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
+            - index.releases.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.partials_beetmover.{{ partial_version | replace(".", "_") }}.{{ platform }}.{{ chunk }}
+            - index.releases.{{ branch }}.latest.{{ product }}.latest.partials_beetmover.{{ partial_version | replace(".", "_") }}.{{ platform }}.{{ chunk }}
         payload:
             maxRunTime: 7200
-            # TODO - create specific image for this
             image: "kmoir/python-beet-runner@sha256:4f6dc84c4386406090a9c72b976be03dea647f01fe45a023d63ce0e479eb3497"
             command:
                 - /bin/bash

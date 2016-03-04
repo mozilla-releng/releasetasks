@@ -45,6 +45,9 @@ def do_common_assertions(graph):
                 for prop in required_properties:
                     assert prop in properties
             assert t["taskId"] not in _cached_taskIDs
+            assert "routes" in task
+            rel_routes = [r.startswith("index.releases.") for r in task["routes"]]
+            assert len(rel_routes) >= 2,  "At least 2 release index routes required"
             _cached_taskIDs.add(t["taskId"])
 
 
