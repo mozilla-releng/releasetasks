@@ -16,6 +16,9 @@
         retries: 5
         scopes:
             - project:releng:buildbot-bridge:builder-name:{{ buildername }}
+        routes:
+            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.updates
+            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.updates
 
         payload:
             buildername: "{{ buildername }}"

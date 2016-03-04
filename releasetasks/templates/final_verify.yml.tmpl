@@ -14,6 +14,9 @@
         expires: "{{ never }}"
         priority: "high"
         retries: 5
+        routes:
+            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.finale_verify
+            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.final_verify
         payload:
             maxRunTime: 7200
             image: "rail/python-test-runner@sha256:450b126cab40b9c105cf260733423cbc47480442c86efdcb387a67efba00d698"
