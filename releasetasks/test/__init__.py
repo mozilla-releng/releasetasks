@@ -55,13 +55,6 @@ def get_task_by_name(graph, name):
     return None
 
 
-def get_task_by_slugid(graph, slugid):
-    for t in graph["tasks"]:
-        if t["taskId"] == slugid:
-            return t
-    return None
-
-
 @mock.patch.object(thclient.client.TreeherderClient, "get_resultsets")
 def make_task_graph(*args, **kwargs):
     args = list(args)
