@@ -104,10 +104,6 @@ tasks:
 
     # push to mirrors
     {% if push_to_releases_enabled %}
-        {% if not push_to_releases_automatic %}
-            # TODO add human decision task for release use case
-        {% endif %}
-
         {% macro push_to_releases_tasks() %}
             {% include "push_to_releases.yml.tmpl" %}
         {% endmacro %}
