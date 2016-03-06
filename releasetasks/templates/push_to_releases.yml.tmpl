@@ -1,11 +1,56 @@
 {% set push_to_releases_basename = "release-{}_{}_push_to_releases".format(branch, product) %}
+
+{% if not push_to_releases_automatic %}
+  {% set push_to_releases_human_upstream_builders = artifact_completes_builders + artifact_partials_builders %}
+  {% do push_to_releases_human_upstream_builders.append("release-{}-{}_chcksms".format(branch, product)) %}
+  {% set push_to_releases_upstream_builders = ['{}_human_decision'.format(push_to_releases_basename)] %}
+{% else %}
+  {% set push_to_releases_upstream_builders = artifact_completes_builders + artifact_partials_builders %}
+  {% do push_to_releases_upstream_builders.append("release-{}-{}_chcksms".format(branch, product)) %}
+{% endif %}
+
+{% if not push_to_releases_automatic %}
+-
+    taskId: "{{ stableSlugId('{}_human_decision'.format(push_to_releases_basename)) }}"
+    requires:
+        {% for upstream_builder in push_to_releases_human_upstream_builders %}
+        - {{ stableSlugId(upstream_builder) }}
+        {% endfor %}
+    reruns: 5
+    task:
+        provisionerId: "null-provisioner"
+        workerType: "human-decision"
+        created: "{{ now }}"
+        deadline: "{{ now.replace(days=4) }}"
+        expires: "{{ never }}"
+        priority: "high"
+        retries: 5
+        routes:
+            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.push_to_cdn_human
+            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.push_to_cdn_human
+
+        payload:
+            description: "required"
+        metadata:
+            name: "{{ product }} {{ branch }} push to releases human decision task"
+            description: "Release Promotion push to releases human decision task"
+            owner: "release@mozilla.com"
+            source: https://github.com/mozilla/releasetasks
+
+        extra:
+            signing:
+               signature: {{ sign_task(stableSlugId('{}_human_decision'.format(push_to_releases_basename)), valid_for=4 * 24 * 3600) }}
+            {% if running_tests is defined %}
+            task_name: "{{ push_to_releases_basename }}_human_decision"
+            {% endif %}
+{% endif %}
+
 -
     taskId: "{{ stableSlugId(push_to_releases_basename) }}"
     requires:
-        {% for upstream_builder in artifact_completes_builders + artifact_partials_builders %}
+        {% for upstream_builder in push_to_releases_upstream_builders %}
         - {{ stableSlugId(upstream_builder) }}
         {% endfor %}
-        - {{ stableSlugId("release-{}-{}_chcksms".format(branch, product)) }}
     reruns: 5
     task:
         provisionerId: aws-provisioner-v1
