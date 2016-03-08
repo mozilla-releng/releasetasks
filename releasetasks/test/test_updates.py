@@ -48,7 +48,8 @@ class TestUpdates(unittest.TestCase):
             postrelease_version_bump_enabled=True,
             signing_class="release-signing",
             release_channels=["foo", "bar"],
-            balrog_api_root="http://balrog/api",
+            balrog_api_root="https://balrog.real/api",
+            funsize_balrog_api_root="http://balrog/api",
             signing_pvt_key=PVT_KEY_FILE,
             build_tools_repo_path='build/tools',
         )
@@ -91,7 +92,7 @@ class TestUpdates(unittest.TestCase):
                          "37.0build2, 38.0build1")
 
     def test_balrog(self):
-        self.assertEqual(self.props["balrog_api_root"], "http://balrog/api")
+        self.assertEqual(self.props["balrog_api_root"], "https://balrog.real/api")
 
     def test_platforms(self):
         self.assertEqual(self.props["platforms"],
