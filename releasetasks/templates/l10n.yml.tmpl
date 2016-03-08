@@ -352,7 +352,7 @@
                 SIGNING_CERT: "release"
                 {% endif %}
                 PARENT_TASK_ARTIFACTS_URL_PREFIX: "https://queue.taskcluster.net/v1/task/{{ stableSlugId('{}_{}_{}_signing_task'.format(buildername, chunk, partial_version)) }}/artifacts/public/env"
-                BALROG_API_ROOT: {{ balrog_api_root }}
+                BALROG_API_ROOT: {{ funsize_balrog_api_root }}
                 # TODO: should funsize be publishing to an s3 bucket? or will beetmover do that?
                 {% if extra_balrog_submitter_params is defined %}
                 EXTRA_BALROG_SUBMITTER_PARAMS: "{{ extra_balrog_submitter_params }}"
