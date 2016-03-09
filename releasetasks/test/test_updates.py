@@ -31,6 +31,7 @@ class TestUpdates(unittest.TestCase):
             repo_path="releases/foo",
             product="firefox",
             revision="fedcba654321",
+            mh_changeset="abcd",
             partial_updates={
                 "38.0": {
                     "buildNumber": 1,
@@ -85,7 +86,7 @@ class TestUpdates(unittest.TestCase):
         self.assertEqual(self.props["repo_path"], "releases/foo")
 
     def test_script_repo_revision(self):
-        self.assertEqual(self.props["script_repo_revision"], "fedcba654321")
+        self.assertEqual(self.props["script_repo_revision"], "abcd")
 
     def test_partials(self):
         self.assertEqual(self.props["partial_versions"],

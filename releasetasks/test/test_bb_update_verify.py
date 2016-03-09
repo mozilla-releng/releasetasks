@@ -59,6 +59,7 @@ class TestBB_UpdateVerify(unittest.TestCase):
             },
             repo_path="releases/mozilla-beta",
             revision="fedcba654321",
+            mh_changeset="abcd",
             branch="beta",
             updates_enabled=True,
             bouncer_enabled=False,

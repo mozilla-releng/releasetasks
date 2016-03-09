@@ -36,7 +36,7 @@
                 version: {{ version }}
                 build_number: {{ buildNumber }}
                 repo_path: "{{ repo_path }}"
-                script_repo_revision: "{{ revision }}"
+                script_repo_revision: "{{ mh_changeset }}"
                 release_promotion: true
                 revision: "{{ revision }}"
                 artifactsTaskId: "{{ stableSlugId('{}_artifacts_{}'.format(buildername, chunk)) }}"
