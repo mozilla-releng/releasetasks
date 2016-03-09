@@ -27,6 +27,7 @@ class TestSourceBuilder(unittest.TestCase):
             l10n_config={},
             repo_path="releases/foo",
             revision="fedcba654321",
+            mozharness_changeset="abcd",
             branch="foo",
             updates_enabled=False,
             bouncer_enabled=False,

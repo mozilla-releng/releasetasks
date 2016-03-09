@@ -63,6 +63,7 @@ class TestL10NSingleChunk(unittest.TestCase):
             product="firefox",
             repo_path="releases/mozilla-beta",
             revision="abcdef123456",
+            mozharness_changeset="abcd",
             release_channels=["beta"],
             signing_pvt_key=PVT_KEY_FILE,
             build_tools_repo_path='build/tools',
@@ -89,7 +90,7 @@ class TestL10NSingleChunk(unittest.TestCase):
 
     def test_script_repo_revision(self):
         self.assertEqual(self.payload["properties"]["script_repo_revision"],
-                         "abcdef123456")
+                         "abcd")
 
     def test_buildername(self):
         self.assertEqual(self.payload["buildername"], "release-mozilla-beta_firefox_win32_l10n_repack")
@@ -193,6 +194,7 @@ class TestL10NMultipleChunks(unittest.TestCase):
             product="firefox",
             repo_path="releases/mozilla-beta",
             revision="abcdef123456",
+            mozharness_changeset="abcd",
             release_channels=["beta"],
             signing_pvt_key=PVT_KEY_FILE,
             build_tools_repo_path='build/tools',
@@ -241,7 +243,7 @@ class TestL10NMultipleChunks(unittest.TestCase):
 
     def test_chunk1_script_repo_revision(self):
         self.assertEqual(self.chunk1_properties["script_repo_revision"],
-                         "abcdef123456")
+                         "abcd")
 
     def test_chunk2_repo_path(self):
         self.assertEqual(self.chunk2_properties["repo_path"],
@@ -249,7 +251,7 @@ class TestL10NMultipleChunks(unittest.TestCase):
 
     def test_chunk2_script_repo_revision(self):
         self.assertEqual(self.chunk2_properties["script_repo_revision"],
-                         "abcdef123456")
+                         "abcd")
 
     def test_no_chunk3(self):
         self.assertIsNone(get_task_by_name(

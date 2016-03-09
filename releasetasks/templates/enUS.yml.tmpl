@@ -26,7 +26,7 @@
                 - /bin/bash
                 - -c
                 - >
-                  wget -O mozharness.tar.bz2 https://hg.mozilla.org/{{ repo_path }}/archive/{{ revision }}.tar.bz2/testing/mozharness &&
+                  wget -O mozharness.tar.bz2 https://hg.mozilla.org/{{ repo_path }}/archive/{{ mozharness_changeset }}.tar.bz2/testing/mozharness &&
                   mkdir mozharness && tar xvfj mozharness.tar.bz2 -C mozharness --strip-components 3 && cd mozharness &&
                   python scripts/release/beet_mover.py --template configs/beetmover/en_us.yml.tmpl --platform {{ buildbot2ftp(platform) }} --version {{ version }} --app-version {{ appVersion }} --locale en-US --taskid {{ platform_info['task_id'] }} --build-num build{{ buildNumber }} --bucket {{ beetmover_candidates_bucket }}
             env:
@@ -317,7 +317,7 @@
                 - /bin/bash
                 - -c
                 - >
-                  wget -O mozharness.tar.bz2 https://hg.mozilla.org/{{ repo_path }}/archive/{{ revision }}.tar.bz2/testing/mozharness &&
+                  wget -O mozharness.tar.bz2 https://hg.mozilla.org/{{ repo_path }}/archive/{{ mozharness_changeset }}.tar.bz2/testing/mozharness &&
                   mkdir mozharness && tar xvfj mozharness.tar.bz2 -C mozharness --strip-components 3 && cd mozharness &&
                   python scripts/release/beet_mover.py --template configs/beetmover/partials.yml.tmpl --platform {{ buildbot2ftp(platform) }} --version {{ version }} --partial-version {{ partial_version }} --artifact-subdir env --locale en-US --taskid {{ stableSlugId('{}_signing_task'.format(funsize_basename)) }} --build-num build{{ buildNumber }} --bucket {{ beetmover_candidates_bucket }}
             env:

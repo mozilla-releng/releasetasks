@@ -37,6 +37,7 @@ class TestEnUSPartials(unittest.TestCase):
             repo_path="releases/mozilla-beta",
             product="firefox",
             revision="abcdef123456",
+            mozharness_changeset="abcd",
             balrog_api_root="https://balrog.real/api",
             funsize_balrog_api_root="http://balrog/api",
             signing_class="release-signing",

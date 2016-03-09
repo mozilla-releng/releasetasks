@@ -30,6 +30,7 @@ class TestBouncerSubmission(unittest.TestCase):
             repo_path="releases/foo",
             product="firefox",
             revision="fedcba654321",
+            mozharness_changeset="abcd",
             partial_updates={
                 "38.0": {
                     "buildNumber": 1,
@@ -87,4 +88,4 @@ class TestBouncerSubmission(unittest.TestCase):
 
     def test_script_repo_revision(self):
         self.assertEqual(self.payload["properties"]["script_repo_revision"],
-                         "fedcba654321")
+                         "abcd")
