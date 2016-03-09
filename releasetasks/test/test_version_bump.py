@@ -32,7 +32,7 @@ class TestVersionBump(unittest.TestCase):
             repo_path="releases/foo",
             product="firefox",
             revision="fedcba654321",
-            mh_changeset="abcd",
+            mozharness_changeset="abcd",
             partial_updates={
                 "38.0": {
                     "buildNumber": 1,
