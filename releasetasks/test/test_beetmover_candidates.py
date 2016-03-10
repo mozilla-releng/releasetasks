@@ -126,11 +126,11 @@ class TestBeetmoverEnUSCandidates(unittest.TestCase, BaseTestBeetmoverCandidates
     def test_extra_build_props(self):
         for platform, task in self.tasks.iteritems():
             build_props = task['task']['extra']['build_props']
-            self.assertTrue(build_props["locales"], ["en-US"])
-            self.assertTrue(build_props["branch"], "mozilla-beta")
+            self.assertEqual(build_props["locales"], ["en-US"])
+            self.assertEqual(build_props["branch"], "mozilla-beta")
             self.assertTrue("platform" in build_props)
-            self.assertTrue(build_props["version"], "42.0b2")
-            self.assertTrue(build_props["revision"], "abcdef123456")
+            self.assertEqual(build_props["version"], "42.0b2")
+            self.assertEqual(build_props["revision"], "abcdef123456")
 
 
 class TestBeetmover110nCandidates(unittest.TestCase, BaseTestBeetmoverCandidates):
@@ -241,11 +241,11 @@ class TestBeetmover110nCandidates(unittest.TestCase, BaseTestBeetmoverCandidates
     def test_extra_build_props(self):
         for platform, task in self.tasks.iteritems():
             build_props = task['task']['extra']['build_props']
-            self.assertTrue(build_props["locales"], ["de", "en-GB", "zh-TW"])
-            self.assertTrue(build_props["branch"], "mozilla-beta")
+            self.assertEqual(build_props["locales"], ["de", "en-GB", "zh-TW"])
+            self.assertEqual(build_props["branch"], "mozilla-beta")
             self.assertTrue("platform" in build_props)
-            self.assertTrue(build_props["version"], "42.0b2")
-            self.assertTrue(build_props["revision"], "abcdef123456")
+            self.assertEqual(build_props["version"], "42.0b2")
+            self.assertEqual(build_props["revision"], "abcdef123456")
 
 
 class TestBeetmoverEnUSPartialsCandidates(unittest.TestCase, BaseTestBeetmoverCandidates):
