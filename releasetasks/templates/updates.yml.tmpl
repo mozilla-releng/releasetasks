@@ -31,9 +31,10 @@
                 appVersion: "{{ appVersion }}"
                 build_number: {{ buildNumber }}
                 repo_path: "{{ repo_path }}"
+                # TODO is this used?
                 script_repo_revision: "{{ mozharness_changeset }}"
                 release_promotion: true
-                revision: "{{ revision }}"
+                revision: "{{ mozharness_changeset }}"
                 partial_versions: {% set pipe = joiner(", ") %}{% for p, e in sorted(partial_updates.items()) %}{{ pipe() }}{{ "{}build{}".format(p, e["buildNumber"]) }}{% endfor %}
                 balrog_api_root: {{ balrog_api_root }}
                 platforms: {{ en_US_config["platforms"] | sort() | join(", ") }}
