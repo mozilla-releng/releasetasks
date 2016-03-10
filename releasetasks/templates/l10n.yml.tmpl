@@ -135,6 +135,15 @@
             {% if running_tests is defined %}
             task_name: "{{ '{}_beetmover_candidates_{}'.format(buildername, chunk) }}"
             {% endif %}
+            mozmill:
+                locales:
+{% for locale in our_locales %}
+                    - {{ locale }}
+{% endfor %}
+                branch: {{ branch }}
+                platform: {{ platform }}
+                version: "{{ version }}"
+                revision: {{ revision }}
             signing:
                signature: {{ sign_task(stableSlugId('{}_beetmover_candidates_{}'.format(buildername, chunk)), valid_for=4 * 24 * 3600) }}
 

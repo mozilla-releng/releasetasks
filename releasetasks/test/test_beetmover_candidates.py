@@ -123,6 +123,11 @@ class TestBeetmoverEnUSCandidates(unittest.TestCase, BaseTestBeetmoverCandidates
             command = task['task']['payload']['command']
             self.assertTrue("--bucket {}".format("mozilla-releng-beet-mover-dev") in "".join(command))
 
+    def test_mozmill_extras(self):
+        for platform, task in self.tasks.iteritems():
+            mozmill = task['task']['extra']['mozmill']
+            self.assertTrue(mozmill["locales"], ["en-US"])
+
 
 class TestBeetmover110nCandidates(unittest.TestCase, BaseTestBeetmoverCandidates):
     maxDiff = 30000
@@ -228,6 +233,11 @@ class TestBeetmover110nCandidates(unittest.TestCase, BaseTestBeetmoverCandidates
             )
             command = task['task']['payload']['command']
             self.assertTrue("--taskid {}".format(l10n_artifact_task['taskId']) in "".join(command))
+
+    def test_mozmill_extras(self):
+        for platform, task in self.tasks.iteritems():
+            mozmill = task['task']['extra']['mozmill']
+            self.assertTrue(mozmill["locales"], ["de", "en-GB", "zh-TW"])
 
 
 class TestBeetmoverEnUSPartialsCandidates(unittest.TestCase, BaseTestBeetmoverCandidates):
