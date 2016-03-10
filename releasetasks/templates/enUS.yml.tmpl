@@ -146,7 +146,7 @@
                 {% else %}
                 SIGNING_CERT: "release"
                 {% endif %}
-                {% if branch == "beta" %}
+                {% if branch == "mozilla-beta" %}
                 # explicitly set MAR channel name, ACCEPTED_MAR_CHANNEL_IDS is the corresponding variable in funsize.py
                 ACCEPTED_MAR_CHANNEL_IDS: firefox-mozilla-beta
                 {% endif %}
