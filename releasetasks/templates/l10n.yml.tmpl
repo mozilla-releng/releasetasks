@@ -36,9 +36,10 @@
                 version: "{{ version }}"
                 build_number: {{ buildNumber }}
                 repo_path: "{{ repo_path }}"
+                # TODO is this used?
                 script_repo_revision: "{{ mozharness_changeset }}"
                 release_promotion: true
-                revision: "{{ revision }}"
+                revision: "{{ mozharness_changeset }}"
                 artifactsTaskId: "{{ stableSlugId('{}_artifacts_{}'.format(buildername, chunk)) }}"
 
         metadata:
