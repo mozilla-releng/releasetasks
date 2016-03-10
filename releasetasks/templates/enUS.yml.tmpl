@@ -48,7 +48,7 @@
             {% if running_tests is defined %}
             task_name: "{{ complete_beetmover_basename }}"
             {% endif %}
-            mozmill:
+            build_props:
                 locales: ["en-US"]
                 branch: {{ branch }}
                 platform: {{ platform }}

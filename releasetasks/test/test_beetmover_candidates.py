@@ -123,10 +123,14 @@ class TestBeetmoverEnUSCandidates(unittest.TestCase, BaseTestBeetmoverCandidates
             command = task['task']['payload']['command']
             self.assertTrue("--bucket {}".format("mozilla-releng-beet-mover-dev") in "".join(command))
 
-    def test_mozmill_extras(self):
+    def test_extra_build_props(self):
         for platform, task in self.tasks.iteritems():
-            mozmill = task['task']['extra']['mozmill']
-            self.assertTrue(mozmill["locales"], ["en-US"])
+            build_props = task['task']['extra']['build_props']
+            self.assertTrue(build_props["locales"], ["en-US"])
+            self.assertTrue(build_props["branch"], "mozilla-beta")
+            self.assertTrue("platform" in build_props)
+            self.assertTrue(build_props["version"], "42.0b2")
+            self.assertTrue(build_props["revision"], "abcdef123456")
 
 
 class TestBeetmover110nCandidates(unittest.TestCase, BaseTestBeetmoverCandidates):
@@ -234,10 +238,14 @@ class TestBeetmover110nCandidates(unittest.TestCase, BaseTestBeetmoverCandidates
             command = task['task']['payload']['command']
             self.assertTrue("--taskid {}".format(l10n_artifact_task['taskId']) in "".join(command))
 
-    def test_mozmill_extras(self):
+    def test_extra_build_props(self):
         for platform, task in self.tasks.iteritems():
-            mozmill = task['task']['extra']['mozmill']
-            self.assertTrue(mozmill["locales"], ["de", "en-GB", "zh-TW"])
+            build_props = task['task']['extra']['build_props']
+            self.assertTrue(build_props["locales"], ["de", "en-GB", "zh-TW"])
+            self.assertTrue(build_props["branch"], "mozilla-beta")
+            self.assertTrue("platform" in build_props)
+            self.assertTrue(build_props["version"], "42.0b2")
+            self.assertTrue(build_props["revision"], "abcdef123456")
 
 
 class TestBeetmoverEnUSPartialsCandidates(unittest.TestCase, BaseTestBeetmoverCandidates):

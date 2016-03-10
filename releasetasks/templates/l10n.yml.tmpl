@@ -135,7 +135,7 @@
             {% if running_tests is defined %}
             task_name: "{{ '{}_beetmover_candidates_{}'.format(buildername, chunk) }}"
             {% endif %}
-            mozmill:
+            build_props:
                 locales:
 {% for locale in our_locales %}
                     - {{ locale }}
