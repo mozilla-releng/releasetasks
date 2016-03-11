@@ -123,6 +123,15 @@ class TestBeetmoverEnUSCandidates(unittest.TestCase, BaseTestBeetmoverCandidates
             command = task['task']['payload']['command']
             self.assertTrue("--bucket {}".format("mozilla-releng-beet-mover-dev") in "".join(command))
 
+    def test_extra_build_props(self):
+        for platform, task in self.tasks.iteritems():
+            build_props = task['task']['extra']['build_props']
+            self.assertEqual(build_props["locales"], ["en-US"])
+            self.assertEqual(build_props["branch"], "mozilla-beta")
+            self.assertTrue("platform" in build_props)
+            self.assertEqual(build_props["version"], "42.0b2")
+            self.assertEqual(build_props["revision"], "abcdef123456")
+
 
 class TestBeetmover110nCandidates(unittest.TestCase, BaseTestBeetmoverCandidates):
     maxDiff = 30000
@@ -228,6 +237,15 @@ class TestBeetmover110nCandidates(unittest.TestCase, BaseTestBeetmoverCandidates
             )
             command = task['task']['payload']['command']
             self.assertTrue("--taskid {}".format(l10n_artifact_task['taskId']) in "".join(command))
+
+    def test_extra_build_props(self):
+        for platform, task in self.tasks.iteritems():
+            build_props = task['task']['extra']['build_props']
+            self.assertEqual(build_props["locales"], ["de", "en-GB", "zh-TW"])
+            self.assertEqual(build_props["branch"], "mozilla-beta")
+            self.assertTrue("platform" in build_props)
+            self.assertEqual(build_props["version"], "42.0b2")
+            self.assertEqual(build_props["revision"], "abcdef123456")
 
 
 class TestBeetmoverEnUSPartialsCandidates(unittest.TestCase, BaseTestBeetmoverCandidates):

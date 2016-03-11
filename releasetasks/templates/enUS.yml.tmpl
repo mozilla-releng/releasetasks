@@ -48,6 +48,13 @@
             {% if running_tests is defined %}
             task_name: "{{ complete_beetmover_basename }}"
             {% endif %}
+            build_props:
+                locales: ["en-US"]
+                branch: {{ branch }}
+                platform: {{ platform }}
+                version: "{{ version }}"
+                revision: {{ revision }}
+
             signing:
                signature: {{ sign_task(stableSlugId(complete_beetmover_basename), valid_for=4 * 24 * 3600) }}
 
