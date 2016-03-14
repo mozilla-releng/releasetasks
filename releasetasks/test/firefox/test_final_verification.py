@@ -1,7 +1,8 @@
 import unittest
 
-from releasetasks.test import make_task_graph, PVT_KEY_FILE, \
-    do_common_assertions, get_task_by_name
+from releasetasks.test.firefox import make_task_graph, do_common_assertions, \
+    get_task_by_name
+from releasetasks.test import PVT_KEY_FILE
 
 
 class TestFinalVerification(unittest.TestCase):

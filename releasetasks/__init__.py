@@ -1,28 +1,29 @@
 # -*- coding: utf-8 -*-
-
-from os import path
-import yaml
 import arrow
-from chunkify import chunkify
+import yaml
+
 from functools import partial
+from os import path
+from chunkify import chunkify
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
-from thclient import TreeherderClient
+from release.platforms import buildbot2ftp, buildbot2bouncer
 from taskcluster.utils import stableSlugId, encryptEnvVar
+from thclient import TreeherderClient
 
 from releasetasks.util import treeherder_platform, sign_task
-from release.platforms import buildbot2ftp, buildbot2bouncer
 
 DEFAULT_TEMPLATE_DIR = path.join(path.dirname(__file__), "templates")
 
 
-def make_task_graph(public_key, signing_pvt_key,
+def make_task_graph(public_key, signing_pvt_key, product,
                     root_template="release_graph.yml.tmpl",
                     template_dir=DEFAULT_TEMPLATE_DIR,
                     **template_kwargs):
     # TODO: some validation of template_kwargs + defaults
-    env = Environment(loader=FileSystemLoader(template_dir),
-                      undefined=StrictUndefined,
-                      extensions=['jinja2.ext.do'])
+    env = Environment(
+        loader=FileSystemLoader(path.join(template_dir, product)),
+        undefined=StrictUndefined,
+        extensions=['jinja2.ext.do'])
     th = TreeherderClient()
 
     now = arrow.now()
@@ -34,6 +35,7 @@ def make_task_graph(public_key, signing_pvt_key,
 
     template = env.get_template(root_template)
     template_vars = {
+        "product": product,
         "stableSlugId": stableSlugId(),
         "chunkify": chunkify,
         "sorted": sorted,

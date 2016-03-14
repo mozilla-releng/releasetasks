@@ -4,8 +4,9 @@ from jose import jwt, jws
 from jose.constants import ALGORITHMS
 
 from releasetasks import sign_task
-from releasetasks.test import PVT_KEY, PUB_KEY, OTHER_PUB_KEY, make_task_graph, \
-    PVT_KEY_FILE, do_common_assertions, get_task_by_name
+from releasetasks.test import PVT_KEY_FILE, PVT_KEY, PUB_KEY, OTHER_PUB_KEY
+from releasetasks.test.firefox import make_task_graph, do_common_assertions, \
+    get_task_by_name
 
 
 class TestTaskSigning(unittest.TestCase):
@@ -93,6 +94,7 @@ class TestGraphScopes(unittest.TestCase):
 
     def setUp(self):
         self.graph = make_task_graph(
+            product="firefox",
             version="42.0b2",
             next_version="42.0b3",
             appVersion="42.0",
