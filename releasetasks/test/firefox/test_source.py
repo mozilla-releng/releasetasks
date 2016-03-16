@@ -124,3 +124,6 @@ class TestSourceBuilder(unittest.TestCase):
 
     def test_signing_task_payload_length(self):
         assert len(self.signing_task["payload"]) == 1
+
+    def test_pkg_version_in_payload(self):
+        self.assertEqual(self.payload["env"]["MOZ_PKG_VERSION"], "42.0b2")
