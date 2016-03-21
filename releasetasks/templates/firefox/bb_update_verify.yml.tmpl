@@ -1,9 +1,10 @@
 {% for channel in release_channels %}
 {% set uv_totalchunks = 6 %}
 {% for chunk in range(1, uv_totalchunks + 1) %}
-{% set uv_buildername = "release-{}_{}_update_verify_{}_{}".format(branch, platform, channel, chunk) %}
+{% set uv_buildername = "release-{}_{}_{}_update_verify".format(branch, product, platform) %}
+{% set task_name = "{}_{}_{}".format(uv_buildername, channel, chunk) %}
 -
-    taskId: "{{ stableSlugId(uv_buildername) }}"
+    taskId: "{{ stableSlugId(task_name) }}"
     requires:
         {% for upstream_builder in artifact_completes_builders + artifact_partials_builders %}
         - {{ stableSlugId(upstream_builder) }}
@@ -40,6 +41,8 @@
                     buildNumber=buildNumber ) }}"
                 NO_BBCONFIG: "1"
                 VERIFY_CONFIG: "{{ channel }}-{{ product }}-{{ platform }}.cfg"
+                TOTAL_CHUNKS: "{{ uv_totalchunks }}"
+                THIS_CHUNK: "{{ chunk }}"
 
         metadata:
             owner: release@mozilla.com
@@ -50,9 +53,9 @@
 
         extra:
             signing:
-               signature: {{ sign_task(stableSlugId(uv_buildername), valid_for=4 * 24 * 3600) }}
+               signature: {{ sign_task(stableSlugId(task_name), valid_for=4 * 24 * 3600) }}
             {% if running_tests is defined %}
-            task_name: "{{ uv_buildername }}"
+            task_name: "{{ uv_buildername }}_{{ channel }}_{{ chunk }}"
             {% endif %}
 
         {# TODO: decide what to use here...
