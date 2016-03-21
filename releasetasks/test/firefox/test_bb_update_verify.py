@@ -78,7 +78,7 @@ class TestBB_UpdateVerify(unittest.TestCase):
             enUS_platforms=["linux", "linux64", "win64", "win32", "macosx64"],
             signing_pvt_key=PVT_KEY_FILE,
         )
-        self.task = get_task_by_name(self.graph, "release-beta_win32_update_verify_beta_3")
+        self.task = get_task_by_name(self.graph, "release-beta_firefox_win32_update_verify_beta_3")
         self.payload = self.task["task"]["payload"]
         self.properties = self.payload["properties"]
 
@@ -105,13 +105,17 @@ class TestBB_UpdateVerify(unittest.TestCase):
         self.assertEqual(self.payload['properties']['VERIFY_CONFIG'],
                          "beta-firefox-win32.cfg")
 
+    def test_chunking_info(self):
+        self.assertEqual(self.payload['properties']['TOTAL_CHUNKS'], "6")
+        self.assertEqual(self.payload['properties']['THIS_CHUNK'], "3")
+
     def test_all_builders_exist(self):
         for p in ['win32', 'win64', 'macosx64']:
             for i in range(1, 7):  # test full chunk size
                 self.assertIsNotNone(
                     get_task_by_name(
                         self.graph,
-                        "release-beta_%s_update_verify_beta_%s" % (p, i)
+                        "release-beta_firefox_%s_update_verify_beta_%s" % (p, i)
                     )
                 )
 
