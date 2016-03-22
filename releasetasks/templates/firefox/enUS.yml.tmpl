@@ -49,6 +49,7 @@
             task_name: "{{ complete_beetmover_basename }}"
             {% endif %}
             build_props:
+                product: {{ product }}
                 locales: ["en-US"]
                 branch: {{ branch }}
                 platform: {{ platform }}
