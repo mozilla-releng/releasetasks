@@ -138,6 +138,7 @@
             task_name: "{{ '{}_beetmover_candidates_{}'.format(buildername, chunk) }}"
             {% endif %}
             build_props:
+                product: {{ product }}
                 locales:
 {% for locale in our_locales %}
                     - {{ locale }}

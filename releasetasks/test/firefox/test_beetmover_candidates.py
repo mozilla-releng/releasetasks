@@ -127,6 +127,7 @@ class TestBeetmoverEnUSCandidates(unittest.TestCase, BaseTestBeetmoverCandidates
     def test_extra_build_props(self):
         for platform, task in self.tasks.iteritems():
             build_props = task['task']['extra']['build_props']
+            self.assertEqual(build_props["product"], "firefox")
             self.assertEqual(build_props["locales"], ["en-US"])
             self.assertEqual(build_props["branch"], "mozilla-beta")
             self.assertTrue("platform" in build_props)
@@ -242,6 +243,7 @@ class TestBeetmover110nCandidates(unittest.TestCase, BaseTestBeetmoverCandidates
     def test_extra_build_props(self):
         for platform, task in self.tasks.iteritems():
             build_props = task['task']['extra']['build_props']
+            self.assertEqual(build_props["product"], "firefox")
             self.assertEqual(build_props["locales"], ["de", "en-GB", "zh-TW"])
             self.assertEqual(build_props["branch"], "mozilla-beta")
             self.assertTrue("platform" in build_props)
