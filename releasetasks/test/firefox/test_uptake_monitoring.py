@@ -57,22 +57,10 @@ class TestUptakeMonitoring(unittest.TestCase):
             signing_pvt_key=PVT_KEY_FILE,
         )
         self.task = get_task_by_name(self.graph, "release-foo-firefox_uptake_monitoring")
-        self.human_task = get_task_by_name(
-            self.graph, "release-foo-firefox_uptake_monitoring_human_decision")
         self.payload = self.task["task"]["payload"]
 
     def test_common_assertions(self):
         do_common_assertions(self.graph)
-
-    def test_human_provisioner(self):
-        self.assertEqual(self.human_task["task"]["provisionerId"], "null-provisioner")
-
-    def test_human_worker_type(self):
-        self.assertEqual(self.human_task["task"]["workerType"], "human-decision")
-
-    def test_human_requires(self):
-        requires = [get_task_by_name(self.graph, "release-foo_firefox_push_to_releases")["taskId"]]
-        self.assertEqual(sorted(self.human_task["requires"]), sorted(requires))
 
     def test_provisioner_id(self):
         assert self.task['task']["provisionerId"] == "aws-provisioner-v1"
@@ -87,7 +75,7 @@ class TestUptakeMonitoring(unittest.TestCase):
         self.assertFalse("scopes" in self.task['task'])
 
     def test_requires(self):
-        requires = [get_task_by_name(self.graph, "release-foo-firefox_uptake_monitoring_human_decision")["taskId"]]
+        requires = [get_task_by_name(self.graph, "release-foo_firefox_push_to_releases")["taskId"]]
         self.assertEqual(sorted(self.task["requires"]), sorted(requires))
 
     def test_sleep_in_command(self):

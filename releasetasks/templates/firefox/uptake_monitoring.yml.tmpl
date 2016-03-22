@@ -1,42 +1,9 @@
 {% set uptake_buildername = "release-{}-{}_uptake_monitoring".format(branch, product) %}
 -
-    taskId: "{{ stableSlugId('{}_human_decision'.format(uptake_buildername)) }}"
-    requires:
-        # tests will catch if this buildername changes
-        - {{ stableSlugId("release-{}_{}_push_to_releases".format(branch, product)) }}
-    reruns: 5
-    task:
-        provisionerId: "null-provisioner"
-        workerType: "human-decision"
-        created: "{{ now }}"
-        deadline: "{{ now.replace(days=4) }}"
-        expires: "{{ never }}"
-        priority: "high"
-        retries: 5
-        routes:
-            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.uptake_human
-            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.uptake_human
-
-        payload:
-            description: "required"
-        metadata:
-            name: "{{ product }} {{ branch }} uptake monitoring human decision task"
-            description: "Release Promotion uptake monitoring human decision task"
-            owner: "release@mozilla.com"
-            source: https://github.com/mozilla/releasetasks
-
-        extra:
-            signing:
-               signature: {{ sign_task(stableSlugId('{}_human_decision'.format(uptake_buildername)), valid_for=4 * 24 * 3600) }}
-            {% if running_tests is defined %}
-            task_name: "{{ uptake_buildername }}_human_decision"
-            {% endif %}
-
--
     taskId: "{{ stableSlugId(uptake_buildername) }}"
     requires:
         # tests will catch if this buildername changes
-        - {{ stableSlugId('{}_human_decision'.format(uptake_buildername)) }}
+        - {{ stableSlugId("release-{}_{}_push_to_releases".format(branch, product)) }}
     reruns: 5
     task:
         provisionerId: aws-provisioner-v1
