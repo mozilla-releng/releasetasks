@@ -86,6 +86,7 @@
 {% set funsize_basename = "{}_{}_{}build{}_funsize".format(platform, locale, partial_version, partial_info["buildNumber"]) %}
 -
     taskId: "{{ stableSlugId('{}_update_generator'.format(funsize_basename)) }}"
+    reruns: 5
     task:
         created: "{{ now }}"
         deadline: "{{ now.replace(days=4) }}"
@@ -167,6 +168,7 @@
 
 -
     taskId: "{{ stableSlugId('{}_signing_task'.format(funsize_basename)) }}"
+    reruns: 5
     requires:
         - "{{ stableSlugId('{}_update_generator'.format(funsize_basename)) }}"
     task:
@@ -220,6 +222,7 @@
 
 -
     taskId: "{{ stableSlugId('{}_balrog_task'.format(funsize_basename)) }}"
+    reruns: 5
     requires:
         - "{{ stableSlugId('{}_signing_task'.format(funsize_basename)) }}"
     task:

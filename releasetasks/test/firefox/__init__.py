@@ -13,6 +13,7 @@ def do_common_assertions(graph):
     if graph["tasks"]:
         for t in graph["tasks"]:
             task = t["task"]
+            assert "reruns" in t
             assert task["priority"] == "high"
             assert "task_name" in task["extra"]
             assert "signature" in task["extra"].get("signing", {}), \

@@ -167,6 +167,7 @@
 {% for partial_version, partial_info in partial_updates.iteritems() %}
 -
     taskId: "{{ stableSlugId('{}_{}_{}_update_generator'.format(buildername, chunk, partial_version)) }}"
+    reruns: 5
     requires:
         - "{{ stableSlugId('{}_artifacts_{}'.format(buildername, chunk)) }}"
     task:
@@ -251,6 +252,7 @@
 
 -
     taskId: "{{ stableSlugId('{}_{}_{}_signing_task'.format(buildername, chunk, partial_version)) }}"
+    reruns: 5
     requires:
         - "{{ stableSlugId('{}_{}_{}_update_generator'.format(buildername, chunk, partial_version)) }}"
     task:
@@ -303,6 +305,7 @@
 
 -
     taskId: "{{ stableSlugId('{}_{}_{}_balrog_task'.format(buildername, chunk, partial_version)) }}"
+    reruns: 5
     requires:
         - "{{ stableSlugId('{}_{}_{}_signing_task'.format(buildername, chunk, partial_version)) }}"
     task:
