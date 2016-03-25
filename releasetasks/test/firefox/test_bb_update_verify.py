@@ -72,6 +72,7 @@ class TestBB_UpdateVerify(unittest.TestCase):
             product="firefox",
             signing_class="release-signing",
             release_channels=["beta"],
+            final_verify_channels=["beta"],
             build_tools_repo_path='build/tools',
             balrog_api_root="https://balrog.real/api",
             funsize_balrog_api_root="http://balrog/api",
@@ -138,3 +139,94 @@ class TestBB_UpdateVerify(unittest.TestCase):
             ])
         requires.append(get_task_by_name(self.graph, "release-beta-firefox_updates")["taskId"])
         self.assertEqual(sorted(self.task["requires"]), sorted(requires))
+
+
+class TestBB_UpdateVerifyMultiChannel(unittest.TestCase):
+    maxDiff = 30000
+    graph = None
+    task = None
+    payload = None
+
+    def setUp(self):
+        self.graph = make_task_graph(
+            version="42.0b2",
+            next_version="42.0b3",
+            appVersion="42.0",
+            buildNumber=3,
+            source_enabled=False,
+            en_US_config={
+                "platforms": {
+                    "macosx64": {"task_id": "xyz"},
+                    "win32": {"task_id": "xyy"},
+                    "win64": {"task_id": "xyw"}
+                }
+            },
+            partial_updates={
+                "38.0": {
+                    "buildNumber": 1,
+                },
+                "37.0": {
+                    "buildNumber": 2,
+                },
+            },
+            l10n_config={
+                "platforms": {
+                    "win32": {
+                        "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.exe",
+                        "locales": ["de", "en-GB", "zh-TW"],
+                        "chunks": 1,
+                    },
+                    "win64": {
+                        "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.exe",
+                        "locales": ["de", "en-GB", "zh-TW"],
+                        "chunks": 1,
+                    },
+                    "macosx64": {
+                        "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.tar.xz",
+                        "locales": ["de", "en-GB", "zh-TW"],
+                        "chunks": 1,
+                    },
+
+                },
+                "changesets": {
+                    "de": "default",
+                    "en-GB": "default",
+                    "zh-TW": "default",
+                },
+            },
+            repo_path="releases/mozilla-beta",
+            revision="fedcba654321",
+            mozharness_changeset="abcd",
+            branch="beta",
+            updates_enabled=True,
+            bouncer_enabled=False,
+            push_to_candidates_enabled=True,
+            push_to_releases_enabled=False,
+            beetmover_candidates_bucket='fake_bucket',
+            checksums_enabled=False,
+            postrelease_version_bump_enabled=False,
+            product="firefox",
+            signing_class="release-signing",
+            release_channels=["beta", "release"],
+            build_tools_repo_path='build/tools',
+            balrog_api_root="https://balrog.real/api",
+            funsize_balrog_api_root="http://balrog/api",
+            enUS_platforms=["linux", "linux64", "win64", "win32", "macosx64"],
+            signing_pvt_key=PVT_KEY_FILE,
+        )
+
+    def test_common_assertions(self):
+        do_common_assertions(self.graph)
+
+    def test_multichannel(self):
+        for chan in ["beta", "release"]:
+            task_def = get_task_by_name(
+                self.graph, "release-{chan}_firefox_win32_update_verify_beta_3".format(chan=chan)
+            )
+            task = task_def["task"]
+            payload = task["payload"]
+            self.assertEqual(task["task"]["provisionerId"], "buildbot-bridge")
+            self.assertEqual(task["task"]["workerType"], "buildbot-bridge")
+            self.assertFalse("scopes" in task)
+            self.assertEqual(payload['properties']['VERIFY_CONFIG'],
+                             "{chan}-firefox-win32.cfg".format(chan=chan))

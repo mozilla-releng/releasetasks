@@ -65,6 +65,7 @@ class TestL10NSingleChunk(unittest.TestCase):
             revision="abcdef123456",
             mozharness_changeset="abcd",
             release_channels=["beta"],
+            final_verify_channels=["beta"],
             signing_pvt_key=PVT_KEY_FILE,
             build_tools_repo_path='build/tools',
         )
@@ -196,6 +197,7 @@ class TestL10NMultipleChunks(unittest.TestCase):
             revision="abcdef123456",
             mozharness_changeset="abcd",
             release_channels=["beta"],
+            final_verify_channels=["beta"],
             signing_pvt_key=PVT_KEY_FILE,
             build_tools_repo_path='build/tools',
         )

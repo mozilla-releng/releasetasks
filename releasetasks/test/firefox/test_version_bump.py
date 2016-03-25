@@ -50,6 +50,7 @@ class TestVersionBump(unittest.TestCase):
             postrelease_version_bump_enabled=True,
             signing_class="release-signing",
             release_channels=["foo"],
+            final_verify_channels=["foo"],
             balrog_api_root="https://balrog.real/api",
             funsize_balrog_api_root="http://balrog/api",
             signing_pvt_key=PVT_KEY_FILE,
