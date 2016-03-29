@@ -1,37 +1,10 @@
 {% set buildername = "release-{}-{}_version_bump".format(branch, product) %}
--
-    taskId: "{{ stableSlugId('{}_human_decision'.format(buildername)) }}"
-    reruns: 5
-    task:
-        provisionerId: "null-provisioner"
-        workerType: "human-decision"
-        created: "{{ now }}"
-        deadline: "{{ now.replace(days=4) }}"
-        expires: "{{ never }}"
-        priority: "high"
-        retries: 5
-        routes:
-            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.version_bump_human
-            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.version_bump_human
-        payload:
-            description: "required"
-        metadata:
-            name: "{{ product }} {{ branch }} version bump human decision task"
-            description: "Release Promotion version bump human decision task"
-            owner: "release@mozilla.com"
-            source: https://github.com/mozilla/releasetasks
-
-        extra:
-            signing:
-               signature: {{ sign_task(stableSlugId('{}_human_decision'.format(buildername)), valid_for=4 * 24 * 3600) }}
-            {% if running_tests is defined %}
-            task_name: "{{ buildername }}_human_decision"
-            {% endif %}
+{% include "post_release_human_decision_task.yml.tmpl" %}
 
 -
     taskId: "{{ stableSlugId(buildername) }}"
     requires:
-        - "{{ stableSlugId('{}_human_decision'.format(buildername)) }}"
+        - "{{ stableSlugId('post_release_human_decision') }}"
     reruns: 5
     task:
         provisionerId: "buildbot-bridge"

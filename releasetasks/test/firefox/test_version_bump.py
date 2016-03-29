@@ -48,6 +48,7 @@ class TestVersionBump(unittest.TestCase):
             push_to_candidates_enabled=False,
             push_to_releases_enabled=False,
             postrelease_version_bump_enabled=True,
+            postrelease_bouncer_aliases_enabled=False,
             signing_class="release-signing",
             release_channels=["foo"],
             balrog_api_root="https://balrog.real/api",
@@ -58,7 +59,7 @@ class TestVersionBump(unittest.TestCase):
         self.task = get_task_by_name(
             self.graph, "release-foo-firefox_version_bump")
         self.human_task = get_task_by_name(
-            self.graph, "release-foo-firefox_version_bump_human_decision")
+            self.graph, "post_release_human_decision")
         self.payload = self.task["task"]["payload"]
 
     def test_common_assertions(self):

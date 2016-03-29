@@ -68,6 +68,7 @@ class TestBeetmoverEnUSCandidates(unittest.TestCase, BaseTestBeetmoverCandidates
             beetmover_candidates_bucket='mozilla-releng-beet-mover-dev',
             push_to_releases_enabled=False,
             postrelease_version_bump_enabled=False,
+            postrelease_bouncer_aliases_enabled=False,
             en_US_config=self.en_US_config,
             l10n_config={},
             partial_updates={
@@ -181,6 +182,7 @@ class TestBeetmover110nCandidates(unittest.TestCase, BaseTestBeetmoverCandidates
             beetmover_candidates_bucket='mozilla-releng-beet-mover-dev',
             push_to_releases_enabled=False,
             postrelease_version_bump_enabled=False,
+            postrelease_bouncer_aliases_enabled=False,
             en_US_config=self.en_US_config,
             l10n_config=self.l10n_config,
             partial_updates={
@@ -277,6 +279,7 @@ class TestBeetmoverEnUSPartialsCandidates(unittest.TestCase, BaseTestBeetmoverCa
             beetmover_candidates_bucket='mozilla-releng-beet-mover-dev',
             push_to_releases_enabled=False,
             postrelease_version_bump_enabled=False,
+            postrelease_bouncer_aliases_enabled=False,
             en_US_config=self.en_US_config,
             l10n_config={},
             partial_updates={
@@ -382,6 +385,7 @@ class TestBeetmoverl10nPartialsCandidates(unittest.TestCase, BaseTestBeetmoverCa
             beetmover_candidates_bucket='mozilla-releng-beet-mover-dev',
             push_to_releases_enabled=False,
             postrelease_version_bump_enabled=False,
+            postrelease_bouncer_aliases_enabled=False,
             en_US_config=self.en_US_config,
             l10n_config=self.l10n_config,
             partial_updates={
