@@ -220,13 +220,11 @@ class TestBB_UpdateVerifyMultiChannel(unittest.TestCase):
 
     def test_multichannel(self):
         for chan in ["beta", "release"]:
-            task_def = get_task_by_name(
-                self.graph, "release-{chan}_firefox_win32_update_verify_beta_3".format(chan=chan)
+            task = get_task_by_name(
+                self.graph, "release-beta_firefox_win32_update_verify_{chan}_3".format(chan=chan)
             )
-            task = task_def["task"]
-            payload = task["payload"]
             self.assertEqual(task["task"]["provisionerId"], "buildbot-bridge")
             self.assertEqual(task["task"]["workerType"], "buildbot-bridge")
             self.assertFalse("scopes" in task)
-            self.assertEqual(payload['properties']['VERIFY_CONFIG'],
+            self.assertEqual(task["task"]["payload"]['properties']['VERIFY_CONFIG'],
                              "{chan}-firefox-win32.cfg".format(chan=chan))
