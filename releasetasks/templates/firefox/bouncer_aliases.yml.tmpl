@@ -1,5 +1,4 @@
 {% set buildername = "release-{}-{}_bouncer_aliases".format(branch, product) %}
-{% include "post_release_human_decision_task.yml.tmpl" %}
 
 -
     taskId: "{{ stableSlugId(buildername) }}"
@@ -16,6 +15,9 @@
         retries: 5
         scopes:
             - project:releng:buildbot-bridge:builder-name:{{ buildername }}
+        routes:
+            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.bouncer_aliases
+            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.bouncer_aliases
         payload:
             buildername: "{{ buildername }}"
             sourcestamp:

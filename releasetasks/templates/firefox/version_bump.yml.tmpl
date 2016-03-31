@@ -1,5 +1,4 @@
 {% set buildername = "release-{}-{}_version_bump".format(branch, product) %}
-{% include "post_release_human_decision_task.yml.tmpl" %}
 
 -
     taskId: "{{ stableSlugId(buildername) }}"

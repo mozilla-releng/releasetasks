@@ -120,6 +120,13 @@ tasks:
         {{ finalVerify_tasks()|indent(4) }}
     {% endif %}
 
+    {% if postrelease_bouncer_aliases_enabled or postrelease_version_bump_enabled %}
+        {% macro post_release_human_decision_tasks() %}
+            {% include "post_release_human_decision.yml.tmpl" %}
+        {% endmacro %}
+        {{ post_release_human_decision_tasks()|indent(4) }}
+    {% endif %}
+
     {% if postrelease_bouncer_aliases_enabled %}
         {% macro bouncer_aliases_tasks() %}
             {% include "bouncer_aliases.yml.tmpl" %}

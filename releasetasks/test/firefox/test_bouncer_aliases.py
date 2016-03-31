@@ -1,6 +1,7 @@
 import unittest
 
-from releasetasks.test.firefox import make_task_graph, get_task_by_name
+from releasetasks.test.firefox import make_task_graph, do_common_assertions, \
+    get_task_by_name
 from releasetasks.test import PVT_KEY_FILE
 
 
@@ -43,7 +44,7 @@ class TestBouncerAliases(unittest.TestCase):
             },
             branch="foo",
             updates_enabled=False,
-            bouncer_enabled=True,
+            bouncer_enabled=False,
             push_to_candidates_enabled=False,
             push_to_releases_enabled=False,
             postrelease_version_bump_enabled=False,
@@ -61,6 +62,9 @@ class TestBouncerAliases(unittest.TestCase):
         self.human_task = get_task_by_name(
             self.graph, "post_release_human_decision")
         self.payload = self.task["task"]["payload"]
+
+    def test_common_assertions(self):
+        do_common_assertions(self.graph)
 
     def test_provisioner(self):
         self.assertEqual(self.task["task"]["provisionerId"],
@@ -86,6 +90,17 @@ class TestBouncerAliases(unittest.TestCase):
     def test_requires(self):
         self.assertIn(self.human_task["taskId"], self.task["requires"])
 
+    def test_product(self):
+        self.assertEqual(self.payload["properties"]["product"],
+                         "firefox")
+
+    def test_version(self):
+        self.assertEqual(self.payload["properties"]["version"],
+                         "42.0b2")
+
+    def test_build_number(self):
+        self.assertEqual(self.payload["properties"]["build_number"], 3)
+
     def test_repo_path(self):
         self.assertEqual(self.payload["properties"]["repo_path"],
                          "releases/foo")
@@ -93,3 +108,11 @@ class TestBouncerAliases(unittest.TestCase):
     def test_script_repo_revision(self):
         self.assertEqual(self.payload["properties"]["script_repo_revision"],
                          "abcd")
+
+    def test_revision(self):
+        self.assertEqual(self.payload["properties"]["revision"],
+                         "fedcba654321")
+
+    def test_tuxedo_server_url(self):
+        self.assertEqual(self.payload["properties"]["tuxedo_server_url"],
+                         "https://bouncer.real.allizom.org/api")
