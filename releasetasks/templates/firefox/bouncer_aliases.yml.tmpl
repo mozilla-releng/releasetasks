@@ -1,4 +1,4 @@
-{% set buildername = "release-{}-{}_version_bump".format(branch, product) %}
+{% set buildername = "release-{}-{}_bouncer_aliases".format(branch, product) %}
 
 -
     taskId: "{{ stableSlugId(buildername) }}"
@@ -16,9 +16,8 @@
         scopes:
             - project:releng:buildbot-bridge:builder-name:{{ buildername }}
         routes:
-            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.version_bump
-            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.version_bump
-
+            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.bouncer_aliases
+            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.bouncer_aliases
         payload:
             buildername: "{{ buildername }}"
             sourcestamp:
@@ -27,16 +26,16 @@
             properties:
                 product: "{{ product }}"
                 version: "{{ version }}"
-                next_version: "{{ next_version }}"
                 build_number: {{ buildNumber }}
                 repo_path: "{{ repo_path }}"
                 script_repo_revision: "{{ mozharness_changeset }}"
                 release_promotion: true
                 revision: "{{ revision }}"
+                tuxedo_server_url: "{{ tuxedo_server_url }}"
 
         metadata:
-            name: "{{ product }} {{ branch }} version bump"
-            description: "Release Promotion version bump"
+            name: "{{ product }} {{ branch }} bouncer aliases"
+            description: "Release Promotion bouncer aliases"
             owner: "release@mozilla.com"
             source: https://github.com/mozilla/releasetasks
 

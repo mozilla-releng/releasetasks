@@ -47,6 +47,7 @@ AUTO_INIT_ITEMS = dict(
     push_to_releases_enabled=True,
     beetmover_candidates_bucket='fake_bucket',
     postrelease_version_bump_enabled=False,
+    postrelease_bouncer_aliases_enabled=False,
     en_US_config=EN_US_CONFIG,
     l10n_config=L10N_CONFIG,
     partial_updates={

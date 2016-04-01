@@ -48,6 +48,7 @@ class TestUpdates(unittest.TestCase):
             beetmover_candidates_bucket='mozilla-releng-beet-mover-dev',
             push_to_releases_enabled=False,
             postrelease_version_bump_enabled=True,
+            postrelease_bouncer_aliases_enabled=False,
             signing_class="release-signing",
             release_channels=["foo", "bar"],
             balrog_api_root="https://balrog.real/api",
