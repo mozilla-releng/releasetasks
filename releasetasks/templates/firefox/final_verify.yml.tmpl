@@ -51,20 +51,17 @@
                 Verifies that all release blobs are in the correct place
 
         extra:
-            {% if running_tests is defined %}
-            task_name: "{{ buildername }}"
-            {% endif %}
-            signing:
-                signature: {{ sign_task(stableSlugId(buildername), valid_for=4 * 24 * 3600) }}
-        {# TODO: decide what to use here...
-        treeherder:
-            symbol: FV
-            groupSymbol: Release
-            collection:
-                opt: true
-            machine:
-                platform: none
-            build:
-                platform: none
-        #}
+            {{ common_extras(taskname=buildername, locales=["null"], platform="null") | indent(12)}}
+
+            {# TODO: decide what to use here...
+            treeherder:
+                symbol: FV
+                groupSymbol: Release
+                collection:
+                    opt: true
+                machine:
+                    platform: none
+                build:
+                    platform: none
+            #}
 {% endfor %}

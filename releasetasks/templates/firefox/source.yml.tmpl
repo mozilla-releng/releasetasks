@@ -64,12 +64,7 @@
             - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.source_tarball
             - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.source_tarball
         extra:
-            signing:
-               signature: {{ sign_task(stableSlugId(buildername), valid_for=4 * 24 * 3600) }}
-            {% if running_tests is defined %}
-            task_name: "{{ buildername }}"
-            {% endif %}
-
+            {{ common_extras(taskname=buildername, locales=["null"], platform="null") | indent(12)}}
             treeherderEnv:
                 - staging
             treeherder:
@@ -112,14 +107,7 @@
             - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.source_tarball_signing
 
         extra:
-            signing:
-               # assert that this signing task was created by the real releaserunner
-               signature: {{ sign_task(stableSlugId(buildername_signing),
-                                       valid_for=4 * 24 * 3600) }}
-            {% if running_tests is defined %}
-            task_name: "{{ buildername_signing }}"
-            {% endif %}
-
+            {{ common_extras(taskname=buildername_signing, locales=["null"], platform="null") | indent(12)}}
             treeherderEnv:
                 - staging
             treeherder:
@@ -175,12 +163,7 @@
             source: https://github.com/mozilla/releasetasks
 
         extra:
-            {% if running_tests is defined %}
-            task_name: "{{ buildername_beet}}"
-            {% endif %}
-            signing:
-               signature: {{ sign_task(stableSlugId(buildername_beet), valid_for=4 * 24 * 3600) }}
-
+            {{ common_extras(taskname=buildername_beet, locales=["null"], platform="null") | indent(12)}}
             treeherderEnv:
                 - staging
             treeherder:
@@ -235,12 +218,7 @@
             source: https://github.com/mozilla/releasetasks
 
         extra:
-            {% if running_tests is defined %}
-            task_name: "{{ buildername_beet_signing }}"
-            {% endif %}
-            signing:
-               signature: {{ sign_task(stableSlugId(buildername_beet_signing), valid_for=4 * 24 * 3600) }}
-
+            {{ common_extras(taskname=buildername_beet_signing, locales=["null"], platform="null") | indent(12)}}
             treeherderEnv:
                 - staging
             treeherder:

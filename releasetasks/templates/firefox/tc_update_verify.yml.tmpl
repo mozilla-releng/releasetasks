@@ -49,22 +49,17 @@
                 Verifies updates for {{ platform }}
 
         extra:
-            signing:
-               signature: {{ sign_task(stableSlugId(uv_buildername), valid_for=4 * 24 * 3600) }}
-            {% if running_tests is defined %}
-            task_name: "{{ uv_buildername }}"
-            {% endif %}
-
-        {# TODO: decide what to use here...
-        treeherder:
-            symbol: UV
-            groupSymbol: Release
-            collection:
-                opt: true
-            machine:
-                platform: {{ platform }}
-            build:
-                platform: none
-        #}
+            {{ common_extras(taskname=uv_buildername, locales=["null"], platform=platform) | indent(12)}}
+            {# TODO: decide what to use here...
+            treeherder:
+                symbol: UV
+                groupSymbol: Release
+                collection:
+                    opt: true
+                machine:
+                    platform: {{ platform }}
+                build:
+                    platform: none
+            #}
 {% endfor %}
 {% endfor %}

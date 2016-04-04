@@ -16,6 +16,10 @@ def do_common_assertions(graph):
             assert "reruns" in t
             assert task["priority"] == "high"
             assert "task_name" in task["extra"]
+            assert "build_props" in task["extra"], "inlcude common_extras.yml.tmpl"
+            for prop in ["product", "locales", "branch", "platform", "version",
+                         "revision"]:
+                assert prop in task["extra"]["build_props"]
             assert "signature" in task["extra"].get("signing", {}), \
                 "%s is not signed" % task["extra"]["task_name"]
             claims = jwt.decode(task["extra"]["signing"]["signature"],
@@ -34,7 +38,7 @@ def do_common_assertions(graph):
             assert t["taskId"] not in _cached_taskIDs
             assert "routes" in task
             rel_routes = [r.startswith("index.releases.") for r in task["routes"]]
-            assert len(rel_routes) >= 2,  "At least 2 release index routes required"
+            assert len(rel_routes) >= 2, "At least 2 release index routes required"
             _cached_taskIDs.add(t["taskId"])
 
 

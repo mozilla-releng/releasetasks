@@ -38,11 +38,7 @@
             source: https://github.com/mozilla/releasetasks
 
         extra:
-            signing:
-               signature: {{ sign_task(stableSlugId('{}_human_decision'.format(push_to_releases_basename)), valid_for=4 * 24 * 3600) }}
-            {% if running_tests is defined %}
-            task_name: "{{ push_to_releases_basename }}_human_decision"
-            {% endif %}
+            {{ common_extras(taskname='{}_human_decision'.format(push_to_releases_basename), locales=["null"], platform="null") | indent(12)}}
 {% endif %}
 
 -
@@ -91,12 +87,7 @@
             source: https://github.com/mozilla/releasetasks
 
         extra:
-            {% if running_tests is defined %}
-            task_name: "{{ push_to_releases_basename }}"
-            {% endif %}
-            signing:
-               signature: {{ sign_task(stableSlugId(push_to_releases_basename), valid_for=4 * 24 * 3600) }}
-
+            {{ common_extras(taskname=push_to_releases_basename, locales=["null"], platform="null") | indent(12)}}
             treeherderEnv:
                 - staging
             treeherder:

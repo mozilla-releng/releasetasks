@@ -52,11 +52,7 @@
                 Verifies updates for {{ platform }}
 
         extra:
-            signing:
-               signature: {{ sign_task(stableSlugId(task_name), valid_for=4 * 24 * 3600) }}
-            {% if running_tests is defined %}
-            task_name: "{{ uv_buildername }}_{{ channel }}_{{ chunk }}"
-            {% endif %}
+            {{ common_extras(taskname=task_name, locales=["null"], platform=platform) | indent(12)}}
 
         {# TODO: decide what to use here...
         treeherder:
