@@ -55,6 +55,7 @@ class TestFullGraph(unittest.TestCase):
             signing_pvt_key=PVT_KEY_FILE,
             build_tools_repo_path='build/tools',
             push_to_releases_automatic=True,
+            partner_repacks_platforms=["win32", "macosx64"],
         )
 
     def test_common_assertions(self):
