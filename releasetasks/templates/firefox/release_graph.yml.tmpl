@@ -2,6 +2,9 @@
 {% set artifact_completes_builders = [] %}
 {% set artifact_partials_builders = [] %}
 {% set push_to_releases_extra_upstream_builders = [] %}
+{% macro common_extras(taskname, locales, platform) %}
+{% include "common_extras.yml.tmpl" %}
+{% endmacro %}
 ---
 metadata:
     name: "Release Promotion"
@@ -150,4 +153,3 @@ tasks:
         {% endmacro %}
         {{ version_bump_tasks()|indent(4) }}
     {% endif %}
-

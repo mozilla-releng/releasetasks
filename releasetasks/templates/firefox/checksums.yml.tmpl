@@ -43,11 +43,7 @@
             source: https://github.com/mozilla/releasetasks
 
         extra:
-            signing:
-               signature: {{ sign_task(stableSlugId(buildername), valid_for=4 * 24 * 3600) }}
-            {% if running_tests is defined %}
-            task_name: "{{ buildername }}"
-            {% endif %}
+            {{ common_extras(taskname=buildername, locales=["null"], platform="null") | indent(12)}}
             treeherderEnv:
                 - staging
             treeherder:
@@ -59,4 +55,3 @@
                     platform: linux64
                 build:
                     platform: all
-

@@ -32,12 +32,7 @@
             source: https://github.com/mozilla/releasetasks
 
         extra:
-            {% if running_tests is defined %}
-            task_name: "{{ uptake_buildername }}"
-            {% endif %}
-            signing:
-               signature: {{ sign_task(stableSlugId(uptake_buildername), valid_for=4 * 24 * 3600) }}
-
+            {{ common_extras(taskname=uptake_buildername, locales=["null"], platform="null") | indent(12)}}
             treeherderEnv:
                 - staging
             treeherder:

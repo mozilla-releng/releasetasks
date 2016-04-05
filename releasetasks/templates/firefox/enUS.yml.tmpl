@@ -45,20 +45,7 @@
             source: https://github.com/mozilla/releasetasks
 
         extra:
-            {% if running_tests is defined %}
-            task_name: "{{ complete_beetmover_basename }}"
-            {% endif %}
-            build_props:
-                product: {{ product }}
-                locales: ["en-US"]
-                branch: {{ branch }}
-                platform: {{ platform }}
-                version: "{{ version }}"
-                revision: {{ revision }}
-
-            signing:
-               signature: {{ sign_task(stableSlugId(complete_beetmover_basename), valid_for=4 * 24 * 3600) }}
-
+            {{ common_extras(taskname=complete_beetmover_basename, locales=["en-US"], platform=platform) | indent(12)}}
             treeherderEnv:
                 - staging
             treeherder:
@@ -104,11 +91,7 @@
             - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.partials.{{ partial_version | replace(".", "_") }}.{{ platform }}.{{ locale }}
             - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.partials.{{ partial_version | replace(".", "_") }}.{{ platform }}.{{ locale }}
         extra:
-            {% if running_tests is defined %}
-            task_name: "{{ '{}_update_generator'.format(funsize_basename) }}"
-            signing:
-               signature: {{ sign_task(stableSlugId('{}_update_generator'.format(funsize_basename)), valid_for=4 * 24 * 3600) }}
-            {% endif %}
+            {{ common_extras(taskname='{}_update_generator'.format(funsize_basename), locales=["en-US"], platform=platform) | indent(12)}}
             funsize:
                 partials:
                     -
@@ -188,14 +171,7 @@
             - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.partials_signing.{{ partial_version | replace(".", "_") }}.{{ platform }}.{{ locale }}
             - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.partials_signing.{{ partial_version | replace(".", "_") }}.{{ platform }}.{{ locale }}
         extra:
-            signing:
-               # assert that this signing task was created by the real releaserunner
-               signature: {{ sign_task(stableSlugId('{}_signing_task'.format(funsize_basename)),
-                                       valid_for=4 * 24 * 3600) }}
-            {% if running_tests is defined %}
-            task_name: "{{ '{}_signing_task'.format(funsize_basename) }}"
-            {% endif %}
-
+            {{ common_extras(taskname='{}_signing_task'.format(funsize_basename), locales=["en-US"], platform=platform) | indent(12)}}
             treeherderEnv:
                 - staging
             treeherder:
@@ -235,11 +211,7 @@
             - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.partials_balrog.{{ partial_version | replace(".", "_") }}.{{ platform }}.{{ locale }}
             - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.partials_balrog.{{ partial_version | replace(".", "_") }}.{{ platform }}.{{ locale }}
         extra:
-            {% if running_tests is defined %}
-            task_name: "{{ '{}_balrog_task'.format(funsize_basename) }}"
-            {% endif %}
-            signing:
-               signature: {{ sign_task(stableSlugId('{}_balrog_task'.format(funsize_basename)), valid_for=4 * 24 * 3600) }}
+            {{ common_extras(taskname='{}_balrog_task'.format(funsize_basename), locales=["en-US"], platform=platform) | indent(12)}}
             treeherderEnv:
                 - staging
             treeherder:
@@ -351,12 +323,7 @@
             source: https://github.com/mozilla/releasetasks
 
         extra:
-            {% if running_tests is defined %}
-            task_name: "{{ partial_beetmover_basename }}"
-            {% endif %}
-            signing:
-               signature: {{ sign_task(stableSlugId(partial_beetmover_basename), valid_for=4 * 24 * 3600) }}
-
+            {{ common_extras(taskname=partial_beetmover_basename, locales=["en-US"], platform=platform) | indent(12)}}
             treeherderEnv:
                 - staging
             treeherder:
