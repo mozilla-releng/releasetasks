@@ -2,6 +2,8 @@
 {% set buildername_signing = "{}_signing".format(buildername) %}
 {% set buildername_beet = "{}_beet".format(buildername) %}
 {% set buildername_beet_signing = "{}_beet".format(buildername_signing) %}
+{% do push_to_releases_extra_upstream_builders.append(buildername_beet) %}
+{% do push_to_releases_extra_upstream_builders.append(buildername_beet_signing) %}
 -
     taskId: "{{ stableSlugId(buildername) }}"
     reruns: 5

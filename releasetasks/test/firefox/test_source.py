@@ -128,3 +128,64 @@ class TestSourceBuilder(unittest.TestCase):
 
     def test_pkg_version_in_payload(self):
         self.assertEqual(self.payload["env"]["MOZ_PKG_VERSION"], "42.0b2")
+
+
+class TestSourceBuilderPushToMirrors(unittest.TestCase):
+    maxDiff = 30000
+    graph = None
+
+    def setUp(self):
+        self.graph = make_task_graph(
+            product="firefox",
+            version="42.0b2",
+            next_version="42.0b3",
+            appVersion="42.0",
+            buildNumber=3,
+            source_enabled=True,
+            checksums_enabled=False,
+            en_US_config={"platforms": {
+                "linux": {"task_id": "xyz"},
+                "win32": {"task_id": "xyy"}
+            }},
+            partial_updates={
+                "38.0": {
+                    "buildNumber": 1,
+                },
+                "37.0": {
+                    "buildNumber": 2,
+                },
+            },
+            l10n_config={},
+            repo_path="releases/foo",
+            revision="fedcba654321",
+            mozharness_changeset="abcd",
+            branch="foo",
+            updates_enabled=False,
+            bouncer_enabled=False,
+            push_to_candidates_enabled=True,
+            beetmover_candidates_bucket='mozilla-releng-beet-mover-dev',
+            push_to_releases_enabled=True,
+            push_to_releases_automatic=True,
+            release_channels=["foo", "bar"],
+            balrog_api_root="https://balrog.real/api",
+            postrelease_version_bump_enabled=False,
+            postrelease_bouncer_aliases_enabled=False,
+            signing_class="release-signing",
+            verifyConfigs={},
+            signing_pvt_key=PVT_KEY_FILE,
+            build_tools_repo_path='build/tools',
+        )
+
+    def test_source_required_by_push_to_mirrors(self):
+        push_to_mirrors = get_task_by_name(
+            self.graph, "release-foo_firefox_push_to_releases")
+        foo_source_beet = get_task_by_name(self.graph, "foo_source_beet")
+        self.assertIn(foo_source_beet["taskId"], push_to_mirrors["requires"])
+
+    def test_source_sig_required_by_push_to_mirrors(self):
+        push_to_mirrors = get_task_by_name(
+            self.graph, "release-foo_firefox_push_to_releases")
+        foo_source_signing_beet = get_task_by_name(self.graph,
+                                                   "foo_source_signing_beet")
+        self.assertIn(foo_source_signing_beet["taskId"],
+                      push_to_mirrors["requires"])

@@ -2,7 +2,7 @@
 -
     taskId: "{{ stableSlugId(buildername) }}"
     requires:
-        {% for upstream_builder in artifact_completes_builders %}
+        {% for upstream_builder in artifact_completes_builders + push_to_releases_extra_upstream_builders %}
         - {{ stableSlugId(upstream_builder) }}
         {% endfor %}
     reruns: 5
