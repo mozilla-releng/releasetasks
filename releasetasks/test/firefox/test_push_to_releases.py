@@ -70,7 +70,7 @@ AUTO_INIT_ITEMS = dict(
     signing_pvt_key=PVT_KEY_FILE,
     release_channels=["beta", "release"],
     final_verify_channels=["beta", "release"],
-    build_tools_repo_path='build/tools'
+    build_tools_repo_path='build/tools',
 )
 HUMAN_INIT_ITEMS = AUTO_INIT_ITEMS.copy()
 HUMAN_INIT_ITEMS["push_to_releases_automatic"] = False

@@ -1,11 +1,13 @@
-{% set buildername = "release-{}-{}_chcksms".format(branch, product) %}
+{% for platform in partner_repacks_platforms %}
+{% set buildername = "release-{}-{}-{}_partner_repacks".format(branch, product, platform) %}
+{% do push_to_releases_extra_upstream_builders.append(buildername) %}
 -
     taskId: "{{ stableSlugId(buildername) }}"
+    reruns: 5
     requires:
-        {% for upstream_builder in artifact_completes_builders + push_to_releases_extra_upstream_builders %}
+        {% for upstream_builder in artifact_completes_builders %}
         - {{ stableSlugId(upstream_builder) }}
         {% endfor %}
-    reruns: 5
     task:
         provisionerId: "buildbot-bridge"
         workerType: "buildbot-bridge"
@@ -16,12 +18,9 @@
         retries: 5
         scopes:
             - project:releng:buildbot-bridge:builder-name:{{ buildername }}
-
         routes:
-            - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
-            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.checksums
-            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.checksums
-
+            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.partner_repacks.{{ platform }}
+            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.partner_repacks.{{ platform }}
         payload:
             buildername: "{{ buildername }}"
             sourcestamp:
@@ -30,15 +29,15 @@
             properties:
                 product: "{{ product }}"
                 version: "{{ version }}"
-                build_number: "{{ buildNumber }}"
-                release_promotion: true
-                revision: "{{ mozharness_changeset }}"
+                build_number: {{ buildNumber }}
                 repo_path: "{{ repo_path }}"
                 script_repo_revision: "{{ mozharness_changeset }}"
+                release_promotion: true
+                revision: "{{ mozharness_changeset }}"
 
         metadata:
-            name: "{{ product }} {{ branch }} checksums builder"
-            description: "Release Promotion checksums job"
+            name: "{{ product }} {{ branch }} {{ platform }} partner repacks"
+            description: "Release Promotion partner repacks"
             owner: "release@mozilla.com"
             source: https://github.com/mozilla/releasetasks
 
@@ -46,17 +45,6 @@
             signing:
                signature: {{ sign_task(stableSlugId(buildername), valid_for=4 * 24 * 3600) }}
             {% if running_tests is defined %}
-            task_name: "{{ buildername }}"
+            task_name: {{ buildername }}
             {% endif %}
-            treeherderEnv:
-                - staging
-            treeherder:
-                symbol: CS
-                groupSymbol: Release
-                collection:
-                    opt: true
-                machine:
-                    platform: linux64
-                build:
-                    platform: all
-
+{% endfor %}
