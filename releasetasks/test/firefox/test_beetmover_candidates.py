@@ -202,6 +202,7 @@ class TestBeetmover110nCandidates(unittest.TestCase, BaseTestBeetmoverCandidates
             revision="abcdef123456",
             mozharness_changeset="abcd",
             release_channels=["beta"],
+            final_verify_channels=["beta"],
             signing_pvt_key=PVT_KEY_FILE,
             build_tools_repo_path='build/tools',
         )
@@ -405,6 +406,7 @@ class TestBeetmoverl10nPartialsCandidates(unittest.TestCase, BaseTestBeetmoverCa
             revision="abcdef123456",
             mozharness_changeset="abcd",
             release_channels=["beta"],
+            final_verify_channels=["beta"],
             signing_pvt_key=PVT_KEY_FILE,
             build_tools_repo_path='build/tools',
         )

@@ -45,6 +45,7 @@ class TestEnUSPartials(unittest.TestCase):
             signing_class="release-signing",
             verifyConfigs={},
             release_channels=["beta"],
+            final_verify_channels=["beta"],
             signing_pvt_key=PVT_KEY_FILE,
             build_tools_repo_path='build/tools',
         )

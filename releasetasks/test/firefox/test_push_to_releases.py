@@ -69,6 +69,7 @@ AUTO_INIT_ITEMS = dict(
     verifyConfigs={},
     signing_pvt_key=PVT_KEY_FILE,
     release_channels=["beta", "release"],
+    final_verify_channels=["beta", "release"],
     build_tools_repo_path='build/tools'
 )
 HUMAN_INIT_ITEMS = AUTO_INIT_ITEMS.copy()

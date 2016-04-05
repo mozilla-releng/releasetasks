@@ -75,6 +75,7 @@ class TestEncryption(unittest.TestCase):
             funsize_balrog_api_root="http://balrog/api",
             signing_class="dep-signing",
             release_channels=["beta"],
+            final_verify_channels=["beta"],
             signing_pvt_key=PVT_KEY_FILE,
             repo_path="foo/bar",
             build_tools_repo_path='build/tools',

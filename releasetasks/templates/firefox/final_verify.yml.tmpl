@@ -1,10 +1,17 @@
-{% for channel in release_channels %}
+{% if push_to_releases_enabled %}
+  {% set final_verify_upstream_builders = ["release-{}-{}_uptake_monitoring".format(branch, product)] %}
+{% else %}
+  {% set final_verify_upstream_builders  = artifact_completes_builders + artifact_partials_builders %}
+{% endif %}
+
+{% for channel in final_verify_channels %}
 {% set buildername = "{}_final_verify".format(channel) %}
 -
     taskId: "{{ stableSlugId(buildername) }}"
     requires:
-        # tests will catch if this buildername changes
-        - {{ stableSlugId("release-{}-{}_uptake_monitoring".format(branch, product)) }}
+        {% for upstream_builder in final_verify_upstream_builders %}
+        - {{ stableSlugId(upstream_builder) }}
+        {% endfor %}
     reruns: 5
     task:
         provisionerId: aws-provisioner-v1
@@ -15,7 +22,7 @@
         priority: "high"
         retries: 5
         routes:
-            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.finale_verify
+            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.final_verify
             - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.final_verify
         payload:
             maxRunTime: 7200
