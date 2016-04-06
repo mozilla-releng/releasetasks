@@ -1,0 +1,102 @@
+{% set buildername = "{}_l10n_changeset".format(branch) %}
+{% set buildername_beet = "{}_beet".format(buildername) %}
+{# Whitespace control is important in the following macro #}
+{% macro format_l10n_changesets(l10n_changesets) %}
+{%- for locale, changeset in sorted(l10n_changesets.items()) %}{{ locale }} {{ changeset }}\n{% endfor -%}
+{% endmacro %}
+-
+    taskId: "{{ stableSlugId(buildername) }}"
+    reruns: 5
+    task:
+        provisionerId: aws-provisioner-v1
+        workerType: opt-linux64
+        created: "{{ now }}"
+        deadline: "{{ now.replace(days=4) }}"
+        expires: "{{ never }}"
+        priority: "high"
+        retries: 5
+
+        payload:
+            maxRunTime: 600
+            image: "rail/python-test-runner@sha256:450b126cab40b9c105cf260733423cbc47480442c86efdcb387a67efba00d698"
+            artifacts:
+                public/build:
+                    path: /home/worker/artifacts/
+                    expires: {{ now.replace(days=365) }}
+                    type: directory
+            command:
+                - /bin/bash
+                - "-c"
+                - >
+                  mkdir -p /home/worker/artifacts &&
+                  wget -O /tmp/task.json https://queue.taskcluster.net/v1/task/{{ stableSlugId(buildername) }} &&
+                  python -c "import json; print(json.load(open('/tmp/task.json'))['extra']['l10n_changesets'])" > /home/worker/artifacts/l10n_changesets.txt
+        metadata:
+            owner: release@mozilla.com
+            source: https://github.com/mozilla/releasetasks
+            name: "{{ branch }} L10N changesets"
+            description:  Generates L10N changesets
+
+        routes:
+            - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
+            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.l10n_changesets
+            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.l10n_changesets
+        extra:
+            {{ common_extras(taskname=buildername, locales=["null"], platform="null") | indent(12)}}
+            l10n_changesets: "{{ format_l10n_changesets(l10n_changesets) }}"
+
+-
+    taskId: "{{ stableSlugId(buildername_beet) }}"
+    requires:
+        - "{{ stableSlugId(buildername) }}"
+    reruns: 5
+    task:
+        provisionerId: aws-provisioner-v1
+        workerType: opt-linux64
+        created: "{{ now }}"
+        deadline: "{{ now.replace(days=4) }}"
+        expires: "{{ never }}"
+        priority: "high"
+        retries: 5
+        routes:
+            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.l10n_changesets_beetmover
+            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.l10n_changesets_beetmover
+
+        payload:
+            maxRunTime: 600
+            image: "kmoir/python-beet-runner@sha256:4f6dc84c4386406090a9c72b976be03dea647f01fe45a023d63ce0e479eb3497"
+            command:
+                - /bin/bash
+                - -c
+                - >
+                  wget -O mozharness.tar.bz2 https://hg.mozilla.org/{{ repo_path }}/archive/{{ mozharness_changeset }}.tar.bz2/testing/mozharness &&
+                  mkdir mozharness && tar xvfj mozharness.tar.bz2 -C mozharness --strip-components 3 && cd mozharness &&
+                  python scripts/release/beet_mover.py --template configs/beetmover/l10n_changesests.yml.tmpl --version {{ version }} --platform linux64 --taskid {{ stableSlugId(buildername) }} --build-num build{{ buildNumber }} --bucket {{ beetmover_candidates_bucket }}
+            env:
+                DUMMY_ENV_FOR_ENCRYPT: "fake"
+            encryptedEnv:
+                - {{ encrypt_env_var(stableSlugId(buildername_beet), now_ms,
+                                   now_ms + 24 * 3600 * 1000, 'AWS_ACCESS_KEY_ID',
+                                   beetmover_aws_access_key_id) }}
+                - {{ encrypt_env_var(stableSlugId(buildername_beet), now_ms,
+                                   now_ms + 24 * 3600 * 1000, 'AWS_SECRET_ACCESS_KEY',
+                                   beetmover_aws_secret_access_key) }}
+        metadata:
+            name: "[beetmover] {{ product }} {{ branch }} move L10N changesets"
+            description: "moves L10N changesets to candidates dir"
+            owner: "release@mozilla.com"
+            source: https://github.com/mozilla/releasetasks
+
+        extra:
+            {{ common_extras(taskname=buildername_beet, locales=["null"], platform="null") | indent(12)}}
+            treeherderEnv:
+                - staging
+            treeherder:
+                symbol: L10N_CHS
+                groupSymbol: BM
+                collection:
+                    opt: true
+                machine:
+                    platform: Linux64
+                build:
+                    platform: all

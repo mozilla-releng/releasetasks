@@ -65,6 +65,13 @@ tasks:
         {{ l10n_tasks()|indent(4) }}
     {% endif %}
 
+    {% if l10n_changesets is defined %}
+        {% macro l10n_changesets_tasks() %}
+            {% include "l10n_changesets.yml.tmpl" %}
+        {% endmacro %}
+        {{ l10n_changesets_tasks()|indent(4) }}
+    {% endif %}
+
     {% if source_enabled %}
         {% macro source_tasks() %}
             {% include "source.yml.tmpl" %}
