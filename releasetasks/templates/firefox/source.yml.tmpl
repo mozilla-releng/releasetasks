@@ -51,7 +51,7 @@
                 MH_BUILD_POOL: "taskcluster"
                 # Don't clone mozharness, use the in-tree version
                 MOZHARNESS_DISABLE: "true"
-                MOZ_PKG_VERSION: {{ version }}
+                MOZ_PKG_VERSION: "{{ version }}"
         metadata:
             owner: release@mozilla.com
             source: https://github.com/mozilla/releasetasks
