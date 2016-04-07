@@ -18,7 +18,7 @@ def do_common_assertions(graph):
             assert "task_name" in task["extra"]
             assert "build_props" in task["extra"], "inlcude common_extras.yml.tmpl"
             for prop in ["product", "locales", "branch", "platform", "version",
-                         "revision"]:
+                         "revision", "build_number"]:
                 assert prop in task["extra"]["build_props"]
             assert "signature" in task["extra"].get("signing", {}), \
                 "%s is not signed" % task["extra"]["task_name"]
