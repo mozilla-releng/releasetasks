@@ -167,6 +167,7 @@
             funsize:
                 partials:
 {% for locale in our_locales %}
+{% if locale in partial_info["locales"] %}
                     -
                         locale: {{ locale }}
                         # TODO: consider using stable URL for from_mar
@@ -178,6 +179,7 @@
                         previousBuildNumber: {{ partial_info["buildNumber"] }}
                         toVersion: "{{ version }}"
                         toBuildNumber: {{ buildNumber }}
+{% endif %}
 {% endfor %}
             treeherderEnv:
                 - staging
@@ -355,6 +357,12 @@
 {% if push_to_candidates_enabled %}
 {% set partial_beetmover_buildername = "{}_partial_{}build{}_beetmover_candidates_{}".format(buildername, partial_version, partial_info["buildNumber"], chunk) %}
 {% do artifact_partials_builders.append(partial_beetmover_buildername) %}
+{% set chunk_locales = [] %}
+{% for l in our_locales %}
+{% if l in partial_info["locales"] %}
+{% do chunk_locales.append(l) %}
+{% endif %}
+{% endfor %}
 -
     taskId: "{{ stableSlugId(partial_beetmover_buildername) }}"
     requires:
@@ -381,7 +389,7 @@
                 - >
                   wget -O mozharness.tar.bz2 https://hg.mozilla.org/{{ repo_path }}/archive/{{ mozharness_changeset }}.tar.bz2/testing/mozharness &&
                   mkdir mozharness && tar xvfj mozharness.tar.bz2 -C mozharness --strip-components 3 && cd mozharness &&
-                  python scripts/release/beet_mover.py --template configs/beetmover/partials.yml.tmpl --platform {{ buildbot2ftp(platform) }} --version {{ version }} --partial-version {{ partial_version }} --artifact-subdir env {% for l in our_locales %}{{ "--locale {} ".format(l) }}{% endfor %} --taskid {{ stableSlugId('{}_{}_{}_signing_task'.format(buildername, chunk, partial_version)) }} --build-num build{{ buildNumber }} --bucket {{ beetmover_candidates_bucket }}
+                  python scripts/release/beet_mover.py --template configs/beetmover/partials.yml.tmpl --platform {{ buildbot2ftp(platform) }} --version {{ version }} --partial-version {{ partial_version }} --artifact-subdir env {% for l in chunk_locales %}{{ "--locale {} ".format(l) }}{% endfor %} --taskid {{ stableSlugId('{}_{}_{}_signing_task'.format(buildername, chunk, partial_version)) }} --build-num build{{ buildNumber }} --bucket {{ beetmover_candidates_bucket }}
             env:
                 DUMMY_ENV_FOR_ENCRYPT: "fake"
             encryptedEnv:

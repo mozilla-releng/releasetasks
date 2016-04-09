@@ -35,9 +35,11 @@ class TestBouncerSubmission(unittest.TestCase):
             partial_updates={
                 "38.0": {
                     "buildNumber": 1,
+                    "locales": ["de", "en-GB", "zh-TW"],
                 },
                 "37.0": {
                     "buildNumber": 2,
+                    "locales": ["de", "en-GB", "zh-TW"],
                 },
             },
             branch="foo",

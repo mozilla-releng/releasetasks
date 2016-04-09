@@ -74,9 +74,11 @@ class TestBeetmoverEnUSCandidates(unittest.TestCase, BaseTestBeetmoverCandidates
             partial_updates={
                 "38.0": {
                     "buildNumber": 1,
+                    "locales": ["de", "en-GB", "zh-TW"],
                 },
                 "37.0": {
                     "buildNumber": 2,
+                    "locales": ["de", "en-GB", "zh-TW"],
                 },
             },
             branch="mozilla-beta",
@@ -188,9 +190,11 @@ class TestBeetmover110nCandidates(unittest.TestCase, BaseTestBeetmoverCandidates
             partial_updates={
                 "38.0": {
                     "buildNumber": 1,
+                    "locales": ["de", "en-GB", "zh-TW"],
                 },
                 "37.0": {
                     "buildNumber": 2,
+                    "locales": ["de", "en-GB", "zh-TW"],
                 },
             },
             balrog_api_root="https://balrog.real/api",
@@ -286,9 +290,11 @@ class TestBeetmoverEnUSPartialsCandidates(unittest.TestCase, BaseTestBeetmoverCa
             partial_updates={
                 "38.0": {
                     "buildNumber": 1,
+                    "locales": ["de", "en-GB", "zh-TW"],
                 },
                 "37.0": {
                     "buildNumber": 2,
+                    "locales": ["de", "en-GB", "zh-TW"],
                 },
             },
             branch="mozilla-beta",
@@ -392,9 +398,11 @@ class TestBeetmoverl10nPartialsCandidates(unittest.TestCase, BaseTestBeetmoverCa
             partial_updates={
                 "38.0": {
                     "buildNumber": 1,
+                    "locales": ["de", "en-GB", "zh-TW"],
                 },
                 "37.0": {
                     "buildNumber": 2,
+                    "locales": ["de", "en-GB", "zh-TW"],
                 },
             },
             balrog_api_root="https://balrog.real/api",
