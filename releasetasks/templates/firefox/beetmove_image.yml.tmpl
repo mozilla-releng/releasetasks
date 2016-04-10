@@ -1,0 +1,57 @@
+# keep first line
+-
+    taskId: "{{ stableSlugId("beetmove_image") }}"
+    reruns: 5
+    task:
+        provisionerId: aws-provisioner-v1
+        workerType: taskcluster-images
+        created: "{{ now }}"
+        deadline: "{{ now.replace(days=4) }}"
+        expires: "{{ never }}"
+        priority: "high"
+        retries: 5
+        routes:
+            - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
+            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.beetmove_image
+            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.beetmove_image
+        payload:
+            artifacts:
+                public/image.tar:
+                      expires: {{ now.replace(days=365) }}
+                      path: /artifacts/image.tar
+                      type: file
+            features:
+                dind: true
+            maxRunTime: 1800
+            image: "taskcluster/image_builder:0.1.3"
+            command:
+                - /bin/bash
+                - "-c"
+                - /home/worker/bin/build_image.sh
+            env:
+                BASE_REPOSITORY: "https://hg.mozilla.org/{{ repo_path }}"
+                CONTEXT_PATH: release/docker/beet-mover
+                HEAD_REF: "{{ revision }}"
+                HEAD_REPOSITORY: "https://hg.mozilla.org/{{ repo_path }}"
+                HEAD_REV: "{{ revision }}"
+                HASH: "{{ revision }}"
+                PROJECT: "{{ branch }}"
+        metadata:
+            name: "Generate beetmover docker image"
+            description: "Refresh AV DB of beetmover docker image"
+            owner: "release@mozilla.com"
+            source: https://github.com/mozilla/releasetasks
+
+        extra:
+            {{ common_extras(taskname="beetmove_image", locales=["null"], platform="null") | indent(12)}}
+            treeherderEnv:
+                - staging
+            treeherder:
+                symbol: Bm
+                groupSymbol: Images
+                collection:
+                    opt: true
+                machine:
+                    platform: linux64
+                build:
+                    platform: all

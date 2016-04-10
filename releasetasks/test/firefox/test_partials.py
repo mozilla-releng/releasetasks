@@ -56,15 +56,17 @@ class TestEnUSPartials(unittest.TestCase):
         do_common_assertions(self.graph)
 
     def test_mar_urls(self):
+        generator_image = get_task_by_name(self.graph, "funsize_update_generator_image")
+        funsize_balrog_image = get_task_by_name(self.graph, "funsize_balrog_image")
         for p in ("win32", "macosx64"):
             for v, appV in (("38.0build1", "38.0"), ("37.0build2", "37.0")):
                 generator = get_task_by_name(self.graph, "{}_en-US_{}_funsize_update_generator".format(p, v))
                 signing = get_task_by_name(self.graph, "{}_en-US_{}_funsize_signing_task".format(p, v))
                 balrog = get_task_by_name(self.graph, "{}_en-US_{}_funsize_balrog_task".format(p, v))
 
-                assert generator.get("requires") is None
+                assert generator.get("requires") == [generator_image["taskId"]]
                 assert signing.get("requires") == [generator["taskId"]]
-                assert balrog.get("requires") == [signing["taskId"]]
+                assert sorted(balrog.get("requires")) == sorted([signing["taskId"], funsize_balrog_image["taskId"]])
                 if p == "win32":
                     assert generator["task"]["extra"]["funsize"]["partials"][0]["from_mar"] == \
                         "http://download.mozilla.org/?product=firefox-%s-complete&os=win&lang=en-US" % appV
