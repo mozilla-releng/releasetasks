@@ -52,9 +52,11 @@ class TestL10NSingleChunk(unittest.TestCase):
             partial_updates={
                 "38.0": {
                     "buildNumber": 1,
+                    "locales": ["de", "en-GB", "zh-TW"],
                 },
                 "37.0": {
                     "buildNumber": 2,
+                    "locales": ["de", "en-GB", "zh-TW"],
                 },
             },
             balrog_api_root="https://balrog.real/api",
@@ -185,9 +187,11 @@ class TestL10NMultipleChunks(unittest.TestCase):
             partial_updates={
                 "38.0": {
                     "buildNumber": 1,
+                    "locales": ["de", "en-GB", "zh-TW"],
                 },
                 "37.0": {
                     "buildNumber": 2,
+                    "locales": ["de", "en-GB", "zh-TW"],
                 },
             },
             signing_class="release-signing",
@@ -289,3 +293,104 @@ class TestL10NMultipleChunks(unittest.TestCase):
                         self.graph, task_name1))
                     self.assertIsNotNone(get_task_by_name(
                         self.graph, task_name2))
+
+
+class TestL10NNewLocales(unittest.TestCase):
+    maxDiff = 30000
+    graph = None
+
+    def setUp(self):
+        self.graph = make_task_graph(
+            version="42.0b2",
+            next_version="42.0b3",
+            appVersion="42.0",
+            buildNumber=3,
+            source_enabled=False,
+            checksums_enabled=False,
+            updates_enabled=True,
+            bouncer_enabled=False,
+            push_to_candidates_enabled=True,
+            push_to_releases_enabled=False,
+            beetmover_candidates_bucket="bucket",
+            postrelease_version_bump_enabled=False,
+            postrelease_bouncer_aliases_enabled=False,
+            enUS_platforms=["win32"],
+            en_US_config={"platforms": {
+                "win32": {"task_id": "xyy"}
+            }},
+            l10n_config={
+                "platforms": {
+                    "win32": {
+                        "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.exe",
+                        "locales": ["de", "en-GB", "ru", "uk", "zh-TW"],
+                        "chunks": 1,
+                    },
+                    "linux64": {
+                        "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.tar.xz",
+                        "locales": ["de", "en-GB", "ru", "uk", "zh-TW"],
+                        "chunks": 1,
+                    },
+                },
+                "changesets": {
+                    "de": "default",
+                    "en-GB": "default",
+                    "ru": "default",
+                    "uk": "default",
+                    "zh-TW": "default",
+                },
+            },
+            partial_updates={
+                "38.0": {
+                    "buildNumber": 1,
+                    "locales": ["de", "en-GB", "ru", "uk", "zh-TW"],
+                },
+                "37.0": {
+                    "buildNumber": 2,
+                    "locales": ["de", "en-GB", "ru", "uk"],
+                },
+            },
+            signing_class="release-signing",
+            balrog_api_root="https://balrog.real/api",
+            funsize_balrog_api_root="http://balrog/api",
+            branch="mozilla-beta",
+            product="firefox",
+            repo_path="releases/mozilla-beta",
+            revision="abcdef123456",
+            mozharness_changeset="abcd",
+            release_channels=["beta"],
+            final_verify_channels=["beta"],
+            signing_pvt_key=PVT_KEY_FILE,
+            build_tools_repo_path='build/tools',
+        )
+
+    def test_common_assertions(self):
+        do_common_assertions(self.graph)
+
+    def test_new_locale_not_in_update_generator(self):
+        t = get_task_by_name(
+            self.graph,
+            "release-mozilla-beta_firefox_win32_l10n_repack_1_37.0_update_generator")
+        self.assertEqual(
+            sorted(["de", "en-GB", "ru", "uk"]),
+            sorted([p["locale"] for p in t["task"]["extra"]["funsize"]["partials"]]))
+
+    def test_new_locale_in_update_generator(self):
+        t = get_task_by_name(
+            self.graph,
+            "release-mozilla-beta_firefox_win32_l10n_repack_1_38.0_update_generator")
+        self.assertEqual(sorted(["de", "en-GB", "ru", "uk", "zh-TW"]),
+                         sorted([p["locale"] for p in t["task"]["extra"]["funsize"]["partials"]]))
+
+    def test_new_locale_not_in_beetmover(self):
+        t = get_task_by_name(
+            self.graph,
+            "release-mozilla-beta_firefox_win32_l10n_repack_partial_37.0build2_beetmover_candidates_1")
+        self.assertNotIn("--locale zh-TW",  " ".join(t["task"]["payload"]["command"]))
+        self.assertIn("--locale en-GB", " ".join(t["task"]["payload"]["command"]))
+
+    def test_new_locale_in_beetmover(self):
+        t = get_task_by_name(
+            self.graph,
+            "release-mozilla-beta_firefox_win32_l10n_repack_partial_38.0build1_beetmover_candidates_1")
+        self.assertIn("--locale zh-TW", " ".join(t["task"]["payload"]["command"]))
+        self.assertIn("--locale en-GB", " ".join(t["task"]["payload"]["command"]))

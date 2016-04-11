@@ -142,6 +142,12 @@
 
 {% if updates_enabled %}  # funsize
 {% for partial_version, partial_info in partial_updates.iteritems() %}
+{% set chunk_locales = [] %}
+{% for l in our_locales %}
+{% if l in partial_info["locales"] %}
+{% do chunk_locales.append(l) %}
+{% endif %}
+{% endfor %}
 -
     taskId: "{{ stableSlugId('{}_{}_{}_update_generator'.format(buildername, chunk, partial_version)) }}"
     reruns: 5
@@ -163,10 +169,10 @@
             - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.partials.{{ partial_version | replace(".", "_") }}.{{ platform }}.{{ chunk }}
             - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.partials.{{ partial_version | replace(".", "_") }}.{{ platform }}.{{ chunk }}
         extra:
-            {{ common_extras(taskname='{}_{}_{}_update_generator'.format(buildername, chunk, partial_version), locales=our_locales, platform=platform) | indent(12)}}
+            {{ common_extras(taskname='{}_{}_{}_update_generator'.format(buildername, chunk, partial_version), locales=chunk_locales, platform=platform) | indent(12)}}
             funsize:
                 partials:
-{% for locale in our_locales %}
+{% for locale in chunk_locales %}
                     -
                         locale: {{ locale }}
                         # TODO: consider using stable URL for from_mar
@@ -245,7 +251,7 @@
             - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.partials_signing.{{ partial_version | replace(".", "_") }}.{{ platform }}.{{ chunk }}
             - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.partials_signing.{{ partial_version | replace(".", "_") }}.{{ platform }}.{{ chunk }}
         extra:
-            {{ common_extras(taskname='{}_{}_{}_signing_task'.format(buildername, chunk, partial_version), locales=our_locales, platform=platform) | indent(12)}}
+            {{ common_extras(taskname='{}_{}_{}_signing_task'.format(buildername, chunk, partial_version), locales=chunk_locales, platform=platform) | indent(12)}}
             treeherderEnv:
                 - staging
             treeherder:
@@ -285,7 +291,7 @@
             - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.partials_balrog.{{ partial_version | replace(".", "_") }}.{{ platform }}.{{ chunk }}
             - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.partials_balrog.{{ partial_version | replace(".", "_") }}.{{ platform }}.{{ chunk }}
         extra:
-            {{ common_extras(taskname='{}_{}_{}_balrog_task'.format(buildername, chunk, partial_version), locales=our_locales, platform=platform) | indent(12)}}
+            {{ common_extras(taskname='{}_{}_{}_balrog_task'.format(buildername, chunk, partial_version), locales=chunk_locales, platform=platform) | indent(12)}}
             treeherderEnv:
                 - staging
             treeherder:
@@ -381,7 +387,7 @@
                 - >
                   wget -O mozharness.tar.bz2 https://hg.mozilla.org/{{ repo_path }}/archive/{{ mozharness_changeset }}.tar.bz2/testing/mozharness &&
                   mkdir mozharness && tar xvfj mozharness.tar.bz2 -C mozharness --strip-components 3 && cd mozharness &&
-                  python scripts/release/beet_mover.py --template configs/beetmover/partials.yml.tmpl --platform {{ buildbot2ftp(platform) }} --version {{ version }} --partial-version {{ partial_version }} --artifact-subdir env {% for l in our_locales %}{{ "--locale {} ".format(l) }}{% endfor %} --taskid {{ stableSlugId('{}_{}_{}_signing_task'.format(buildername, chunk, partial_version)) }} --build-num build{{ buildNumber }} --bucket {{ beetmover_candidates_bucket }}
+                  python scripts/release/beet_mover.py --template configs/beetmover/partials.yml.tmpl --platform {{ buildbot2ftp(platform) }} --version {{ version }} --partial-version {{ partial_version }} --artifact-subdir env {% for l in chunk_locales %}{{ "--locale {} ".format(l) }}{% endfor %} --taskid {{ stableSlugId('{}_{}_{}_signing_task'.format(buildername, chunk, partial_version)) }} --build-num build{{ buildNumber }} --bucket {{ beetmover_candidates_bucket }}
             env:
                 DUMMY_ENV_FOR_ENCRYPT: "fake"
             encryptedEnv:
@@ -398,7 +404,7 @@
             source: https://github.com/mozilla/releasetasks
 
         extra:
-            {{ common_extras(taskname=partial_beetmover_buildername, locales=our_locales, platform=platform) | indent(12)}}
+            {{ common_extras(taskname=partial_beetmover_buildername, locales=chunk_locales, platform=platform) | indent(12)}}
             treeherderEnv:
                 - staging
             treeherder:

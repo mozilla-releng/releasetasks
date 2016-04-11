@@ -32,9 +32,11 @@ class TestFinalVerification(unittest.TestCase):
             partial_updates={
                 "38.0": {
                     "buildNumber": 1,
+                    "locales": ["de", "en-GB", "zh-TW"],
                 },
                 "37.0": {
                     "buildNumber": 2,
+                    "locales": ["de", "en-GB", "zh-TW"],
                 },
             },
             l10n_config={},
@@ -127,9 +129,11 @@ class TestFinalVerificationMultiChannel(unittest.TestCase):
             partial_updates={
                 "38.0": {
                     "buildNumber": 1,
+                    "locales": ["de", "en-GB", "zh-TW"],
                 },
                 "37.0": {
                     "buildNumber": 2,
+                    "locales": ["de", "en-GB", "zh-TW"],
                 },
             },
             l10n_config={},
@@ -206,9 +210,11 @@ class TestFinalVerifyNoMirrors(unittest.TestCase):
             partial_updates={
                 "38.0": {
                     "buildNumber": 1,
+                    "locales": ["de", "en-GB", "zh-TW"],
                 },
                 "37.0": {
                     "buildNumber": 2,
+                    "locales": ["de", "en-GB", "zh-TW"],
                 },
             },
             l10n_config={
