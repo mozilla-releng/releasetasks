@@ -1,6 +1,5 @@
 {% for platform in partner_repacks_platforms %}
 {% set buildername = "release-{}-{}-{}_partner_repacks".format(branch, product, platform) %}
-{% do push_to_releases_extra_upstream_builders.append(buildername) %}
 -
     taskId: "{{ stableSlugId(buildername) }}"
     reruns: 5
@@ -44,3 +43,66 @@
         extra:
             {{ common_extras(taskname=buildername, locales=["null"], platform="null") | indent(12)}}
 {% endfor %}
+
+{% if push_to_releases_enabled is defined and push_to_releases_enabled %}
+{% set buildername_push = "release-{}-{}_partner_repacks_copy_to_releases".format(branch, product) %}
+
+-
+    taskId: "{{ stableSlugId(buildername_push) }}"
+    requires:
+        {% for platform in partner_repacks_platforms %}
+        - "{{ stableSlugId("release-{}-{}-{}_partner_repacks".format(branch, product, platform)) }}"
+        {% endfor %}
+        - "{{ stableSlugId("release-{}_{}_push_to_releases".format(branch, product)) }}"
+    reruns: 5
+    task:
+        provisionerId: aws-provisioner-v1
+        workerType: opt-linux64
+        created: "{{ now }}"
+        deadline: "{{ now.replace(days=4) }}"
+        expires: "{{ never }}"
+        priority: "high"
+        retries: 5
+        routes:
+            - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
+            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.partner_push_to_cdn
+            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.partner_push_to_cdn
+        payload:
+            maxRunTime: 1800
+            image: "kmoir/python-beet-runner@sha256:4f6dc84c4386406090a9c72b976be03dea647f01fe45a023d63ce0e479eb3497"
+            command:
+                - /bin/bash
+                - -c
+                - >
+                  wget -O mozharness.tar.bz2 https://hg.mozilla.org/{{ repo_path }}/archive/{{ mozharness_changeset }}.tar.bz2/testing/mozharness &&
+                  mkdir mozharness && tar xvfj mozharness.tar.bz2 -C mozharness --strip-components 3 && cd mozharness &&
+                  python scripts/release/push-candidate-to-releases.py --product {{ product }} --version {{ version }} --build-number {{ buildNumber }} --bucket {{ beetmover_candidates_bucket }}
+            env:
+                DUMMY_ENV_FOR_ENCRYPT: "fake"
+            encryptedEnv:
+                - {{ encrypt_env_var(stableSlugId(buildername_push), now_ms,
+                                   now_ms + 24 * 3600 * 1000, 'AWS_ACCESS_KEY_ID',
+                                   beetmover_aws_access_key_id) }}
+                - {{ encrypt_env_var(stableSlugId(buildername_push), now_ms,
+                                   now_ms + 24 * 3600 * 1000, 'AWS_SECRET_ACCESS_KEY',
+                                   beetmover_aws_secret_access_key) }}
+        metadata:
+            name: "[beetmover] {{ product }} {{ branch }} partner repacks push to releases"
+            description: "moves partner repacks to releases dir"
+            owner: "release@mozilla.com"
+            source: https://github.com/mozilla/releasetasks
+
+        extra:
+            {{ common_extras(taskname=buildername_push, locales=["null"], platform="null") | indent(12)}}
+            treeherderEnv:
+                - staging
+            treeherder:
+                symbol: pp2m
+                groupSymbol: BM
+                collection:
+                    opt: true
+                machine:
+                    platform: linux64
+                build:
+                    platform: all
+{% endif %}

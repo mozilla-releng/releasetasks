@@ -79,7 +79,8 @@ tasks:
         {{ source_tasks()|indent(4) }}
     {% endif %}
 
-    {% if partner_repacks_platforms is defined %}
+    {% if partner_repacks_platforms is defined and push_to_candidates_enabled and l10n_config.get("platforms") %}
+    {# partner repacks require l10n in the candidates directory #}
         {% macro partner_repacks_tasks() %}
             {% include "partner_repacks.yml.tmpl" %}
         {% endmacro %}

@@ -116,12 +116,28 @@ class TestPartnerRepacks(unittest.TestCase):
             ]
             self.assertEqual(sorted(partner_repacks["requires"]), sorted(requires))
 
-    def test_required_by_push_to_mirrors(self):
+    def test_not_required_by_push_to_mirrors(self):
         push_to_mirrors = get_task_by_name(
             self.graph, "release-foo_firefox_push_to_releases")
         for platform in ["win32", "linux"]:
             partner_repacks = get_task_by_name(
                 self.graph,
                 "release-foo-firefox-{}_partner_repacks".format(platform))
-            self.assertIn(partner_repacks["taskId"],
-                          push_to_mirrors["requires"])
+            self.assertNotIn(partner_repacks["taskId"],
+                             push_to_mirrors["requires"])
+
+    def test_partner_push_to_releases_requires(self):
+        partner_push_to_mirrors = get_task_by_name(
+            self.graph, "release-foo-firefox_partner_repacks_copy_to_releases")
+        push_to_mirrors = get_task_by_name(
+            self.graph, "release-foo_firefox_push_to_releases")
+        repacks_task_ids = [
+            get_task_by_name(
+                self.graph,
+                "release-foo-firefox-{}_partner_repacks".format(platform))["taskId"]
+            for platform in ["win32", "linux"]
+        ]
+
+        self.assertEqual(
+            sorted(partner_push_to_mirrors["requires"]),
+            sorted(repacks_task_ids + [push_to_mirrors["taskId"]]))
