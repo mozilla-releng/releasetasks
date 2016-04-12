@@ -3,6 +3,7 @@
 {% if push_to_candidates_enabled %}  # beetmover
 {% set complete_beetmover_basename = "release-{}_{}_{}_complete_en-US_beetmover_candidates".format(branch, product, platform) %}
 {% do artifact_completes_builders.append(complete_beetmover_basename) %}
+{% do partner_repacks_upstreams.append(complete_beetmover_basename) %}
 -
     taskId: "{{ stableSlugId(complete_beetmover_basename) }}"
     reruns: 5
