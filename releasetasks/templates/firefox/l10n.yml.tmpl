@@ -82,7 +82,6 @@
 # repacks beetmover
 {% if push_to_candidates_enabled %}
 {% do artifact_completes_builders.append('{}_beetmover_candidates_{}'.format(buildername, chunk)) %}
-{% do partner_repacks_upstreams.append('{}_beetmover_candidates_{}'.format(buildername, chunk)) %}
 -
     taskId: "{{ stableSlugId('{}_beetmover_candidates_{}'.format(buildername, chunk)) }}"
     requires:

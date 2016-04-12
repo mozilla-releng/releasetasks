@@ -4,7 +4,7 @@
     taskId: "{{ stableSlugId(buildername) }}"
     reruns: 5
     requires:
-        {% for upstream_builder in partner_repacks_upstreams %}
+        {% for upstream_builder in artifact_completes_builders %}
         - {{ stableSlugId(upstream_builder) }}
         {% endfor %}
     task:
