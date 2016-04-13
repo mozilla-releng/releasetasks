@@ -6,11 +6,11 @@ from functools import partial
 from os import path
 from chunkify import chunkify
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
-from release.platforms import buildbot2ftp, buildbot2bouncer
 from taskcluster.utils import stableSlugId, encryptEnvVar
 from thclient import TreeherderClient
 
-from releasetasks.util import treeherder_platform, sign_task
+from releasetasks.util import (
+    treeherder_platform, sign_task, buildbot2ftp, buildbot2bouncer)
 
 DEFAULT_TEMPLATE_DIR = path.join(path.dirname(__file__), "templates")
 
