@@ -3,7 +3,7 @@ import unittest
 from releasetasks.test.firefox import make_task_graph, do_common_assertions, \
     get_task_by_name
 from releasetasks.test import PVT_KEY_FILE
-from release.platforms import buildbot2ftp
+from releasetasks.util import buildbot2ftp
 
 
 class BaseTestBeetmoverCandidates(object):

@@ -18,7 +18,6 @@ requirements = [
     "chunkify",
     "treeherder-client>=2.0.1",
     "PGPy",
-    "buildtools",
     "python-jose<=0.5.6",
 ]
 test_requirements = [
