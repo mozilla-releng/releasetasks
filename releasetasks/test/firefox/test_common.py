@@ -121,6 +121,7 @@ class TestGraphScopes(unittest.TestCase):
             l10n_config={},
             verifyConfigs={},
             signing_pvt_key=PVT_KEY_FILE,
+            signing_class="release-signing",
         )
 
     def test_common_assertions(self):

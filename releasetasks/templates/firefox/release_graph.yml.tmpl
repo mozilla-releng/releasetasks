@@ -19,11 +19,8 @@ scopes:
   - queue:task-priority:high
   # TODO: need a better way to specify dev/prod scopes
   - project:releng:buildbot-bridge:builder-name:release-*
-{% if source_enabled or push_to_candidates_enabled %}
   - queue:define-task:aws-provisioner-v1/opt-linux64
   - queue:create-task:aws-provisioner-v1/opt-linux64
-{% endif %}
-{% if source_enabled %}
   - docker-worker:cache:tc-vcs
   - docker-worker:image:taskcluster/builder:*
   - queue:define-task:aws-provisioner-v1/build-c4-2xlarge
@@ -31,10 +28,7 @@ scopes:
   - docker-worker:cache:build-{{ branch }}-release-workspace
   - docker-worker:cache:tooltool-cache
   - project:releng:signing:cert:{{ signing_class }}
-  - project:releng:signing:format:gpg
   - docker-worker:relengapi-proxy:tooltool.download.public
-{% endif %}
-{% if updates_enabled %}
   - queue:*
   - docker-worker:*
   - scheduler:*
@@ -45,7 +39,6 @@ scopes:
 #}
 {% if signing_class != "dep-signing" %}
   - docker-worker:feature:balrogVPNProxy
-{% endif %}
 {% endif %}
 
 tasks:
