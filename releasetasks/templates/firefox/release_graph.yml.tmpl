@@ -65,7 +65,7 @@ tasks:
         {{ l10n_tasks()|indent(4) }}
     {% endif %}
 
-    {% if l10n_changesets is defined %}
+    {% if l10n_changesets is defined and l10n_changesets %}
         {% macro l10n_changesets_tasks() %}
             {% include "l10n_changesets.yml.tmpl" %}
         {% endmacro %}
@@ -101,12 +101,14 @@ tasks:
       {{ checksums_tasks()|indent(4) }}
     {% endif %}
 
-    {% if release_channels is defined %}
+    {% if updates_builder_enabled is defined and updates_builder_enabled %}
         {% macro updates_task() %}
             {% include "updates.yml.tmpl" %}
         {% endmacro %}
         {{ updates_task()|indent(4) }}
+    {% endif %}
 
+    {% if update_verify_enabled is defined and update_verify_enabled %}
         {% macro updateVerify_task(platform) %}
             {% if platform in ["linux", "linux64"] %}
                 {% include "tc_update_verify.yml.tmpl" %}
@@ -117,7 +119,6 @@ tasks:
         {% for plat in en_US_config["platforms"].keys() %}
             {{ updateVerify_task(plat)|indent(4) }}
         {% endfor %}
-
     {% endif %}
 
     # push to mirrors
@@ -134,7 +135,7 @@ tasks:
 
     {% endif %}
 
-    {% if final_verify_channels is defined %}
+    {% if final_verify_channels is defined and final_verify_platforms is defined %}
         {% macro finalVerify_tasks() %}
             {% include "final_verify.yml.tmpl" %}
         {% endmacro %}

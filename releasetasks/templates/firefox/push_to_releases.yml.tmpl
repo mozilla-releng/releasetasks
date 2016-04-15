@@ -2,20 +2,26 @@
 
 {% if not push_to_releases_automatic %}
   {% set push_to_releases_human_upstream_builders = artifact_completes_builders + artifact_partials_builders + push_to_releases_extra_upstream_builders %}
-  {% do push_to_releases_human_upstream_builders.append("release-{}-{}_chcksms".format(branch, product)) %}
+  {% if checksums_enabled %}
+    {% do push_to_releases_human_upstream_builders.append("release-{}-{}_chcksms".format(branch, product)) %}
+  {% endif %}
   {% set push_to_releases_upstream_builders = ['{}_human_decision'.format(push_to_releases_basename)] %}
 {% else %}
   {% set push_to_releases_upstream_builders = artifact_completes_builders + artifact_partials_builders + push_to_releases_extra_upstream_builders %}
-  {% do push_to_releases_upstream_builders.append("release-{}-{}_chcksms".format(branch, product)) %}
+  {% if checksums_enabled %}
+    {% do push_to_releases_upstream_builders.append("release-{}-{}_chcksms".format(branch, product)) %}
+  {% endif %}
 {% endif %}
 
 {% if not push_to_releases_automatic %}
 -
     taskId: "{{ stableSlugId('{}_human_decision'.format(push_to_releases_basename)) }}"
+    {% if push_to_releases_human_upstream_builders %}
     requires:
         {% for upstream_builder in push_to_releases_human_upstream_builders %}
         - {{ stableSlugId(upstream_builder) }}
         {% endfor %}
+    {% endif %}
     reruns: 5
     task:
         provisionerId: "null-provisioner"
@@ -43,10 +49,12 @@
 
 -
     taskId: "{{ stableSlugId(push_to_releases_basename) }}"
+    {% if push_to_releases_upstream_builders %}
     requires:
         {% for upstream_builder in push_to_releases_upstream_builders %}
         - {{ stableSlugId(upstream_builder) }}
         {% endfor %}
+    {% endif %}
     reruns: 5
     task:
         provisionerId: aws-provisioner-v1

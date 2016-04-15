@@ -51,6 +51,7 @@ class TestUpdates(unittest.TestCase):
             push_to_releases_enabled=False,
             postrelease_version_bump_enabled=True,
             postrelease_bouncer_aliases_enabled=False,
+            updates_builder_enabled=True,
             signing_class="release-signing",
             release_channels=["foo", "bar"],
             final_verify_channels=["foo", "beta"],

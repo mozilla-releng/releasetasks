@@ -37,7 +37,7 @@
                     version=version.replace('.', '_'),
                     buildNumber=buildNumber ) }}"
                 RELEASE_CONFIGS: {#
-                    #}{% for platform in en_US_config["platforms"].keys() %}{#
+                    #}{% for platform in final_verify_platforms %}{#
                         #}{{ "{channel}-{product}-{platform}.cfg".format(
                                platform=platform,
                                channel=channel,
