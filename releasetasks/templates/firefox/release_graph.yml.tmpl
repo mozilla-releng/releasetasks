@@ -44,7 +44,7 @@ scopes:
 tasks:
     {% if updates_enabled is defined and updates_enabled %}
         {% macro funsize_images_tasks() %}
-            {% include "funsize.yml.tmpl" %}
+            {% include "funsize_image.yml.tmpl" %}
         {% endmacro %}
         {{ funsize_images_tasks()|indent(4) }}
     {% endif %}
