@@ -124,6 +124,7 @@
     taskId: "{{ stableSlugId(buildername_beet) }}"
     requires:
         - "{{ stableSlugId(buildername) }}"
+        - "{{ stableSlugId("beetmove_image") }}"
     reruns: 5
     task:
         provisionerId: aws-provisioner-v1
@@ -139,14 +140,17 @@
 
         payload:
             maxRunTime: 7200
-            image: "kmoir/python-beet-runner@sha256:4f6dc84c4386406090a9c72b976be03dea647f01fe45a023d63ce0e479eb3497"
+            image:
+                type: task-image
+                path: public/image.tar
+                taskId: {{ stableSlugId("beetmove_image") }}
             command:
                 - /bin/bash
                 - -c
                 - >
                   wget -O mozharness.tar.bz2 https://hg.mozilla.org/{{ repo_path }}/archive/{{ mozharness_changeset }}.tar.bz2/testing/mozharness &&
                   mkdir mozharness && tar xvfj mozharness.tar.bz2 -C mozharness --strip-components 3 && cd mozharness &&
-                  python scripts/release/beet_mover.py --template configs/beetmover/source.yml.tmpl --platform linux64 --version {{ version }} --locale en-US --taskid {{ stableSlugId(buildername) }} --build-num build{{ buildNumber }} --bucket {{ beetmover_candidates_bucket }}
+                  python scripts/release/beet_mover.py --no-refresh-antivirus --template configs/beetmover/source.yml.tmpl --platform linux64 --version {{ version }} --locale en-US --taskid {{ stableSlugId(buildername) }} --build-num build{{ buildNumber }} --bucket {{ beetmover_candidates_bucket }}
             env:
                 DUMMY_ENV_FOR_ENCRYPT: "fake"
             encryptedEnv:
@@ -180,6 +184,7 @@
     taskId: "{{ stableSlugId(buildername_beet_signing) }}"
     requires:
         - "{{ stableSlugId(buildername_signing) }}"
+        - "{{ stableSlugId("beetmove_image") }}"
     reruns: 5
     task:
         provisionerId: aws-provisioner-v1
@@ -194,14 +199,17 @@
             - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.source_tarball_sigs_beetmover
         payload:
             maxRunTime: 7200
-            image: "kmoir/python-beet-runner@sha256:4f6dc84c4386406090a9c72b976be03dea647f01fe45a023d63ce0e479eb3497"
+            image:
+                type: task-image
+                path: public/image.tar
+                taskId: {{ stableSlugId("beetmove_image") }}
             command:
                 - /bin/bash
                 - -c
                 - >
                   wget -O mozharness.tar.bz2 https://hg.mozilla.org/{{ repo_path }}/archive/{{ mozharness_changeset }}.tar.bz2/testing/mozharness &&
                   mkdir mozharness && tar xvfj mozharness.tar.bz2 -C mozharness --strip-components 3 && cd mozharness &&
-                  python scripts/release/beet_mover.py --template configs/beetmover/source_checksums.yml.tmpl --platform linux64 --version {{ version }} --locale en-US  --artifact-subdir env --taskid "{{ stableSlugId(buildername_signing) }}" --build-num build{{ buildNumber }} --bucket {{ beetmover_candidates_bucket }}
+                  python scripts/release/beet_mover.py --no-refresh-antivirus --template configs/beetmover/source_checksums.yml.tmpl --platform linux64 --version {{ version }} --locale en-US  --artifact-subdir env --taskid "{{ stableSlugId(buildername_signing) }}" --build-num build{{ buildNumber }} --bucket {{ beetmover_candidates_bucket }}
             env:
                 DUMMY_ENV_FOR_ENCRYPT: "fake"
             encryptedEnv:

@@ -5,6 +5,8 @@
 {% do artifact_completes_builders.append(complete_beetmover_basename) %}
 -
     taskId: "{{ stableSlugId(complete_beetmover_basename) }}"
+    requires:
+        - "{{ stableSlugId("beetmove_image") }}"
     reruns: 5
     task:
         provisionerId: aws-provisioner-v1
@@ -20,15 +22,17 @@
             - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.beetmover.en_US.{{ platform }}
         payload:
             maxRunTime: 7200
-            # TODO - create specific image for this
-            image: "kmoir/python-beet-runner@sha256:4f6dc84c4386406090a9c72b976be03dea647f01fe45a023d63ce0e479eb3497"
+            image:
+                type: task-image
+                path: public/image.tar
+                taskId: {{ stableSlugId("beetmove_image") }}
             command:
                 - /bin/bash
                 - -c
                 - >
                   wget -O mozharness.tar.bz2 https://hg.mozilla.org/{{ repo_path }}/archive/{{ mozharness_changeset }}.tar.bz2/testing/mozharness &&
                   mkdir mozharness && tar xvfj mozharness.tar.bz2 -C mozharness --strip-components 3 && cd mozharness &&
-                  python scripts/release/beet_mover.py --template configs/beetmover/en_us.yml.tmpl --platform {{ buildbot2ftp(platform) }} --version {{ version }} --app-version {{ appVersion }} --locale en-US --taskid {{ platform_info['task_id'] }} --build-num build{{ buildNumber }} --bucket {{ beetmover_candidates_bucket }}
+                  python scripts/release/beet_mover.py --no-refresh-antivirus --template configs/beetmover/en_us.yml.tmpl --platform {{ buildbot2ftp(platform) }} --version {{ version }} --app-version {{ appVersion }} --locale en-US --taskid {{ platform_info['task_id'] }} --build-num build{{ buildNumber }} --bucket {{ beetmover_candidates_bucket }}
             env:
                 DUMMY_ENV_FOR_ENCRYPT: "fake"
             encryptedEnv:
@@ -74,6 +78,8 @@
 -
     taskId: "{{ stableSlugId('{}_update_generator'.format(funsize_basename)) }}"
     reruns: 5
+    requires:
+        - "{{ stableSlugId("funsize_update_generator_image") }}"
     task:
         created: "{{ now }}"
         deadline: "{{ now.replace(days=4) }}"
@@ -125,7 +131,10 @@
             createdForUser: release+funsize@mozilla.com
 
         payload:
-            image: "rail/funsize-update-generator@sha256:d1c88af7f13d124e08a37d10203e9e60655a231301123e5f2127fab5468ef5dd"
+            image:
+                type: task-image
+                path: public/image.tar
+                taskId: "{{ stableSlugId("funsize_update_generator_image") }}"
             maxRunTime: 3600
             command:
                 - /runme.sh
@@ -142,6 +151,7 @@
                 # explicitly set MAR channel name, ACCEPTED_MAR_CHANNEL_IDS is the corresponding variable in funsize.py
                 ACCEPTED_MAR_CHANNEL_IDS: firefox-mozilla-beta
                 {% endif %}
+                EXTRA_PARAMS: "--no-freshclam"
 
             artifacts:
                 "public/env":
@@ -201,6 +211,7 @@
     reruns: 5
     requires:
         - "{{ stableSlugId('{}_signing_task'.format(funsize_basename)) }}"
+        - "{{ stableSlugId("funsize_balrog_image") }}"
     task:
         created: "{{ now }}"
         deadline: "{{ now.replace(days=4) }}"
@@ -241,7 +252,10 @@
             createdForUser: release+funsize@mozilla.com
 
         payload:
-            image: "rail/funsize-balrog-submitter@sha256:e8788f0e0e64813cfdfd720e2fab9c32a5c6ea76e27bc0270d40e6e13f0b074b"
+            image:
+                type: task-image
+                path: public/image.tar
+                taskId: "{{ stableSlugId("funsize_balrog_image") }}"
             maxRunTime: 1800
             command:
                 - /runme.sh
@@ -283,6 +297,7 @@
     taskId: "{{ stableSlugId(partial_beetmover_basename) }}"
     requires:
         - "{{ stableSlugId('{}_signing_task'.format(funsize_basename)) }}"
+        - "{{ stableSlugId("beetmove_image") }}"
     reruns: 5
     task:
         provisionerId: aws-provisioner-v1
@@ -299,14 +314,17 @@
         payload:
             maxRunTime: 7200
             # TODO - create specific image for this
-            image: "kmoir/python-beet-runner@sha256:4f6dc84c4386406090a9c72b976be03dea647f01fe45a023d63ce0e479eb3497"
+            image:
+                type: task-image
+                path: public/image.tar
+                taskId: {{ stableSlugId("beetmove_image") }}
             command:
                 - /bin/bash
                 - -c
                 - >
                   wget -O mozharness.tar.bz2 https://hg.mozilla.org/{{ repo_path }}/archive/{{ mozharness_changeset }}.tar.bz2/testing/mozharness &&
                   mkdir mozharness && tar xvfj mozharness.tar.bz2 -C mozharness --strip-components 3 && cd mozharness &&
-                  python scripts/release/beet_mover.py --template configs/beetmover/partials.yml.tmpl --platform {{ buildbot2ftp(platform) }} --version {{ version }} --partial-version {{ partial_version }} --artifact-subdir env --locale en-US --taskid {{ stableSlugId('{}_signing_task'.format(funsize_basename)) }} --build-num build{{ buildNumber }} --bucket {{ beetmover_candidates_bucket }}
+                  python scripts/release/beet_mover.py --no-refresh-antivirus --template configs/beetmover/partials.yml.tmpl --platform {{ buildbot2ftp(platform) }} --version {{ version }} --partial-version {{ partial_version }} --artifact-subdir env --locale en-US --taskid {{ stableSlugId('{}_signing_task'.format(funsize_basename)) }} --build-num build{{ buildNumber }} --bucket {{ beetmover_candidates_bucket }}
             env:
                 DUMMY_ENV_FOR_ENCRYPT: "fake"
             encryptedEnv:

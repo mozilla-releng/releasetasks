@@ -42,12 +42,25 @@ scopes:
 {% endif %}
 
 tasks:
+    {% if updates_enabled is defined and updates_enabled %}
+        {% macro funsize_images_tasks() %}
+            {% include "funsize_image.yml.tmpl" %}
+        {% endmacro %}
+        {{ funsize_images_tasks()|indent(4) }}
+    {% endif %}
+    {% if push_to_candidates_enabled is defined and push_to_candidates_enabled %}
+        {% macro beetmove_image_task() %}
+            {% include "beetmove_image.yml.tmpl" %}
+        {% endmacro %}
+        {{ beetmove_image_task()|indent(4) }}
+    {% endif %}
     {% if en_US_config.get("platforms") %}
         # partials (funsize) and push to candidates (beetmover)
         {% macro enUS_tasks() %}
             {% include "enUS.yml.tmpl" %}
         {% endmacro %}
         {{ enUS_tasks()|indent(4) }}
+
     {% endif %}
 
     {% if l10n_config.get("platforms") %}

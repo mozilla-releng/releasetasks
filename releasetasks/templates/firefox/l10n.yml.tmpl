@@ -86,6 +86,7 @@
     taskId: "{{ stableSlugId('{}_beetmover_candidates_{}'.format(buildername, chunk)) }}"
     requires:
         - "{{ stableSlugId('{}_artifacts_{}'.format(buildername, chunk)) }}"
+        - "{{ stableSlugId("beetmove_image") }}"
     reruns: 5
     task:
         provisionerId: aws-provisioner-v1
@@ -102,14 +103,17 @@
         payload:
             maxRunTime: 7200
             # TODO - create specific image for this
-            image: "kmoir/python-beet-runner@sha256:4f6dc84c4386406090a9c72b976be03dea647f01fe45a023d63ce0e479eb3497"
+            image:
+                type: task-image
+                path: public/image.tar
+                taskId: {{ stableSlugId("beetmove_image") }}
             command:
                 - /bin/bash
                 - -c
                 - >
                   wget -O mozharness.tar.bz2 https://hg.mozilla.org/{{ repo_path }}/archive/{{ mozharness_changeset }}.tar.bz2/testing/mozharness &&
                   mkdir mozharness && tar xvfj mozharness.tar.bz2 -C mozharness --strip-components 3 && cd mozharness &&
-                  python scripts/release/beet_mover.py --template configs/beetmover/repacks.yml.tmpl --platform {{ buildbot2ftp(platform) }} --version {{ version }} --app-version {{ appVersion }} {% for l in our_locales %}{{ "--locale {} ".format(l) }}{% endfor %} --taskid {{ stableSlugId('{}_artifacts_{}'.format(buildername, chunk)) }} --build-num build{{ buildNumber }} --bucket {{ beetmover_candidates_bucket }}
+                  python scripts/release/beet_mover.py --no-refresh-antivirus --template configs/beetmover/repacks.yml.tmpl --platform {{ buildbot2ftp(platform) }} --version {{ version }} --app-version {{ appVersion }} {% for l in our_locales %}{{ "--locale {} ".format(l) }}{% endfor %} --taskid {{ stableSlugId('{}_artifacts_{}'.format(buildername, chunk)) }} --build-num build{{ buildNumber }} --bucket {{ beetmover_candidates_bucket }}
             env:
                 DUMMY_ENV_FOR_ENCRYPT: "fake"
             encryptedEnv:
@@ -153,6 +157,7 @@
     reruns: 5
     requires:
         - "{{ stableSlugId('{}_artifacts_{}'.format(buildername, chunk)) }}"
+        - "{{ stableSlugId("funsize_update_generator_image") }}"
     task:
         created: "{{ now }}"
         deadline: "{{ now.replace(days=4) }}"
@@ -204,7 +209,10 @@
             createdForUser: release+funsize@mozilla.com
 
         payload:
-            image: "rail/funsize-update-generator@sha256:d1c88af7f13d124e08a37d10203e9e60655a231301123e5f2127fab5468ef5dd"
+            image:
+                type: task-image
+                path: public/image.tar
+                taskId: "{{ stableSlugId("funsize_update_generator_image") }}"
             maxRunTime: 7200
             command:
                 - /runme.sh
@@ -222,6 +230,7 @@
                 # explicitly set MAR channel name, ACCEPTED_MAR_CHANNEL_IDS is the corresponding variable in funsize.py
                 ACCEPTED_MAR_CHANNEL_IDS: firefox-mozilla-beta
                 {% endif %}
+                EXTRA_PARAMS: "--no-freshclam"
 
             artifacts:
                 "public/env":
@@ -281,6 +290,7 @@
     reruns: 5
     requires:
         - "{{ stableSlugId('{}_{}_{}_signing_task'.format(buildername, chunk, partial_version)) }}"
+        - "{{ stableSlugId("funsize_balrog_image") }}"
     task:
         created: "{{ now }}"
         deadline: "{{ now.replace(days=4) }}"
@@ -321,7 +331,10 @@
             createdForUser: release+funsize@mozilla.com
 
         payload:
-            image: "rail/funsize-balrog-submitter@sha256:e8788f0e0e64813cfdfd720e2fab9c32a5c6ea76e27bc0270d40e6e13f0b074b"
+            image:
+                type: task-image
+                path: public/image.tar
+                taskId: "{{ stableSlugId("funsize_balrog_image") }}"
             maxRunTime: 1800
             command:
                 - /runme.sh
@@ -365,6 +378,7 @@
     taskId: "{{ stableSlugId(partial_beetmover_buildername) }}"
     requires:
         - "{{ stableSlugId('{}_{}_{}_signing_task'.format(buildername, chunk, partial_version)) }}"
+        - "{{ stableSlugId("beetmove_image") }}"
     reruns: 5
     task:
         provisionerId: aws-provisioner-v1
@@ -380,14 +394,17 @@
             - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.partials_beetmover.{{ partial_version | replace(".", "_") }}.{{ platform }}.{{ chunk }}
         payload:
             maxRunTime: 7200
-            image: "kmoir/python-beet-runner@sha256:4f6dc84c4386406090a9c72b976be03dea647f01fe45a023d63ce0e479eb3497"
+            image:
+                type: task-image
+                path: public/image.tar
+                taskId: {{ stableSlugId("beetmove_image") }}
             command:
                 - /bin/bash
                 - -c
                 - >
                   wget -O mozharness.tar.bz2 https://hg.mozilla.org/{{ repo_path }}/archive/{{ mozharness_changeset }}.tar.bz2/testing/mozharness &&
                   mkdir mozharness && tar xvfj mozharness.tar.bz2 -C mozharness --strip-components 3 && cd mozharness &&
-                  python scripts/release/beet_mover.py --template configs/beetmover/partials.yml.tmpl --platform {{ buildbot2ftp(platform) }} --version {{ version }} --partial-version {{ partial_version }} --artifact-subdir env {% for l in chunk_locales %}{{ "--locale {} ".format(l) }}{% endfor %} --taskid {{ stableSlugId('{}_{}_{}_signing_task'.format(buildername, chunk, partial_version)) }} --build-num build{{ buildNumber }} --bucket {{ beetmover_candidates_bucket }}
+                  python scripts/release/beet_mover.py --template configs/beetmover/partials.yml.tmpl --platform {{ buildbot2ftp(platform) }} --version {{ version }} --partial-version {{ partial_version }} --artifact-subdir env {% for l in chunk_locales %}{{ "--locale {} ".format(l) }}{% endfor %} --taskid {{ stableSlugId('{}_{}_{}_signing_task'.format(buildername, chunk, partial_version)) }} --build-num build{{ buildNumber }} --bucket {{ beetmover_candidates_bucket }} --no-refresh-antivirus
             env:
                 DUMMY_ENV_FOR_ENCRYPT: "fake"
             encryptedEnv:
