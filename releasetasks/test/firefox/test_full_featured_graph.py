@@ -46,6 +46,7 @@ class TestFullGraph(unittest.TestCase):
             push_to_candidates_enabled=True,
             beetmover_candidates_bucket='mozilla-releng-beet-mover-dev',
             push_to_releases_enabled=True,
+            uptake_monitoring_enabled=True,
             postrelease_version_bump_enabled=True,
             postrelease_bouncer_aliases_enabled=True,
             tuxedo_server_url="https://bouncer.real.allizom.org/api",

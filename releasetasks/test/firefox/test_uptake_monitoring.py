@@ -51,8 +51,10 @@ class TestUptakeMonitoring(unittest.TestCase):
             beetmover_candidates_bucket='mozilla-releng-beet-mover-dev',
             push_to_releases_enabled=True,
             push_to_releases_automatic=False,
+            uptake_monitoring_enabled=True,
             postrelease_version_bump_enabled=False,
             postrelease_bouncer_aliases_enabled=False,
+            tuxedo_server_url="https://bouncer.real.allizom.org/api",
             signing_class="release-signing",
             release_channels=["foo"],
             final_verify_channels=["foo"],
@@ -66,24 +68,43 @@ class TestUptakeMonitoring(unittest.TestCase):
     def test_common_assertions(self):
         do_common_assertions(self.graph)
 
-    def test_provisioner_id(self):
-        assert self.task['task']["provisionerId"] == "aws-provisioner-v1"
+    def test_provisioner(self):
+        self.assertEqual(self.task["task"]["provisionerId"],
+                         "buildbot-bridge")
 
     def test_worker_type(self):
-        assert self.task['task']["workerType"] == "opt-linux64"
-
-    def test_image_name(self):
-        assert self.payload["image"] == 'ubuntu'
+        self.assertEqual(self.task["task"]["workerType"], "buildbot-bridge")
 
     def test_scopes_present(self):
-        self.assertFalse("scopes" in self.task['task'])
+        self.assertTrue("scopes" in self.task['task'])
 
     def test_requires(self):
         requires = [get_task_by_name(self.graph, "release-foo_firefox_push_to_releases")["taskId"]]
         self.assertEqual(sorted(self.task["requires"]), sorted(requires))
 
-    def test_sleep_in_command(self):
-        command = self.task['task']['payload']['command']
-        self.assertTrue(
-            "for i in {1..10}; do echo wait...sleep...good dog && sleep 1m; done" in "".join(command)
-        )
+    def test_product(self):
+        self.assertEqual(self.payload["properties"]["product"],
+                         "firefox")
+
+    def test_version(self):
+        self.assertEqual(self.payload["properties"]["version"],
+                         "42.0b2")
+
+    def test_build_number(self):
+        self.assertEqual(self.payload["properties"]["build_number"], 3)
+
+    def test_repo_path(self):
+        self.assertEqual(self.payload["properties"]["repo_path"],
+                         "releases/foo")
+
+    def test_script_repo_revision(self):
+        self.assertEqual(self.payload["properties"]["script_repo_revision"],
+                         "abcd")
+
+    def test_revision(self):
+        self.assertEqual(self.payload["properties"]["revision"],
+                         "fedcba654321")
+
+    def test_tuxedo_server_url(self):
+        self.assertEqual(self.payload["properties"]["tuxedo_server_url"],
+                         "https://bouncer.real.allizom.org/api")

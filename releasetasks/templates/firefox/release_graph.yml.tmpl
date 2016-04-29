@@ -134,10 +134,12 @@ tasks:
         {% endmacro %}
         {{ push_to_releases_tasks()|indent(4) }}
 
-        {% macro uptake_monitoring_tasks() %}
-            {% include "uptake_monitoring.yml.tmpl" %}
-        {% endmacro %}
-        {{ uptake_monitoring_tasks()|indent(4) }}
+        {% if uptake_monitoring_enabled %}
+          {% macro uptake_monitoring_tasks() %}
+              {% include "uptake_monitoring.yml.tmpl" %}
+          {% endmacro %}
+          {{ uptake_monitoring_tasks()|indent(4) }}
+        {% endif %}
 
     {% endif %}
 

@@ -62,6 +62,7 @@ class TestPartnerRepacks(unittest.TestCase):
             push_to_candidates_enabled=True,
             beetmover_candidates_bucket='mozilla-releng-beet-mover-dev',
             push_to_releases_enabled=True,
+            uptake_monitoring_enabled=False,
             postrelease_version_bump_enabled=False,
             postrelease_bouncer_aliases_enabled=False,
             push_to_releases_automatic=True,

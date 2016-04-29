@@ -52,6 +52,7 @@ class TestEncryption(unittest.TestCase):
             bouncer_enabled=False,
             push_to_candidates_enabled=False,
             push_to_releases_enabled=False,
+            uptake_monitoring_enabled=False,
             postrelease_version_bump_enabled=False,
             postrelease_bouncer_aliases_enabled=False,
             en_US_config={"platforms": {
@@ -112,6 +113,7 @@ class TestGraphScopes(unittest.TestCase):
             checksums_enabled=False,
             push_to_candidates_enabled=False,
             push_to_releases_enabled=False,
+            uptake_monitoring_enabled=False,
             postrelease_version_bump_enabled=False,
             postrelease_bouncer_aliases_enabled=False,
             en_US_config={"platforms": {
