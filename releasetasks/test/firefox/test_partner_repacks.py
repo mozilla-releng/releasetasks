@@ -9,6 +9,8 @@ class TestPartnerRepacks(unittest.TestCase):
     maxDiff = 30000
     graph = None
     tasks = None
+    partner_tasks = None
+    eme_free_tasks = None
 
     def setUp(self):
         self.graph = make_task_graph(
@@ -73,9 +75,15 @@ class TestPartnerRepacks(unittest.TestCase):
             build_tools_repo_path='build/tools',
             partner_repacks_platforms=["win32", "linux"],
         )
-        self.tasks = [
+        self.partner_tasks = [
             get_task_by_name(self.graph, "release-foo-firefox-{}_partner_repacks".format(platform))
-            for platform in ["win32", "linux"]]
+            for platform in ["win32", "linux"]
+        ]
+        self.eme_free_tasks = [
+            get_task_by_name(self.graph, "release-foo-firefox-{}_eme_free_repacks".format(platform))
+            for platform in ["win32", "linux"]
+        ]
+        self.tasks = self.partner_tasks + self.eme_free_tasks
 
     def test_common_assertions(self):
         do_common_assertions(self.graph)
@@ -95,6 +103,16 @@ class TestPartnerRepacks(unittest.TestCase):
     def test_build_number(self):
         for t in self.tasks:
             self.assertEqual(t["task"]["payload"]["properties"]["build_number"], 3)
+
+    def test_partner_manifests(self):
+        for t in self.partner_tasks:
+            self.assertEqual(t["task"]["payload"]["properties"]["repack_manifests_url"],
+                             "git@github.com:mozilla-partners/repack-manifests.git")
+
+    def test_eme_free_manifests(self):
+        for t in self.eme_free_tasks:
+            self.assertEqual(t["task"]["payload"]["properties"]["repack_manifests_url"],
+                             "https://github.com/mozilla-partners/mozilla-EME-free-manifest")
 
     def test_requires(self):
         upstream = [
@@ -116,6 +134,26 @@ class TestPartnerRepacks(unittest.TestCase):
             ]
             self.assertEqual(sorted(partner_repacks["requires"]), sorted(requires))
 
+    def test_eme_free_requires(self):
+        upstream = [
+            "release-foo_firefox_{}_complete_en-US_beetmover_candidates".format(platform)
+            for platform in ["win32", "linux"]
+        ] + [
+            "release-foo_firefox_{}_l10n_repack_beetmover_candidates_1".format(platform)
+            for platform in ["win32", "linux"]
+        ]
+
+        for platform in ["win32", "linux"]:
+            partner_repacks = get_task_by_name(
+                self.graph,
+                "release-foo-firefox-{}_eme_free_repacks".format(platform))
+
+            requires = [
+                get_task_by_name(self.graph, t)["taskId"]
+                for t in upstream
+            ]
+            self.assertEqual(sorted(partner_repacks["requires"]), sorted(requires))
+
     def test_not_required_by_push_to_mirrors(self):
         push_to_mirrors = get_task_by_name(
             self.graph, "release-foo_firefox_push_to_releases")
@@ -124,6 +162,11 @@ class TestPartnerRepacks(unittest.TestCase):
                 self.graph,
                 "release-foo-firefox-{}_partner_repacks".format(platform))
             self.assertNotIn(partner_repacks["taskId"],
+                             push_to_mirrors["requires"])
+            eme_free = get_task_by_name(
+                self.graph,
+                "release-foo-firefox-{}_eme_free_repacks".format(platform))
+            self.assertNotIn(eme_free["taskId"],
                              push_to_mirrors["requires"])
 
     def test_partner_push_to_releases_requires(self):
@@ -135,6 +178,11 @@ class TestPartnerRepacks(unittest.TestCase):
             get_task_by_name(
                 self.graph,
                 "release-foo-firefox-{}_partner_repacks".format(platform))["taskId"]
+            for platform in ["win32", "linux"]
+        ] + [
+            get_task_by_name(
+                self.graph,
+                "release-foo-firefox-{}_eme_free_repacks".format(platform))["taskId"]
             for platform in ["win32", "linux"]
         ]
 

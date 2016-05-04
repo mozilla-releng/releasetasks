@@ -1,5 +1,6 @@
 {% for platform in partner_repacks_platforms %}
 {% set buildername = "release-{}-{}-{}_partner_repacks".format(branch, product, platform) %}
+{% set buildername_eme_free = "release-{}-{}-{}_eme_free_repacks".format(branch, product, platform) %}
 -
     taskId: "{{ stableSlugId(buildername) }}"
     reruns: 5
@@ -33,7 +34,7 @@
                 script_repo_revision: "{{ mozharness_changeset }}"
                 release_promotion: true
                 revision: "{{ mozharness_changeset }}"
-
+                repack_manifests_url: "git@github.com:mozilla-partners/repack-manifests.git"
         metadata:
             name: "{{ product }} {{ branch }} {{ platform }} partner repacks"
             description: "Release Promotion partner repacks"
@@ -42,6 +43,50 @@
 
         extra:
             {{ common_extras(taskname=buildername, locales=["null"], platform="null") | indent(12)}}
+
+-
+    taskId: "{{ stableSlugId(buildername_eme_free) }}"
+    reruns: 5
+    requires:
+        {% for upstream_builder in artifact_completes_builders %}
+        - {{ stableSlugId(upstream_builder) }}
+        {% endfor %}
+    task:
+        provisionerId: "buildbot-bridge"
+        workerType: "buildbot-bridge"
+        created: "{{ now }}"
+        deadline: "{{ now.replace(days=4) }}"
+        expires: "{{ never }}"
+        priority: "high"
+        retries: 5
+        scopes:
+            - project:releng:buildbot-bridge:builder-name:{{ buildername }}
+        routes:
+            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.eme_free_repacks.{{ platform }}
+            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.eme_free_repacks.{{ platform }}
+        payload:
+            buildername: "{{ buildername }}"
+            sourcestamp:
+                branch: "{{ repo_path }}"
+                revision: "{{ mozharness_changeset }}"
+            properties:
+                product: "{{ product }}"
+                version: "{{ version }}"
+                build_number: {{ buildNumber }}
+                repo_path: "{{ repo_path }}"
+                script_repo_revision: "{{ mozharness_changeset }}"
+                release_promotion: true
+                revision: "{{ mozharness_changeset }}"
+                repack_manifests_url: "https://github.com/mozilla-partners/mozilla-EME-free-manifest"
+        metadata:
+            name: "{{ product }} {{ branch }} {{ platform }} EME-free repacks"
+            description: "Release Promotion EME-free repacks"
+            owner: "release@mozilla.com"
+            source: https://github.com/mozilla/releasetasks
+
+        extra:
+            {{ common_extras(taskname=buildername_eme_free, locales=["null"], platform="null") | indent(12)}}
+
 {% endfor %}
 
 {% if push_to_releases_enabled is defined and push_to_releases_enabled %}
@@ -52,6 +97,7 @@
     requires:
         {% for platform in partner_repacks_platforms %}
         - "{{ stableSlugId("release-{}-{}-{}_partner_repacks".format(branch, product, platform)) }}"
+        - "{{ stableSlugId("release-{}-{}-{}_eme_free_repacks".format(branch, product, platform)) }}"
         {% endfor %}
         - "{{ stableSlugId("release-{}_{}_push_to_releases".format(branch, product)) }}"
     reruns: 5
