@@ -6,28 +6,38 @@
         - {{ stableSlugId("release-{}_{}_push_to_releases".format(branch, product)) }}
     reruns: 5
     task:
-        provisionerId: aws-provisioner-v1
-        workerType: opt-linux64
+        provisionerId: "buildbot-bridge"
+        workerType: "buildbot-bridge"
         created: "{{ now }}"
         deadline: "{{ now.replace(days=4) }}"
         expires: "{{ never }}"
         priority: "high"
         retries: 5
+        scopes:
+            - project:releng:buildbot-bridge:builder-name:{{ uptake_buildername }}
         routes:
             - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
-            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.uptake
-            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.uptake
+            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.uptake_monitoring
+            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.uptake_monitoring
         payload:
-            maxRunTime: 7200
-            image: ubuntu
-            command:
-                - /bin/bash
-                - -c
-                - >
-                  for i in {1..10}; do echo wait...sleep...good dog && sleep 1m; done
+            buildername: "{{ uptake_buildername }}"
+            sourcestamp:
+                branch: "{{ repo_path }}"
+                revision: "{{ mozharness_changeset }}"
+            properties:
+                product: "{{ product }}"
+                version: "{{ version }}"
+                build_number: {{ buildNumber }}
+                repo_path: "{{ repo_path }}"
+                script_repo_revision: "{{ mozharness_changeset }}"
+                release_promotion: true
+                revision: "{{ revision }}"
+                tuxedo_server_url: "{{ tuxedo_server_url }}"
+                partial_versions: {% set pipe = joiner(", ") %}{% for p, e in sorted(partial_updates.items()) %}{{ pipe() }}{{ "{}build{}".format(p, e["buildNumber"]) }}{% endfor %}
+                platforms: {{ en_US_config["platforms"] | sort() | join(", ") }}
         metadata:
             name: "{{ product }} {{ branch }} uptake monitoring"
-            description: "for now this does nothing but wait enough for bouncer to point to valid paths in releases dir"
+            description: "Release Promotion uptake monitoring"
             owner: "release@mozilla.com"
             source: https://github.com/mozilla/releasetasks
 

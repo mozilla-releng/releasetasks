@@ -24,6 +24,7 @@ channels:
 final_verify_channels:
     - "release-dev"
 postrelease_bouncer_aliases_enabled: true
+uptake_monitoring_enabled: true
 postrelease_version_bump_enabled: true
 
 product: "firefox"

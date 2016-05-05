@@ -24,6 +24,7 @@ class TestL10NSingleChunk(unittest.TestCase):
             bouncer_enabled=False,
             push_to_candidates_enabled=False,
             push_to_releases_enabled=False,
+            uptake_monitoring_enabled=False,
             postrelease_version_bump_enabled=False,
             postrelease_bouncer_aliases_enabled=False,
             en_US_config={"platforms": {
@@ -157,6 +158,7 @@ class TestL10NMultipleChunks(unittest.TestCase):
             bouncer_enabled=False,
             push_to_candidates_enabled=False,
             push_to_releases_enabled=False,
+            uptake_monitoring_enabled=False,
             postrelease_version_bump_enabled=False,
             postrelease_bouncer_aliases_enabled=False,
             enUS_platforms=["win32"],
@@ -311,6 +313,7 @@ class TestL10NNewLocales(unittest.TestCase):
             bouncer_enabled=False,
             push_to_candidates_enabled=True,
             push_to_releases_enabled=False,
+            uptake_monitoring_enabled=False,
             beetmover_candidates_bucket="bucket",
             postrelease_version_bump_enabled=False,
             postrelease_bouncer_aliases_enabled=False,

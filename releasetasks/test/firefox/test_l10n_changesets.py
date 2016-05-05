@@ -66,6 +66,7 @@ class TestL10NChangesets(unittest.TestCase):
             postrelease_version_bump_enabled=False,
             postrelease_bouncer_aliases_enabled=False,
             push_to_releases_automatic=True,
+            uptake_monitoring_enabled=False,
             release_channels=["foo", "bar"],
             balrog_api_root="https://balrog.real/api",
             signing_class="release-signing",

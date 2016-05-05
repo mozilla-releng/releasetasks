@@ -45,6 +45,7 @@ AUTO_INIT_ITEMS = dict(
     bouncer_enabled=False,
     push_to_candidates_enabled=True,
     push_to_releases_enabled=True,
+    uptake_monitoring_enabled=False,
     beetmover_candidates_bucket='fake_bucket',
     postrelease_version_bump_enabled=False,
     postrelease_bouncer_aliases_enabled=False,

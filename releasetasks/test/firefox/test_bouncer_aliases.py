@@ -49,6 +49,7 @@ class TestBouncerAliases(unittest.TestCase):
             bouncer_enabled=False,
             push_to_candidates_enabled=False,
             push_to_releases_enabled=False,
+            uptake_monitoring_enabled=False,
             postrelease_version_bump_enabled=False,
             postrelease_bouncer_aliases_enabled=True,
             tuxedo_server_url="https://bouncer.real.allizom.org/api",

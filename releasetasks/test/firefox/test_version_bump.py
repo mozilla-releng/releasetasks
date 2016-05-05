@@ -49,6 +49,7 @@ class TestVersionBump(unittest.TestCase):
             bouncer_enabled=True,
             push_to_candidates_enabled=False,
             push_to_releases_enabled=False,
+            uptake_monitoring_enabled=False,
             postrelease_version_bump_enabled=True,
             postrelease_bouncer_aliases_enabled=False,
             signing_class="release-signing",
