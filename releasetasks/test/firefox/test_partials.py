@@ -138,8 +138,8 @@ class TestEnUSPartials(unittest.TestCase):
                 signing = get_task_by_name(self.graph, "{}_en-US_{}_funsize_signing_task".format(p, v))
                 balrog = get_task_by_name(self.graph, "{}_en-US_{}_funsize_balrog_task".format(p, v))
                 self.assertEquals(generator["task"]["metadata"]["name"],
-                                  "[funsize] Update generating task %s %s from %s" % (p, "en-US", v.split('build')[0],))
+                                  "[funsize] Update generating task %s %s for %s" % (p, "en-US", v.split('build')[0],))
                 self.assertEquals(signing["task"]["metadata"]["name"],
-                                  "[funsize] MAR signing task %s %s from %s" % (p, "en-US", v.split('build')[0],))
+                                  "[funsize] MAR signing task %s %s for %s" % (p, "en-US", v.split('build')[0],))
                 self.assertEquals(balrog["task"]["metadata"]["name"],
-                                  "[funsize] Publish to Balrog %s %s from %s" % (p, "en-US", v.split('build')[0],))
+                                  "[funsize] Publish to Balrog %s %s for %s" % (p, "en-US", v.split('build')[0],))
