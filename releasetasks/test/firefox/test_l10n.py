@@ -137,6 +137,22 @@ class TestL10NSingleChunk(unittest.TestCase):
                 self.assertIsNotNone(get_task_by_name(
                     self.graph, task_name))
 
+    def test_funsize_name(self):
+        for platform in ("win32", "linux64",):
+            for version in ("37.0", "38.0",):
+                generator = get_task_by_name(self.graph,
+                                             "release-mozilla-beta_firefox_{pl}_l10n_repack_1_{part}_update_generator".format(pl=platform, part=version))
+                signing = get_task_by_name(self.graph,
+                                           "release-mozilla-beta_firefox_{pl}_l10n_repack_1_{part}_signing_task".format(pl=platform, part=version))
+                balrog = get_task_by_name(self.graph,
+                                          "release-mozilla-beta_firefox_{pl}_l10n_repack_1_{part}_balrog_task".format(pl=platform, part=version))
+                self.assertEqual(generator["task"]["metadata"]["name"],
+                                 "[funsize] Update generating task %s chunk %s for %s" % (platform, "1", version,))
+                self.assertEqual(signing["task"]["metadata"]["name"],
+                                 "[funsize] MAR signing task %s chunk %s for %s" % (platform, "1", version,))
+                self.assertEqual(balrog["task"]["metadata"]["name"],
+                                 "[funsize] Publish to Balrog %s chunk %s for %s" % (platform, "1", version,))
+
 
 class TestL10NMultipleChunks(unittest.TestCase):
     maxDiff = 30000
