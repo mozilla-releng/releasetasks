@@ -166,9 +166,9 @@
         metadata:
             owner: release+funsize@mozilla.com
             source: https://github.com/mozilla/funsize
-            name: "[funsize] Update generating task"
+            name: "[funsize] Update generating task {{ platform }} chunk {{ chunk }} for {{ partial_version }}"
             description: |
-                This task generates MAR files and publishes unsigned bits.
+                This task generates MAR files and publishes unsigned bits for the locales {{ chunk_locales|join(', ') }}
         routes:
             - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
             - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.partials.{{ partial_version | replace(".", "_") }}.{{ platform }}.{{ chunk }}
@@ -251,9 +251,9 @@
         metadata:
             owner: release+funsize@mozilla.com
             source: https://github.com/mozilla/funsize
-            name: "[funsize] MAR signing task"
+            name: "[funsize] MAR signing task {{ platform }} chunk {{ chunk }} for {{ partial_version }}"
             description: |
-                This task signs MAR files and publishes signed bits.
+                This task signs MAR files and publishes signed bits for the locales {{ chunk_locales|join(', ') }}
 
         routes:
             - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
@@ -317,9 +317,9 @@
         metadata:
             owner: release+funsize@mozilla.com
             source: https://github.com/mozilla/funsize
-            name: "[funsize] Publish to Balrog"
+            name: "[funsize] Publish to Balrog {{ platform }} chunk {{ chunk }} for {{ partial_version }}"
             description: |
-                This task publishes signed updates to Balrog.
+                This task publishes signed updates to Balrog for the locales {{ chunk_locales|join(", ")}}.
 
         workerType: "funsize-balrog"
         provisionerId: "aws-provisioner-v1"

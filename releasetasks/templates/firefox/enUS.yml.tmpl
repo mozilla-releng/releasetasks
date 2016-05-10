@@ -88,7 +88,7 @@
         metadata:
             owner: release+funsize@mozilla.com
             source: https://github.com/mozilla/funsize
-            name: "[funsize] Update generating task"
+            name: "[funsize] Update generating task {{ platform }} {{ locale }} for {{ partial_version }}"
             description: |
                 This task generates MAR files and publishes unsigned bits.
 
@@ -172,7 +172,7 @@
         metadata:
             owner: release+funsize@mozilla.com
             source: https://github.com/mozilla/funsize
-            name: "[funsize] MAR signing task"
+            name: "[funsize] MAR signing task {{ platform }} {{ locale }} for {{ partial_version }}"
             description: |
                 This task signs MAR files and publishes signed bits.
 
@@ -238,7 +238,7 @@
         metadata:
             owner: release+funsize@mozilla.com
             source: https://github.com/mozilla/funsize
-            name: "[funsize] Publish to Balrog"
+            name: "[funsize] Publish to Balrog {{ platform }} {{ locale }} for {{ partial_version }}"
             description: |
                 This task publishes signed updates to Balrog.
 
