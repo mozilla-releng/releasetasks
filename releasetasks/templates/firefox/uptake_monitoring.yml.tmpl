@@ -17,6 +17,7 @@
             - project:releng:buildbot-bridge:builder-name:{{ uptake_buildername }}
         routes:
             - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
+            - tc-treeherder.{{ branch }}.{{ revision_hash }}
             - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.uptake_monitoring
             - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.uptake_monitoring
         payload:
@@ -45,6 +46,7 @@
             {{ common_extras(taskname=uptake_buildername, locales=["null"], platform="null") | indent(12)}}
             treeherderEnv:
                 - staging
+                - production
             treeherder:
                 symbol: up-m
                 groupSymbol: Release

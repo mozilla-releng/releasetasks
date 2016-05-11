@@ -12,6 +12,7 @@
         retries: 5
         routes:
             - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
+            - tc-treeherder.{{ branch }}.{{ revision_hash }}
             - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.funsize_update_generator_image
             - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.funsize_update_generator_image
         payload:
@@ -45,6 +46,7 @@
         extra:
             {{ common_extras(taskname="funsize_update_generator_image", locales=["null"], platform="null") | indent(12)}}
             treeherderEnv:
+                - production
                 - staging
             treeherder:
                 symbol: Fu
@@ -68,6 +70,7 @@
         retries: 5
         routes:
             - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
+            - tc-treeherder.{{ branch }}.{{ revision_hash }}
             - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.funsize_balrog_image
             - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.funsize_balrog_image
         payload:
@@ -102,6 +105,7 @@
             {{ common_extras(taskname="funsize_balrog_image", locales=["null"], platform="null") | indent(12)}}
             treeherderEnv:
                 - staging
+                - production
             treeherder:
                 symbol: Fb
                 groupSymbol: Images

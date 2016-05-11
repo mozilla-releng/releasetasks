@@ -12,6 +12,7 @@
         retries: 5
         routes:
             - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
+            - tc-treeherder.{{ branch }}.{{ revision_hash }}
             - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.beetmove_image
             - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.beetmove_image
         payload:
@@ -46,6 +47,7 @@
             {{ common_extras(taskname="beetmove_image", locales=["null"], platform="null") | indent(12)}}
             treeherderEnv:
                 - staging
+                - production
             treeherder:
                 symbol: Bm
                 groupSymbol: Images
