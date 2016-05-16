@@ -74,6 +74,7 @@ AUTO_INIT_ITEMS = dict(
     release_channels=["beta", "release"],
     final_verify_channels=["beta", "release"],
     build_tools_repo_path='build/tools',
+    partner_repacks_platforms=["win32", "macosx64"],
 )
 HUMAN_INIT_ITEMS = AUTO_INIT_ITEMS.copy()
 HUMAN_INIT_ITEMS["push_to_releases_automatic"] = False
@@ -196,6 +197,10 @@ class TestPushToMirrorsAutomatic(unittest.TestCase):
         command = self.task['task']['payload']['command']
         self.assertTrue("--build-number 3" in "".join(command))
 
+    def test_exclude_in_command(self):
+        command = self.task['task']['payload']['command']
+        assert "--exclude '.*-EME-free/.*'" in "".join(command)
+
     def test_human_decision_is_none(self):
         self.assertIsNone(get_task_by_name(self.graph, self.human_task_name))
 
@@ -218,3 +223,25 @@ class TestPushToMirrorsAutomatic(unittest.TestCase):
             ])
         requires.append(get_task_by_name(self.graph, "release-mozilla-beta-firefox_chcksms")["taskId"])
         self.assertEqual(sorted(self.task["requires"]), sorted(requires))
+
+
+class TestPushToMirrorsGraph2(unittest.TestCase):
+    maxDiff = 30000
+    graph = None
+    # we will end up with one task for each platform
+    tasks = None
+    human_task_name = "release-{}_{}_push_to_releases_human_decision".format("mozilla-beta",
+                                                                             "firefox")
+
+    def setUp(self):
+        kwargs = AUTO_INIT_ITEMS.copy()
+        kwargs["partner_repacks_platforms"] = []
+
+        self.graph = make_task_graph(**kwargs)
+        self.task = get_task_by_name(
+            self.graph, "release-{}_{}_push_to_releases".format("mozilla-beta", "firefox")
+        )
+
+    def test_exclude_not_in_command(self):
+        command = self.task['task']['payload']['command']
+        assert "--exclude '.*-EME-free/.*'" not in "".join(command)
