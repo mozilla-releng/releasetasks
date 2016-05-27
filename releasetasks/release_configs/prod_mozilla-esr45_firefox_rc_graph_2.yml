@@ -1,0 +1,38 @@
+# we don't want to do any en-US, l10n, or parter based tasks for graph 2
+platforms: {}
+release_platforms: []
+final_verify_platforms:
+  - "linux"
+  - "linux64"
+  - "win32"
+  - "win64"
+  - "macosx64"
+l10n_release_platforms: []
+partner_repacks_platforms: []
+
+updates_builder_enabled: false
+source_enabled: false
+bouncer_enabled: false
+# funsize
+updates_enabled: false
+checksums_enabled: false
+push_to_candidates_enabled: false
+update_verify_enabled: false
+push_to_releases_enabled: true
+# rc graph 2 only needs final_verify_channels
+channels:
+final_verify_channels:
+    - "esr"
+postrelease_bouncer_aliases_enabled: true
+uptake_monitoring_enabled: true
+postrelease_version_bump_enabled: true
+
+product: "firefox"
+repo_path: "releases/mozilla-esr45"
+branch: "mozilla-esr45"
+funsize_balrog_api_root: "http://balrog/api"
+balrog_api_root: "https://aus4-admin.mozilla.org/api"
+build_tools_repo_path: "build/tools"
+tuxedo_server_url: "https://bounceradmin.mozilla.com/api"
+push_to_releases_automatic: true
+beetmover_candidates_bucket: "net-mozaws-prod-delivery-firefox"
