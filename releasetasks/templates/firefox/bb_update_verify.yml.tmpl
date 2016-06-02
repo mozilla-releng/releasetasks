@@ -1,5 +1,5 @@
 {% for channel in release_channels %}
-{% set uv_totalchunks = 6 %}
+{% set uv_totalchunks = 12 %}
 {% for chunk in range(1, uv_totalchunks + 1) %}
 {% set uv_buildername = "release-{}_{}_{}_update_verify".format(branch, product, platform) %}
 {% set task_name = "{}_{}_{}".format(uv_buildername, channel, chunk) %}

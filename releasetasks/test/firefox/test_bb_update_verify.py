@@ -113,7 +113,7 @@ class TestBB_UpdateVerify(unittest.TestCase):
                          "beta-firefox-win32.cfg")
 
     def test_chunking_info(self):
-        self.assertEqual(self.payload['properties']['TOTAL_CHUNKS'], "6")
+        self.assertEqual(self.payload['properties']['TOTAL_CHUNKS'], "12")
         self.assertEqual(self.payload['properties']['THIS_CHUNK'], "3")
 
     def test_all_builders_exist(self):
