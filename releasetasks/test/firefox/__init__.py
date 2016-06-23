@@ -35,6 +35,12 @@ def do_common_assertions(graph):
                     "revision", "product")
                 for prop in required_properties:
                     assert prop in properties
+            # encryptedEnvs = task["payload"].get("encryptedEnv")
+            # if encryptedEnvs:
+            #    for encryptedEnv in encryptedEnvs:
+            #        # TODO: Check the encryptedEnv endTime >= task deadline
+            #        #    Requires a private key of the dummy pubkey we use.
+            #        #    Can use from taskcluster.utils import decryptMessage
             assert t["taskId"] not in _cached_taskIDs
             assert "routes" in task
             rel_routes = [r.startswith("index.releases.") for r in task["routes"]]
