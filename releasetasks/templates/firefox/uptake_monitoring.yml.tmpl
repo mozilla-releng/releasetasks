@@ -35,7 +35,7 @@
                 revision: "{{ revision }}"
                 tuxedo_server_url: "{{ tuxedo_server_url }}"
                 partial_versions: {% set pipe = joiner(", ") %}{% for p, e in sorted(partial_updates.items()) %}{{ pipe() }}{{ "{}build{}".format(p, e["buildNumber"]) }}{% endfor %}
-                platforms: {{ en_US_config["platforms"] | sort() | join(", ") }}
+                platforms: "{{ uptake_monitoring_platforms }}"
         metadata:
             name: "{{ product }} {{ branch }} uptake monitoring"
             description: "Release Promotion uptake monitoring"

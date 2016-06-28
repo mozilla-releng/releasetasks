@@ -25,6 +25,16 @@ class TestSourceBuilder(unittest.TestCase):
                 "linux": {"task_id": "xyz"},
                 "win32": {"task_id": "xyy"}
             }},
+            partial_updates={
+                "38.0": {
+                    "buildNumber": 1,
+                    "locales": ["de", "en-GB", "zh-TW"],
+                },
+                "37.0": {
+                    "buildNumber": 2,
+                    "locales": ["de", "en-GB", "zh-TW"],
+                },
+            },
             l10n_config={},
             repo_path="releases/foo",
             revision="fedcba654321",

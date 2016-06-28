@@ -55,6 +55,7 @@ class TestUptakeMonitoring(unittest.TestCase):
             postrelease_version_bump_enabled=False,
             postrelease_bouncer_aliases_enabled=False,
             tuxedo_server_url="https://bouncer.real.allizom.org/api",
+            uptake_monitoring_platforms=["macosx64", "win32", "win64", "linux", "linux64"],
             signing_class="release-signing",
             release_channels=["foo"],
             final_verify_channels=["foo"],
