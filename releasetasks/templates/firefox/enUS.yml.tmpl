@@ -37,10 +37,10 @@
                 DUMMY_ENV_FOR_ENCRYPT: "fake"
             encryptedEnv:
                 - {{ encrypt_env_var(stableSlugId(complete_beetmover_basename), now_ms,
-                                   now_ms + 24 * 3600 * 1000, 'AWS_ACCESS_KEY_ID',
+                                   now_ms + 24 * 4 * 3600 * 1000, 'AWS_ACCESS_KEY_ID',
                                    beetmover_aws_access_key_id) }}
                 - {{ encrypt_env_var(stableSlugId(complete_beetmover_basename), now_ms,
-                                   now_ms + 24 * 3600 * 1000, 'AWS_SECRET_ACCESS_KEY',
+                                   now_ms + 24 * 4 * 3600 * 1000, 'AWS_SECRET_ACCESS_KEY',
                                    beetmover_aws_secret_access_key) }}
         metadata:
             name: "[beetmover] {{ product }} {{ branch }} {{ platform }} en_US completes candidates"
@@ -280,10 +280,10 @@
                 {% endif %}
             encryptedEnv:
                 - {{ encrypt_env_var(stableSlugId('{}_balrog_task'.format(funsize_basename)), now_ms,
-                                    now_ms + 24 * 3600 * 1000, "BALROG_USERNAME",
+                                    now_ms + 24 * 4 * 3600 * 1000, "BALROG_USERNAME",
                                     balrog_username) }}
                 - {{ encrypt_env_var(stableSlugId('{}_balrog_task'.format(funsize_basename)), now_ms,
-                                    now_ms + 24 * 3600 * 1000, "BALROG_PASSWORD",
+                                    now_ms + 24 * 4 * 3600 * 1000, "BALROG_PASSWORD",
                                     balrog_password) }}
             {% if signing_class != "dep-signing" %}
             features:
@@ -329,10 +329,10 @@
                 DUMMY_ENV_FOR_ENCRYPT: "fake"
             encryptedEnv:
                 - {{ encrypt_env_var(stableSlugId(partial_beetmover_basename), now_ms,
-                                   now_ms + 24 * 3600 * 1000, 'AWS_ACCESS_KEY_ID',
+                                   now_ms + 24 * 4 * 3600 * 1000, 'AWS_ACCESS_KEY_ID',
                                    beetmover_aws_access_key_id) }}
                 - {{ encrypt_env_var(stableSlugId(partial_beetmover_basename), now_ms,
-                                   now_ms + 24 * 3600 * 1000, 'AWS_SECRET_ACCESS_KEY',
+                                   now_ms + 24 * 4 * 3600 * 1000, 'AWS_SECRET_ACCESS_KEY',
                                    beetmover_aws_secret_access_key) }}
         metadata:
             name: "[beetmover] {{ product }} {{ branch }} {{ platform }} en_US partials candidates"
