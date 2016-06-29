@@ -7,6 +7,12 @@ final_verify_platforms:
   - "win32"
   - "win64"
   - "macosx64"
+uptake_monitoring_platforms:
+  - "linux"
+  - "linux64"
+  - "win32"
+  - "win64"
+  - "macosx64"
 l10n_release_platforms: []
 partner_repacks_platforms: []
 

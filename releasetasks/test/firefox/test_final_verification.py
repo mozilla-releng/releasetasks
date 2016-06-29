@@ -59,6 +59,7 @@ class TestFinalVerification(unittest.TestCase):
             release_channels=["foo"],
             final_verify_channels=["foo"],
             final_verify_platforms=["macosx64", "win32", "win64", "linux", "linux64"],
+            uptake_monitoring_platforms=["macosx64", "win32", "win64", "linux", "linux64"],
             balrog_api_root="https://balrog.real/api",
             funsize_balrog_api_root="http://balrog/api",
             enUS_platforms=["linux", "linux64", "win64", "win32", "macosx64"],
