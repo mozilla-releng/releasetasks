@@ -84,6 +84,7 @@ class TestBB_UpdateVerify(unittest.TestCase):
             funsize_balrog_api_root="http://balrog/api",
             enUS_platforms=["linux", "linux64", "win64", "win32", "macosx64"],
             signing_pvt_key=PVT_KEY_FILE,
+            publish_to_balrog_channels=None,
         )
         self.task = get_task_by_name(self.graph, "release-beta_firefox_win32_update_verify_beta_3")
         self.payload = self.task["task"]["payload"]
@@ -224,6 +225,7 @@ class TestBB_UpdateVerifyMultiChannel(unittest.TestCase):
             funsize_balrog_api_root="http://balrog/api",
             enUS_platforms=["linux", "linux64", "win64", "win32", "macosx64"],
             signing_pvt_key=PVT_KEY_FILE,
+            publish_to_balrog_channels=None,
         )
 
     def test_common_assertions(self):

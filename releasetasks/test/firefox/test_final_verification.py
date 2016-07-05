@@ -65,6 +65,7 @@ class TestFinalVerification(unittest.TestCase):
             enUS_platforms=["linux", "linux64", "win64", "win32", "macosx64"],
             signing_pvt_key=PVT_KEY_FILE,
             build_tools_repo_path='build/tools',
+            publish_to_balrog_channels=None,
         )
         self.task_def = get_task_by_name(self.graph, "foo_final_verify")
         self.task = self.task_def["task"]
@@ -164,6 +165,7 @@ class TestFinalVerificationMultiChannel(unittest.TestCase):
             funsize_balrog_api_root="http://balrog/api",
             signing_pvt_key=PVT_KEY_FILE,
             build_tools_repo_path='build/tools',
+            publish_to_balrog_channels=None,
         )
 
     def test_common_assertions(self):
@@ -266,6 +268,7 @@ class TestFinalVerifyNoMirrors(unittest.TestCase):
             enUS_platforms=["win32", "macosx64"],
             signing_pvt_key=PVT_KEY_FILE,
             build_tools_repo_path='build/tools',
+            publish_to_balrog_channels=None,
         )
         self.task_def = get_task_by_name(self.graph, "beta_final_verify")
         self.task = self.task_def["task"]

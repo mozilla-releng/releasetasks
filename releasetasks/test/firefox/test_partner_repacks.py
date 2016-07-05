@@ -75,6 +75,7 @@ class TestPartnerRepacks(unittest.TestCase):
             signing_pvt_key=PVT_KEY_FILE,
             build_tools_repo_path='build/tools',
             partner_repacks_platforms=["win32", "linux"],
+            publish_to_balrog_channels=None,
         )
         self.partner_tasks = [
             get_task_by_name(self.graph, "release-foo-firefox-{}_partner_repacks".format(platform))

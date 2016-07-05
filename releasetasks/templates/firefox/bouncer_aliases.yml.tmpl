@@ -3,7 +3,7 @@
 -
     taskId: "{{ stableSlugId(buildername) }}"
     requires:
-        - "{{ stableSlugId('post_release_human_decision') }}"
+        - "{{ stableSlugId('publish_release_human_decision') }}"
     reruns: 5
     task:
         provisionerId: "buildbot-bridge"

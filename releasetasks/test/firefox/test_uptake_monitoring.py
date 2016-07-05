@@ -62,6 +62,7 @@ class TestUptakeMonitoring(unittest.TestCase):
             balrog_api_root="https://balrog.real/api",
             funsize_balrog_api_root="http://balrog/api",
             signing_pvt_key=PVT_KEY_FILE,
+            publish_to_balrog_channels=None,
         )
         self.task = get_task_by_name(self.graph, "release-foo-firefox_uptake_monitoring")
         self.payload = self.task["task"]["payload"]

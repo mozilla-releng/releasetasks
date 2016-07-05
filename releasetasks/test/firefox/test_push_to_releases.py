@@ -75,6 +75,7 @@ AUTO_INIT_ITEMS = dict(
     final_verify_channels=["beta", "release"],
     build_tools_repo_path='build/tools',
     partner_repacks_platforms=["win32", "macosx64"],
+    publish_to_balrog_channels=None,
 )
 HUMAN_INIT_ITEMS = AUTO_INIT_ITEMS.copy()
 HUMAN_INIT_ITEMS["push_to_releases_automatic"] = False

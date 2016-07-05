@@ -82,6 +82,7 @@ class TestEncryption(unittest.TestCase):
             signing_pvt_key=PVT_KEY_FILE,
             repo_path="foo/bar",
             build_tools_repo_path='build/tools',
+            publish_to_balrog_channels=None,
         )
         do_common_assertions(graph)
         for p in ("win32", "macosx64"):
@@ -124,6 +125,7 @@ class TestGraphScopes(unittest.TestCase):
             verifyConfigs={},
             signing_pvt_key=PVT_KEY_FILE,
             signing_class="release-signing",
+            publish_to_balrog_channels=None,
         )
 
     def test_common_assertions(self):

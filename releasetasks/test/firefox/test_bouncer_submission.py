@@ -58,6 +58,7 @@ class TestBouncerSubmission(unittest.TestCase):
             funsize_balrog_api_root="http://balrog/api",
             signing_pvt_key=PVT_KEY_FILE,
             build_tools_repo_path='build/tools',
+            publish_to_balrog_channels=None,
         )
         self.task = get_task_by_name(self.graph,
                                      "release-foo_firefox_bncr_sub")

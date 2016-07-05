@@ -27,6 +27,8 @@ update_verify_enabled: false
 push_to_releases_enabled: true
 # rc graph 2 only needs final_verify_channels
 channels:
+publish_to_balrog_channels:
+    - "release"
 final_verify_channels:
     - "release"
 postrelease_bouncer_aliases_enabled: true

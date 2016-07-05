@@ -1,0 +1,25 @@
+
+-
+    taskId: "{{ stableSlugId('publish_release_human_decision') }}"
+    reruns: 5
+    task:
+        provisionerId: "null-provisioner"
+        workerType: "human-decision"
+        created: "{{ now }}"
+        deadline: "{{ now.replace(days=4) }}"
+        expires: "{{ never }}"
+        priority: "high"
+        retries: 5
+        routes:
+            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.publish_release_human_decision
+            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.publish_release_human_decision
+        payload:
+            description: "required"
+        metadata:
+            name: "{{ product }} {{ branch }} publish release human decision task"
+            description: "Release Promotion publish release human decision task"
+            owner: "release@mozilla.com"
+            source: https://github.com/mozilla/releasetasks
+
+        extra:
+            {{ common_extras(taskname="publish_release_human_decision", locales=["null"], platform="null") | indent(12)}}

@@ -1,4 +1,4 @@
-{% set buildername = "release-{}-{}_version_bump".format(branch, product) %}
+{% set buildername = "release-{}-{}_publish_balrog".format(branch, product) %}
 
 -
     taskId: "{{ stableSlugId(buildername) }}"
@@ -16,9 +16,8 @@
         scopes:
             - project:releng:buildbot-bridge:builder-name:{{ buildername }}
         routes:
-            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.version_bump
-            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.version_bump
-
+            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.publish_balrog
+            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.publish_balrog
         payload:
             buildername: "{{ buildername }}"
             sourcestamp:
@@ -27,16 +26,17 @@
             properties:
                 product: "{{ product }}"
                 version: "{{ version }}"
-                next_version: "{{ next_version }}"
                 build_number: {{ buildNumber }}
                 repo_path: "{{ repo_path }}"
                 script_repo_revision: "{{ mozharness_changeset }}"
                 release_promotion: true
                 revision: "{{ revision }}"
+                balrog_api_root: {{ balrog_api_root }}
+                channels: {{ publish_to_balrog_channels | sort() | join(", ") }}
 
         metadata:
-            name: "{{ product }} {{ branch }} version bump"
-            description: "Release Promotion version bump"
+            name: "{{ product }} {{ branch }} publish balrog"
+            description: "Release Promotion publish balrog"
             owner: "release@mozilla.com"
             source: https://github.com/mozilla/releasetasks
 

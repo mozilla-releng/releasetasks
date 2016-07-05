@@ -5,11 +5,11 @@ from releasetasks.test.firefox import make_task_graph, do_common_assertions, \
 from releasetasks.test import PVT_KEY_FILE
 
 
-class TestUpdates(unittest.TestCase):
+class TestPublishBalrog(unittest.TestCase):
     maxDiff = 30000
     graph = None
     task = None
-    props = None
+    payload = None
 
     def setUp(self):
         self.graph = make_task_graph(
@@ -18,7 +18,6 @@ class TestUpdates(unittest.TestCase):
             appVersion="42.0",
             buildNumber=3,
             source_enabled=False,
-            checksums_enabled=False,
             en_US_config={
                 "platforms": {
                     "macosx64": {"task_id": "abc"},
@@ -30,6 +29,7 @@ class TestUpdates(unittest.TestCase):
             },
             l10n_config={},
             repo_path="releases/foo",
+            build_tools_repo_path='build/tools',
             product="firefox",
             revision="fedcba654321",
             mozharness_changeset="abcd",
@@ -44,27 +44,27 @@ class TestUpdates(unittest.TestCase):
                 },
             },
             branch="foo",
-            updates_enabled=True,
-            bouncer_enabled=True,
+            updates_enabled=False,
+            bouncer_enabled=False,
+            checksums_enabled=False,
             push_to_candidates_enabled=True,
             beetmover_candidates_bucket='mozilla-releng-beet-mover-dev',
-            push_to_releases_enabled=False,
+            push_to_releases_enabled=True,
+            push_to_releases_automatic=False,
             uptake_monitoring_enabled=False,
-            postrelease_version_bump_enabled=True,
+            postrelease_version_bump_enabled=False,
             postrelease_bouncer_aliases_enabled=False,
-            updates_builder_enabled=True,
+            tuxedo_server_url="https://bouncer.real.allizom.org/api",
             signing_class="release-signing",
-            release_channels=["foo", "bar"],
-            final_verify_channels=["foo", "beta"],
+            release_channels=["foo"],
+            final_verify_channels=["foo"],
             balrog_api_root="https://balrog.real/api",
             funsize_balrog_api_root="http://balrog/api",
             signing_pvt_key=PVT_KEY_FILE,
-            build_tools_repo_path='build/tools',
-            publish_to_balrog_channels=None,
+            publish_to_balrog_channels=["release-dev", "alpha"],
         )
-        self.task = get_task_by_name(
-            self.graph, "release-foo-firefox_updates")
-        self.props = self.task["task"]["payload"]["properties"]
+        self.task = get_task_by_name(self.graph, "release-foo-firefox_publish_balrog")
+        self.payload = self.task["task"]["payload"]
 
     def test_common_assertions(self):
         do_common_assertions(self.graph)
@@ -76,36 +76,14 @@ class TestUpdates(unittest.TestCase):
     def test_worker_type(self):
         self.assertEqual(self.task["task"]["workerType"], "buildbot-bridge")
 
-    def test_graph_scopes(self):
-        expected_graph_scopes = set([
-            "queue:task-priority:high",
-        ])
-        self.assertTrue(expected_graph_scopes.issubset(self.graph["scopes"]))
-
     def test_requires(self):
-        tmpl = "release-foo_firefox_{}_complete_en-US_beetmover_candidates"
-        requires = [
-            get_task_by_name(self.graph, tmpl.format(p))["taskId"]
-            for p in ("linux", "linux64", "macosx64", "win32", "win64")
-        ]
+        requires = [get_task_by_name(self.graph, "publish_release_human_decision")["taskId"]]
         self.assertEqual(sorted(self.task["requires"]), sorted(requires))
 
-    def test_repo_path(self):
-        self.assertEqual(self.props["repo_path"], "releases/foo")
-
-    def test_script_repo_revision(self):
-        self.assertEqual(self.props["script_repo_revision"], "abcd")
-
-    def test_partials(self):
-        self.assertEqual(self.props["partial_versions"],
-                         "37.0build2, 38.0build1")
-
-    def test_balrog(self):
-        self.assertEqual(self.props["balrog_api_root"], "https://balrog.real/api")
-
-    def test_platforms(self):
-        self.assertEqual(self.props["platforms"],
-                         "linux, linux64, macosx64, win32, win64")
+    def test_balrog_api(self):
+        self.assertEqual(self.payload["properties"]["balrog_api_root"],
+                         "https://balrog.real/api")
 
     def test_channels(self):
-        self.assertEqual(self.props["channels"], "bar, foo")
+        self.assertEqual(self.payload["properties"]["channels"],
+                         "alpha, release-dev")

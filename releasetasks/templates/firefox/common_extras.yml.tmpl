@@ -12,6 +12,7 @@ build_props:
     platform: {{ platform }}
     version: "{{ version }}"
     revision: {{ revision }}
+    mozharness_changeset: "{{ mozharness_changeset }}"
     build_number: {{ buildNumber }}
     partials: {% set pipe = joiner(", ") %}{% for p, e in sorted(partial_updates.items()) %}{{ pipe() }}{{ "{}build{}".format(p, e["buildNumber"]) }}{% endfor %}
 

@@ -52,6 +52,7 @@ class TestSourceBuilder(unittest.TestCase):
             verifyConfigs={},
             signing_pvt_key=PVT_KEY_FILE,
             build_tools_repo_path='build/tools',
+            publish_to_balrog_channels=None,
         )
         self.task_def = get_task_by_name(self.graph, "foo_source")
         self.task = self.task_def["task"]
@@ -188,6 +189,7 @@ class TestSourceBuilderPushToMirrors(unittest.TestCase):
             verifyConfigs={},
             signing_pvt_key=PVT_KEY_FILE,
             build_tools_repo_path='build/tools',
+            publish_to_balrog_channels=None,
         )
 
     def test_source_required_by_push_to_mirrors(self):

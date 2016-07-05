@@ -75,6 +75,7 @@ class TestL10NChangesets(unittest.TestCase):
             build_tools_repo_path='build/tools',
             partner_repacks_platforms=["win32", "linux"],
             l10n_changesets={"ab": "cd", "ef": "gh", "ij": "kl"},
+            publish_to_balrog_channels=None,
         )
         self.task = get_task_by_name(self.graph, "foo_l10n_changeset")
         self.task_beet = get_task_by_name(self.graph, "foo_l10n_changeset_beet")

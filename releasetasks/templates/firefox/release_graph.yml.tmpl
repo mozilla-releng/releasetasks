@@ -150,11 +150,19 @@ tasks:
         {{ finalVerify_tasks()|indent(4) }}
     {% endif %}
 
-    {% if postrelease_bouncer_aliases_enabled or postrelease_version_bump_enabled %}
-        {% macro post_release_human_decision_tasks() %}
-            {% include "post_release_human_decision.yml.tmpl" %}
+
+    {% if postrelease_bouncer_aliases_enabled or postrelease_version_bump_enabled or publish_to_balrog_channels %}
+        {% macro publish_release_human_decision_tasks() %}
+            {% include "publish_release_human_decision.yml.tmpl" %}
         {% endmacro %}
-        {{ post_release_human_decision_tasks()|indent(4) }}
+        {{ publish_release_human_decision_tasks()|indent(4) }}
+    {% endif %}
+
+    {% if publish_to_balrog_channels %}
+        {% macro publish_balrog_tasks() %}
+            {% include "publish_balrog.yml.tmpl" %}
+        {% endmacro %}
+        {{ publish_balrog_tasks()|indent(4) }}
     {% endif %}
 
     {% if postrelease_bouncer_aliases_enabled %}

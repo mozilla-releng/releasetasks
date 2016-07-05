@@ -60,6 +60,7 @@ class TestFullGraph(unittest.TestCase):
             build_tools_repo_path='build/tools',
             push_to_releases_automatic=True,
             partner_repacks_platforms=["win32", "macosx64"],
+            publish_to_balrog_channels=["foo"],
         )
 
     def test_common_assertions(self):

@@ -72,6 +72,7 @@ class TestL10NSingleChunk(unittest.TestCase):
             final_verify_channels=["beta"],
             signing_pvt_key=PVT_KEY_FILE,
             build_tools_repo_path='build/tools',
+            publish_to_balrog_channels=None,
         )
         self.task = get_task_by_name(self.graph, "release-mozilla-beta_firefox_win32_l10n_repack_1")
         self.payload = self.task["task"]["payload"]
@@ -224,6 +225,7 @@ class TestL10NMultipleChunks(unittest.TestCase):
             final_verify_channels=["beta"],
             signing_pvt_key=PVT_KEY_FILE,
             build_tools_repo_path='build/tools',
+            publish_to_balrog_channels=None,
         )
         self.chunk1 = get_task_by_name(
             self.graph, "release-mozilla-beta_firefox_win32_l10n_repack_1")
@@ -400,6 +402,7 @@ class TestL10NNewLocales(unittest.TestCase):
             final_verify_channels=["beta"],
             signing_pvt_key=PVT_KEY_FILE,
             build_tools_repo_path='build/tools',
+            publish_to_balrog_channels=None,
         )
 
     def test_common_assertions(self):
