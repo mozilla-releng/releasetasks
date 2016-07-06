@@ -19,6 +19,8 @@
         priority: "high"
         retries: 5
         routes:
+            - tc-treeherder-stage.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
+            - tc-treeherder-production.{{ branch }}.{{ revision }}.{{ pushlog_id }}
             - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.update_verify.{{ channel }}.{{ platform }}.{{ chunk }}
             - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.update_verify.{{ channel }}.{{ platform }}.{{ chunk }}
 
@@ -50,16 +52,17 @@
 
         extra:
             {{ common_extras(taskname=uv_buildername, locales=["null"], platform=platform) | indent(12)}}
-            {# TODO: decide what to use here...
+            treeherderEnv:
+                - staging
+                - production
             treeherder:
                 symbol: UV
                 groupSymbol: Release
                 collection:
                     opt: true
                 machine:
-                    platform: {{ platform }}
+                    platform: linux64
                 build:
-                    platform: none
-            #}
+                    platform: linux64
 {% endfor %}
 {% endfor %}

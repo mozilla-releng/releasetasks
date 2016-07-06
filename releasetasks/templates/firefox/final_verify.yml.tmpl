@@ -22,6 +22,8 @@
         priority: "high"
         retries: 5
         routes:
+            - tc-treeherder-stage.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
+            - tc-treeherder.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
             - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.final_verify
             - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.final_verify
         payload:
@@ -52,16 +54,16 @@
 
         extra:
             {{ common_extras(taskname=buildername, locales=["null"], platform="null") | indent(12)}}
-
-            {# TODO: decide what to use here...
+            treeherderEnv:
+                - production
+                - staging
             treeherder:
                 symbol: FV
                 groupSymbol: Release
                 collection:
                     opt: true
                 machine:
-                    platform: none
+                    platform: linux64
                 build:
-                    platform: none
-            #}
+                    platform: linux64
 {% endfor %}

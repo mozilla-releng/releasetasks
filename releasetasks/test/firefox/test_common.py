@@ -107,6 +107,7 @@ class TestGraphScopes(unittest.TestCase):
             buildNumber=3,
             branch="foo",
             revision="abcdef123456",
+            repo_path="foo/bar",
             mozharness_changeset="abcd",
             updates_enabled=False,
             bouncer_enabled=False,

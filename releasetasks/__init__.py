@@ -7,10 +7,10 @@ from os import path
 from chunkify import chunkify
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 from taskcluster.utils import stableSlugId, encryptEnvVar
-from thclient import TreeherderClient
 
 from releasetasks.util import (
-    treeherder_platform, sign_task, buildbot2ftp, buildbot2bouncer)
+    treeherder_platform, sign_task, buildbot2ftp, buildbot2bouncer,
+    get_json_rev)
 
 DEFAULT_TEMPLATE_DIR = path.join(path.dirname(__file__), "templates")
 
@@ -24,7 +24,6 @@ def make_task_graph(public_key, signing_pvt_key, product,
         loader=FileSystemLoader(path.join(template_dir, product)),
         undefined=StrictUndefined,
         extensions=['jinja2.ext.do'])
-    th = TreeherderClient()
 
     now = arrow.now()
     now_ms = now.timestamp * 1000
@@ -45,10 +44,8 @@ def make_task_graph(public_key, signing_pvt_key, product,
         # actually tell Taskcluster never to expire them, but 1,000 years
         # is as good as never....
         "never": arrow.now().replace(years=1000),
-        # Treeherder expects 12 symbols in revision
-        "revision_hash": th.get_resultsets(
-            template_kwargs["branch"],
-            revision=template_kwargs["revision"][:12])[0]["revision_hash"],
+        "pushlog_id": get_json_rev(template_kwargs["repo_path"],
+                                   template_kwargs["revision"])["pushid"],
         "get_treeherder_platform": treeherder_platform,
         "encrypt_env_var": lambda *args: encryptEnvVar(*args,
                                                        keyFile=public_key),

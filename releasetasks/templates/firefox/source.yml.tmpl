@@ -61,8 +61,8 @@
                 Generates a source tarball
 
         routes:
-            - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
-            - tc-treeherder.{{ branch }}.{{ revision_hash }}
+            - tc-treeherder-stage.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
+            - tc-treeherder.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
             - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.source_tarball
             - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.source_tarball
         extra:
@@ -78,7 +78,7 @@
                 machine:
                     platform: linux64
                 build:
-                    platform: all
+                    platform: linux64
 -
     taskId: "{{ stableSlugId(buildername_signing) }}"
     requires:
@@ -105,8 +105,8 @@
                 Sign source tarball
 
         routes:
-            - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
-            - tc-treeherder-production.{{ branch }}.{{ revision_hash }}
+            - tc-treeherder-stage.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
+            - tc-treeherder-production.{{ branch }}.{{ revision }}.{{ pushlog_id }}
             - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.source_tarball_signing
             - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.source_tarball_signing
 
@@ -123,7 +123,7 @@
                 machine:
                     platform: linux64
                 build:
-                    platform: all
+                    platform: linux64
 
 -
     taskId: "{{ stableSlugId(buildername_beet) }}"
@@ -140,6 +140,8 @@
         priority: "high"
         retries: 5
         routes:
+            - tc-treeherder-stage.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
+            - tc-treeherder-production.{{ branch }}.{{ revision }}.{{ pushlog_id }}
             - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.source_tarball_beetmover
             - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.source_tarball_beetmover
 
@@ -175,6 +177,7 @@
             {{ common_extras(taskname=buildername_beet, locales=["null"], platform="null") | indent(12)}}
             treeherderEnv:
                 - staging
+                - production
             treeherder:
                 symbol: Src
                 groupSymbol: BM
@@ -183,7 +186,7 @@
                 machine:
                     platform: Linux64
                 build:
-                    platform: all
+                    platform: linux64
 
 -
     taskId: "{{ stableSlugId(buildername_beet_signing) }}"
@@ -200,6 +203,8 @@
         priority: "high"
         retries: 5
         routes:
+            - tc-treeherder-stage.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
+            - tc-treeherder.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
             - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.source_tarball_sigs_beetmover
             - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.source_tarball_sigs_beetmover
         payload:

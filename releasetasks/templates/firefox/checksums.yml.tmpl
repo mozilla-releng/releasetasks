@@ -18,8 +18,6 @@
             - project:releng:buildbot-bridge:builder-name:{{ buildername }}
 
         routes:
-            - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
-            - tc-treeherder.{{ branch }}.{{ revision_hash }}
             - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.checksums
             - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.checksums
 
@@ -45,15 +43,3 @@
 
         extra:
             {{ common_extras(taskname=buildername, locales=["null"], platform="null") | indent(12)}}
-            treeherderEnv:
-                - staging
-                - production
-            treeherder:
-                symbol: CS
-                groupSymbol: Release
-                collection:
-                    opt: true
-                machine:
-                    platform: linux64
-                build:
-                    platform: all

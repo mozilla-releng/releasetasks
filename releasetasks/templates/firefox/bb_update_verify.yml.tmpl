@@ -53,17 +53,5 @@
 
         extra:
             {{ common_extras(taskname=task_name, locales=["null"], platform=platform) | indent(12)}}
-
-        {# TODO: decide what to use here...
-        treeherder:
-            symbol: UV
-            groupSymbol: Release
-            collection:
-                opt: true
-            machine:
-                platform: {{ platform }}
-            build:
-                platform: none
-        #}
 {% endfor %}
 {% endfor %}

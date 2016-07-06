@@ -11,8 +11,8 @@
         priority: "high"
         retries: 5
         routes:
-            - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
-            - tc-treeherder.{{ branch }}.{{ revision_hash }}
+            - tc-treeherder-stage.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
+            - tc-treeherder.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
             - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.beetmove_image
             - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.beetmove_image
         payload:
@@ -56,4 +56,4 @@
                 machine:
                     platform: linux64
                 build:
-                    platform: all
+                    platform: linux64

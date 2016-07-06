@@ -110,7 +110,8 @@
         priority: "high"
         retries: 5
         routes:
-            - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
+            - tc-treeherder-stage.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
+            - tc-treeherder.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
             - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.partner_push_to_cdn
             - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.partner_push_to_cdn
         payload:
@@ -145,6 +146,7 @@
             {{ common_extras(taskname=buildername_push, locales=["null"], platform="null") | indent(12)}}
             treeherderEnv:
                 - staging
+                - production
             treeherder:
                 symbol: pp2m
                 groupSymbol: BM
@@ -153,5 +155,5 @@
                 machine:
                     platform: linux64
                 build:
-                    platform: all
+                    platform: linux64
 {% endif %}

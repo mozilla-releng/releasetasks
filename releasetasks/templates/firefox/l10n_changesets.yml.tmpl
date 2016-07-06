@@ -38,11 +38,24 @@
             description:  Generates L10N changesets
 
         routes:
-            - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
+            - tc-treeherder-stage.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
+            - tc-treeherder.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
             - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.l10n_changesets
             - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.l10n_changesets
         extra:
             {{ common_extras(taskname=buildername, locales=["null"], platform="null") | indent(12)}}
+            treeherderEnv:
+                - staging
+                - production
+            treeherder:
+                symbol: L10N_CHS
+                groupSymbol: Release
+                collection:
+                    opt: true
+                machine:
+                    platform: linux64
+                build:
+                    platform: linux64
             l10n_changesets: "{{ format_l10n_changesets(l10n_changesets) }}"
 
 -
@@ -60,6 +73,8 @@
         priority: "high"
         retries: 5
         routes:
+            - tc-treeherder-stage.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
+            - tc-treeherder.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
             - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.l10n_changesets_beetmover
             - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.l10n_changesets_beetmover
 
@@ -95,12 +110,13 @@
             {{ common_extras(taskname=buildername_beet, locales=["null"], platform="null") | indent(12)}}
             treeherderEnv:
                 - staging
+                - production
             treeherder:
                 symbol: L10N_CHS
                 groupSymbol: BM
                 collection:
                     opt: true
                 machine:
-                    platform: Linux64
+                    platform: linux64
                 build:
-                    platform: all
+                    platform: linux64

@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import mock
-import thclient.client
 from jose import jwt
 from jose.constants import ALGORITHMS
 
@@ -13,6 +12,7 @@ def do_common_assertions(graph):
     if graph["tasks"]:
         for t in graph["tasks"]:
             task = t["task"]
+            task_name = task["metadata"]["name"]
             assert "reruns" in t
             assert task["priority"] == "high"
             assert "task_name" in task["extra"]
@@ -45,6 +45,23 @@ def do_common_assertions(graph):
             assert "routes" in task
             rel_routes = [r.startswith("index.releases.") for r in task["routes"]]
             assert len(rel_routes) >= 2, "At least 2 release index routes required"
+
+            if task["provisionerId"] == "buildbot-bridge":
+                assert "treeherder" not in task["extra"], \
+                    "remove treeherder from {}: {}".format(task_name, task)
+                assert "treeherderEnv" not in task["extra"], \
+                    "remove treeherderEnv from {}: {}".format(task_name, task)
+                assert not any([r.startswith("tc-treeherder") for r in task["routes"]]), \
+                    "remove treeherder routes from {}: {}".format(task_name, task)
+
+            if task["provisionerId"] == "aws-provisioner-v1":
+                assert "treeherder" in task["extra"], \
+                    "add treeherder to {}: {}".format(task_name, task)
+                assert "treeherderEnv" in task["extra"], \
+                    "add treeherderEnv to {}: {}".format(task_name, task)
+                assert len([r for r in task["routes"] if r.startswith("tc-treeherder")]) == 2, \
+                    "{} has to have 2 treeherder routes: {}".format(task_name, task)
+
             _cached_taskIDs.add(t["taskId"])
 
 
@@ -55,11 +72,11 @@ def get_task_by_name(graph, name):
     return None
 
 
-@mock.patch.object(thclient.client.TreeherderClient, "get_resultsets")
+@mock.patch("releasetasks.get_json_rev")
 def make_task_graph(*args, **kwargs):
     args = list(args)
-    mocked_get_resultsets = args.pop()
-    mocked_get_resultsets.return_value = [{"revision_hash": "abcdefgh1234567"}]
+    mocked_get_json_rev = args.pop()
+    mocked_get_json_rev.return_value = {"pushid": 78123}
     return make_task_graph_orig(*args, public_key=DUMMY_PUBLIC_KEY,
                                 balrog_username="fake", balrog_password="fake",
                                 beetmover_aws_access_key_id="baz",

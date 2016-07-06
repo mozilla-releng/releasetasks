@@ -97,7 +97,8 @@
         priority: "high"
         retries: 5
         routes:
-            - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
+            - tc-treeherder-stage.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
+            - tc-treeherder.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
             - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.beetmover.{{ chunk }}.{{ platform }}
             - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.beetmover.{{ chunk }}.{{ platform }}
         payload:
@@ -133,6 +134,7 @@
             {{ common_extras(taskname='{}_beetmover_candidates_{}'.format(buildername, chunk), locales=our_locales, platform=platform) | indent(12)}}
             treeherderEnv:
                 - staging
+                - production
             treeherder:
                 symbol: l10n-{{ chunk }}
                 groupSymbol: BM
@@ -170,7 +172,8 @@
             description: |
                 This task generates MAR files and publishes unsigned bits for the locales {{ chunk_locales|join(', ') }}
         routes:
-            - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
+            - tc-treeherder-stage.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
+            - tc-treeherder.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
             - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.partials.{{ partial_version | replace(".", "_") }}.{{ platform }}.{{ chunk }}
             - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.partials.{{ partial_version | replace(".", "_") }}.{{ platform }}.{{ chunk }}
         extra:
@@ -192,6 +195,7 @@
 {% endfor %}
             treeherderEnv:
                 - staging
+                - production
             treeherder:
                 symbol: {{ chunk }}-{{ partial_version }}-g
                 groupSymbol: Update
@@ -256,13 +260,15 @@
                 This task signs MAR files and publishes signed bits for the locales {{ chunk_locales|join(', ') }}
 
         routes:
-            - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
+            - tc-treeherder-stage.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
+            - tc-treeherder.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
             - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.partials_signing.{{ partial_version | replace(".", "_") }}.{{ platform }}.{{ chunk }}
             - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.partials_signing.{{ partial_version | replace(".", "_") }}.{{ platform }}.{{ chunk }}
         extra:
             {{ common_extras(taskname='{}_{}_{}_signing_task'.format(buildername, chunk, partial_version), locales=chunk_locales, platform=platform) | indent(12)}}
             treeherderEnv:
                 - staging
+                - production
             treeherder:
                 symbol: {{ chunk }}-{{ partial_version }}-s
                 groupSymbol: Update
@@ -297,13 +303,15 @@
         expires: "{{ never }}"
         priority: "high"
         routes:
-            - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
+            - tc-treeherder-stage.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
+            - tc-treeherder.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
             - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.partials_balrog.{{ partial_version | replace(".", "_") }}.{{ platform }}.{{ chunk }}
             - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.partials_balrog.{{ partial_version | replace(".", "_") }}.{{ platform }}.{{ chunk }}
         extra:
             {{ common_extras(taskname='{}_{}_{}_balrog_task'.format(buildername, chunk, partial_version), locales=chunk_locales, platform=platform) | indent(12)}}
             treeherderEnv:
                 - staging
+                - production
             treeherder:
                 symbol: {{ chunk }}-{{ partial_version }}-u
                 groupSymbol: Update
@@ -389,7 +397,8 @@
         priority: "high"
         retries: 5
         routes:
-            - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
+            - tc-treeherder-stage.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
+            - tc-treeherder.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
             - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.partials_beetmover.{{ partial_version | replace(".", "_") }}.{{ platform }}.{{ chunk }}
             - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.partials_beetmover.{{ partial_version | replace(".", "_") }}.{{ platform }}.{{ chunk }}
         payload:
@@ -424,6 +433,7 @@
             {{ common_extras(taskname=partial_beetmover_buildername, locales=chunk_locales, platform=platform) | indent(12)}}
             treeherderEnv:
                 - staging
+                - production
             treeherder:
                 symbol: l10n-{{ chunk }}-{{ partial_version }}
                 groupSymbol: BM

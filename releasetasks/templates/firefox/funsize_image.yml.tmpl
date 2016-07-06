@@ -11,8 +11,8 @@
         priority: "high"
         retries: 5
         routes:
-            - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
-            - tc-treeherder.{{ branch }}.{{ revision_hash }}
+            - tc-treeherder-stage.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
+            - tc-treeherder.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
             - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.funsize_update_generator_image
             - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.funsize_update_generator_image
         payload:
@@ -56,7 +56,7 @@
                 machine:
                     platform: linux64
                 build:
-                    platform: all
+                    platform: linux64
 -
     taskId: "{{ stableSlugId("funsize_balrog_image") }}"
     reruns: 5
@@ -69,8 +69,8 @@
         priority: "high"
         retries: 5
         routes:
-            - tc-treeherder-stage.{{ branch }}.{{ revision_hash }}
-            - tc-treeherder.{{ branch }}.{{ revision_hash }}
+            - tc-treeherder-stage.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
+            - tc-treeherder.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
             - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.funsize_balrog_image
             - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.funsize_balrog_image
         payload:
@@ -114,4 +114,4 @@
                 machine:
                     platform: linux64
                 build:
-                    platform: all
+                    platform: linux64
