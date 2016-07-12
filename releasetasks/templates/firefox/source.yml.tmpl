@@ -79,6 +79,8 @@
                     platform: linux64
                 build:
                     platform: linux64
+            {{ task_notifications("{} source generation".format(branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
+
 -
     taskId: "{{ stableSlugId(buildername_signing) }}"
     requires:
@@ -124,6 +126,7 @@
                     platform: linux64
                 build:
                     platform: linux64
+            {{ task_notifications("{} source signing".format(branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
 
 -
     taskId: "{{ stableSlugId(buildername_beet) }}"
@@ -187,6 +190,7 @@
                     platform: linux64
                 build:
                     platform: linux64
+            {{ task_notifications("[beetmover] {} {} move source bundles".format(product, branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
 
 -
     taskId: "{{ stableSlugId(buildername_beet_signing) }}"
@@ -248,3 +252,4 @@
                     platform: linux64
                 build:
                     platform: linux64
+            {{ task_notifications("[beetmover] {} {} move source bundle checksums".format(product, branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}

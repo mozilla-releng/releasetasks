@@ -21,7 +21,7 @@ def make_task_graph(public_key, signing_pvt_key, product,
                     **template_kwargs):
     # TODO: some validation of template_kwargs + defaults
     env = Environment(
-        loader=FileSystemLoader(path.join(template_dir, product)),
+        loader=FileSystemLoader([path.join(template_dir, product), path.join(template_dir, 'notification')]),
         undefined=StrictUndefined,
         extensions=['jinja2.ext.do'])
 

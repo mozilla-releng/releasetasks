@@ -43,6 +43,8 @@
 
         extra:
             {{ common_extras(taskname=buildername, locales=["null"], platform="null") | indent(12)}}
+            {{ task_notifications("{} {} {} partner repacks".format(product, branch, platform), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
+
 
 -
     taskId: "{{ stableSlugId(buildername_eme_free) }}"
@@ -86,6 +88,9 @@
 
         extra:
             {{ common_extras(taskname=buildername_eme_free, locales=["null"], platform="null") | indent(12)}}
+            {{ task_notifications("{} {} {} EME-free repacks".format(product, branch, platform), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
+
+
 
 {% endfor %}
 
@@ -156,4 +161,6 @@
                     platform: linux64
                 build:
                     platform: linux64
+            {{ task_notifications("[beetmover] {} {} partner repacks push to releases".format(product, branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
+
 {% endif %}

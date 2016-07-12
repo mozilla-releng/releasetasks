@@ -48,3 +48,4 @@
 
         extra:
             {{ common_extras(taskname=buildername, locales=["null"], platform="null") | indent(12)}}
+            {{ task_notifications("{} {} updates".format(product, branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}

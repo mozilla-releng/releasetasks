@@ -1,0 +1,50 @@
+{#
+Notifications via Pulse-Notify service
+The macro call should look like
+    task_notifications(taskname, completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"])
+As defined at the top of release_graph.yml.tmpl
+
+If any kwarg is a list, it is assumed to be IDs for notification. If the kwarg is a dict, it is a custom notification configuration
+specific to the task.
+#}
+{% if (completed is not none) or (failed is not none) or (artifact is not none) or (exception is not none) %}
+notifications:
+    {% if completed is iterable %}
+    task-completed:
+        subject: "{{ taskname }} completed"
+        message: "{{ taskname }} has completed successfully! Yay!"
+        ids:
+            {% for id in completed %}
+            - {{ id }}
+            {% endfor %}
+    {% endif %}
+    {% if failed is iterable %}
+    task-failed:
+        subject: "{{ taskname }} failed"
+        message: "Uh-oh! {{ taskname }} failed."
+        ids:
+            {% for id in failed %}
+            - {{ id }}
+            {% endfor %}
+    {% endif %}
+    {% if artifact is iterable %}
+    artifact-created:
+        subject: "{{ taskname }} artifact created"
+        message: "{{ taskname }} has resulted in the creation of an artifact."
+        ids:
+            {% for id in artifact%}
+            - {{ id }}
+            {% endfor %}
+    {% endif %}
+    {% if exception is iterable %}
+    task-exception:
+        subject: "{{ taskname }} exception"
+        message: "Uh-oh! {{ taskname }} resulted in an exception."
+        ids:
+            {% for id in exception %}
+            - {{ id }}
+            {% endfor %}
+    {% endif %}
+{% else %}
+notifications: no notifications
+{% endif %}

@@ -44,3 +44,5 @@ docs/_build
 
 MANIFEST
 .cache/
+
+.idea
