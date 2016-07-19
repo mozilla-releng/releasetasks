@@ -2,6 +2,7 @@ import time
 import requests
 from jose import jws
 from jose.constants import ALGORITHMS
+from redo import retriable
 
 
 ftp_platform_map = {
@@ -56,6 +57,7 @@ def buildbot2bouncer(platform):
     return bouncer_platform_map.get(platform, platform)
 
 
+@retriable(sleeptime=0, jitter=0, retry_exceptions=(requests.HTTPError,))
 def get_json_rev(repo_path, revision):
     url = "https://hg.mozilla.org/{repo_path}/json-rev/{revision}".format(
         repo_path=repo_path, revision=revision)

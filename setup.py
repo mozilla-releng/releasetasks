@@ -18,6 +18,7 @@ requirements = [
     "chunkify",
     "PGPy",
     "python-jose<=0.5.6",
+    "redo",
 ]
 test_requirements = [
     "pytest",
