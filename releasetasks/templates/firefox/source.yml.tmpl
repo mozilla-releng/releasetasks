@@ -52,7 +52,7 @@
                 # Don't clone mozharness, use the in-tree version
                 MOZHARNESS_DISABLE: "true"
                 MOZ_PKG_VERSION: "{{ version }}"
-                MOZHARNESS_ACTIONS: "no-checkout-sources"
+                MOZHARNESS_ACTIONS: "no-clone-tools no-checkout-sources no-setup-mock"
         metadata:
             owner: release@mozilla.com
             source: https://github.com/mozilla/releasetasks
