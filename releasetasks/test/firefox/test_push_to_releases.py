@@ -202,6 +202,10 @@ class TestPushToMirrorsAutomatic(unittest.TestCase):
         command = self.task['task']['payload']['command']
         assert "--exclude '.*-EME-free/.*'" in "".join(command)
 
+    def test_exclude_sha1_in_command(self):
+        command = self.task['task']['payload']['command']
+        assert "--exclude '.*/win32-sha1/.*'" in "".join(command)
+
     def test_human_decision_is_none(self):
         self.assertIsNone(get_task_by_name(self.graph, self.human_task_name))
 
@@ -246,3 +250,7 @@ class TestPushToMirrorsGraph2(unittest.TestCase):
     def test_exclude_not_in_command(self):
         command = self.task['task']['payload']['command']
         assert "--exclude '.*-EME-free/.*'" not in "".join(command)
+
+    def test_exclude_sha1_not_in_command(self):
+        command = self.task['task']['payload']['command']
+        assert "--exclude '.*/win32-sha1/.*'" not in "".join(command)
