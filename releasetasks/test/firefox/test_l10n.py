@@ -26,6 +26,7 @@ class TestL10NSingleChunk(unittest.TestCase):
             push_to_releases_enabled=False,
             uptake_monitoring_enabled=False,
             postrelease_version_bump_enabled=False,
+            postrelease_mark_as_shipped_enabled=False,
             postrelease_bouncer_aliases_enabled=False,
             en_US_config={"platforms": {
                 "win32": {"task_id": "xyy"}
@@ -177,6 +178,7 @@ class TestL10NMultipleChunks(unittest.TestCase):
             push_to_releases_enabled=False,
             uptake_monitoring_enabled=False,
             postrelease_version_bump_enabled=False,
+            postrelease_mark_as_shipped_enabled=False,
             postrelease_bouncer_aliases_enabled=False,
             enUS_platforms=["win32"],
             en_US_config={"platforms": {
@@ -354,6 +356,7 @@ class TestL10NNewLocales(unittest.TestCase):
             uptake_monitoring_enabled=False,
             beetmover_candidates_bucket="bucket",
             postrelease_version_bump_enabled=False,
+            postrelease_mark_as_shipped_enabled=False,
             postrelease_bouncer_aliases_enabled=False,
             enUS_platforms=["win32"],
             en_US_config={"platforms": {

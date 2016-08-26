@@ -54,6 +54,7 @@ class TestEncryption(unittest.TestCase):
             push_to_releases_enabled=False,
             uptake_monitoring_enabled=False,
             postrelease_version_bump_enabled=False,
+            postrelease_mark_as_shipped_enabled=False,
             postrelease_bouncer_aliases_enabled=False,
             en_US_config={"platforms": {
                 "macosx64": {"task_id": "xyz"},
@@ -117,6 +118,7 @@ class TestGraphScopes(unittest.TestCase):
             push_to_releases_enabled=False,
             uptake_monitoring_enabled=False,
             postrelease_version_bump_enabled=False,
+            postrelease_mark_as_shipped_enabled=False,
             postrelease_bouncer_aliases_enabled=False,
             en_US_config={"platforms": {
                 "linux": {"task_id": "xyz"},
