@@ -34,6 +34,7 @@ final_verify_channels:
 postrelease_bouncer_aliases_enabled: true
 uptake_monitoring_enabled: true
 postrelease_version_bump_enabled: true
+postrelease_mark_as_shipped_enabled: true
 
 product: "firefox"
 repo_path: "projects/jamun"
