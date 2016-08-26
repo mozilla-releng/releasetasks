@@ -156,7 +156,7 @@ tasks:
     {% endif %}
 
 
-    {% if postrelease_bouncer_aliases_enabled or postrelease_version_bump_enabled or publish_to_balrog_channels %}
+    {% if postrelease_bouncer_aliases_enabled or postrelease_version_bump_enabled or postrelease_mark_as_shipped_enabled or publish_to_balrog_channels %}
         {% macro publish_release_human_decision_tasks() %}
             {% include "publish_release_human_decision.yml.tmpl" %}
         {% endmacro %}
@@ -182,4 +182,11 @@ tasks:
             {% include "version_bump.yml.tmpl" %}
         {% endmacro %}
         {{ version_bump_tasks()|indent(4) }}
+    {% endif %}
+
+    {% if postrelease_mark_as_shipped_enabled %}
+        {% macro mark_as_shipped_tasks() %}
+            {% include "mark_as_shipped.yml.tmpl" %}
+        {% endmacro %}
+        {{ mark_as_shipped_tasks()|indent(4) }}
     {% endif %}

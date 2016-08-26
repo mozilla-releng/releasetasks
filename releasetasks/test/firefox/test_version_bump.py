@@ -51,6 +51,7 @@ class TestVersionBump(unittest.TestCase):
             push_to_releases_enabled=False,
             uptake_monitoring_enabled=False,
             postrelease_version_bump_enabled=True,
+            postrelease_mark_as_shipped_enabled=False,
             postrelease_bouncer_aliases_enabled=False,
             signing_class="release-signing",
             release_channels=["foo"],

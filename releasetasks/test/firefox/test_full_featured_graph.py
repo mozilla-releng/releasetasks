@@ -48,6 +48,7 @@ class TestFullGraph(unittest.TestCase):
             push_to_releases_enabled=True,
             uptake_monitoring_enabled=True,
             postrelease_version_bump_enabled=True,
+            postrelease_mark_as_shipped_enabled=True,
             postrelease_bouncer_aliases_enabled=True,
             tuxedo_server_url="https://bouncer.real.allizom.org/api",
             uptake_monitoring_platforms=["macosx64", "win32", "win64", "linux", "linux64"],

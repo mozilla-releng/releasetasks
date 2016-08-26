@@ -47,6 +47,7 @@ class TestTaskNotifications(unittest.TestCase):
             push_to_releases_automatic=True,
             uptake_monitoring_enabled=False,
             postrelease_version_bump_enabled=True,
+            postrelease_mark_as_shipped_enabled=True,
             postrelease_bouncer_aliases_enabled=True,
             tuxedo_server_url="https://bouncer.real.allizom.org/api",
             signing_class="release-signing",

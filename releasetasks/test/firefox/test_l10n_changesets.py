@@ -64,6 +64,7 @@ class TestL10NChangesets(unittest.TestCase):
             beetmover_candidates_bucket='mozilla-releng-beet-mover-dev',
             push_to_releases_enabled=True,
             postrelease_version_bump_enabled=False,
+            postrelease_mark_as_shipped_enabled=False,
             postrelease_bouncer_aliases_enabled=False,
             push_to_releases_automatic=True,
             uptake_monitoring_enabled=False,

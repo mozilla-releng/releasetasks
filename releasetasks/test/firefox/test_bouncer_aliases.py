@@ -51,6 +51,7 @@ class TestBouncerAliases(unittest.TestCase):
             push_to_releases_enabled=False,
             uptake_monitoring_enabled=False,
             postrelease_version_bump_enabled=False,
+            postrelease_mark_as_shipped_enabled=False,
             postrelease_bouncer_aliases_enabled=True,
             tuxedo_server_url="https://bouncer.real.allizom.org/api",
             signing_class="release-signing",
