@@ -21,9 +21,7 @@ class TestChecksums(unittest.TestCase):
             en_US_config={
                 "platforms": {
                     "macosx64": {"task_id": "abc"},
-                    "win32": {"task_id": "def"},
                     "win64": {"task_id": "jgh"},
-                    "linux": {"task_id": "ijk"},
                     "linux64": {"task_id": "lmn"},
                 }
             },
@@ -44,7 +42,7 @@ class TestChecksums(unittest.TestCase):
                 },
             },
             branch="foo",
-            updates_enabled=False,
+            updates_enabled=True,
             bouncer_enabled=False,
             checksums_enabled=True,
             push_to_candidates_enabled=True,
@@ -89,9 +87,14 @@ class TestChecksums(unittest.TestCase):
         self.assertEqual(self.payload["properties"]["build_number"], "3")
 
     def test_requires(self):
-        tmpl = "release-foo_firefox_{}_complete_en-US_beetmover_candidates"
+        tmpl = "release-foo_firefox_{p}_complete_en-US_beetmover_candidates"
+        tmpl_partials = "release-foo_firefox_{p}_partial_en-US_{v}build{b}_beetmover_candidates"
         requires = [
-            get_task_by_name(self.graph, tmpl.format(p))["taskId"]
-            for p in ("linux", "linux64", "macosx64", "win32", "win64")
-            ]
+            get_task_by_name(self.graph, tmpl.format(p=p))["taskId"]
+            for p in ("linux64", "macosx64", "win64")
+        ] + [
+            get_task_by_name(self.graph, tmpl_partials.format(p=p, v=v, b=b))["taskId"]
+            for p in ("linux64", "macosx64", "win64")
+            for v, b in [("37.0", 2), ("38.0", 1)]
+        ]
         self.assertEqual(sorted(self.task["requires"]), sorted(requires))
