@@ -18,4 +18,4 @@ Example test invocation using docker:
   docker run --rm -v `pwd`:/src -ti rail/python-test-runner /bin/sh -c "cd /src && tox"
 
 Or to run a single test:
-  docker run --rm -v `pwd`:/src -ti rail/python-test-runner /bin/sh -c "cd /src && .tox/py27/bin/py.test --verbose --cov=releasetasks --cov-report term-missing --doctest-modules releasetasks/test/firefox/test_updates.py::TestUpdates::test_requires"
+  docker run --rm -v `pwd`:/src -ti rail/python-test-runner /bin/sh -c "cd /src && .tox/py27/bin/py.test --verbose --doctest-modules releasetasks/test/firefox/test_updates.py::TestUpdates::test_requires"

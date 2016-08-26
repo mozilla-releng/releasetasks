@@ -1,6 +1,7 @@
 {% for platform in partner_repacks_platforms %}
 {% set buildername = "release-{}-{}-{}_partner_repacks".format(branch, product, platform) %}
 {% set buildername_eme_free = "release-{}-{}-{}_eme_free_repacks".format(branch, product, platform) %}
+{% set buildername_sha1 = "release-{}-{}-{}_sha1_repacks".format(branch, product, platform) %}
 -
     taskId: "{{ stableSlugId(buildername) }}"
     reruns: 5
@@ -91,6 +92,51 @@
             {{ task_notifications("{} {} {} EME-free repacks".format(product, branch, platform), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
 
 
+-
+    taskId: "{{ stableSlugId(buildername_sha1) }}"
+    reruns: 5
+    requires:
+        {% for upstream_builder in artifact_completes_builders %}
+        - {{ stableSlugId(upstream_builder) }}
+        {% endfor %}
+    task:
+        provisionerId: "buildbot-bridge"
+        workerType: "buildbot-bridge"
+        created: "{{ now }}"
+        deadline: "{{ now.replace(days=4) }}"
+        expires: "{{ never }}"
+        priority: "high"
+        retries: 5
+        scopes:
+            - project:releng:buildbot-bridge:builder-name:{{ buildername }}
+        routes:
+            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.sha1_repacks.{{ platform }}
+            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.sha1_repacks.{{ platform }}
+        payload:
+            buildername: "{{ buildername }}"
+            sourcestamp:
+                branch: "{{ repo_path }}"
+                revision: "{{ mozharness_changeset }}"
+            properties:
+                product: "{{ product }}"
+                version: "{{ version }}"
+                build_number: {{ buildNumber }}
+                repo_path: "{{ repo_path }}"
+                script_repo_revision: "{{ mozharness_changeset }}"
+                release_promotion: true
+                revision: "{{ mozharness_changeset }}"
+                repack_manifests_url: "https://github.com/mozilla-partners/mozilla-sha1-manifest"
+        metadata:
+            name: "{{ product }} {{ branch }} {{ platform }} SHA1 repacks"
+            description: "Release Promotion SHA1 repacks"
+            owner: "release@mozilla.com"
+            source: https://github.com/mozilla/releasetasks
+
+        extra:
+            {{ common_extras(taskname=buildername_sha1, locales=["null"], platform="null") | indent(12)}}
+            {{ task_notifications("{} {} {} SHA1 repacks".format(product, branch, platform), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
+
+
 
 {% endfor %}
 
@@ -103,6 +149,7 @@
         {% for platform in partner_repacks_platforms %}
         - "{{ stableSlugId("release-{}-{}-{}_partner_repacks".format(branch, product, platform)) }}"
         - "{{ stableSlugId("release-{}-{}-{}_eme_free_repacks".format(branch, product, platform)) }}"
+        - "{{ stableSlugId("release-{}-{}-{}_sha1_repacks".format(branch, product, platform)) }}"
         {% endfor %}
         - "{{ stableSlugId("release-{}_{}_push_to_releases".format(branch, product)) }}"
     reruns: 5
