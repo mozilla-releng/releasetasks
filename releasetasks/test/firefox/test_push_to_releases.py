@@ -187,6 +187,10 @@ class TestPushToMirrorsAutomatic(unittest.TestCase):
         command = self.task['task']['payload']['command']
         assert "--exclude '.*/win32-sha1/.*'" in "".join(command)
 
+    def test_exclude_snap_in_command(self):
+        command = self.task['task']['payload']['command']
+        assert "--exclude '.*/snap/.*'" in "".join(command)
+
     def test_human_decision_is_none(self):
         self.assertIsNone(get_task_by_name(self.graph, self.human_task_name))
 
