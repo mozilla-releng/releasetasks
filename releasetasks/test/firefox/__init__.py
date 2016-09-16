@@ -5,9 +5,91 @@ from jose.constants import ALGORITHMS
 
 from releasetasks import make_task_graph as make_task_graph_orig
 from releasetasks.test import PUB_KEY, DUMMY_PUBLIC_KEY
+from voluptuous.schema_builder import Optional, Required, Schema
+from voluptuous.validators import Any
+
+
+TASK_SCHEMA = Schema({
+    Required('reruns'): Any(),
+    Required('task'): {
+        Required('priority'): 'high',
+        Required('metadata'): {
+            Required('name'): str,
+        },
+        Required('extra'): {
+            Required('task_name'): str,
+            Required('build_props'): {
+                Required('product'): str,
+                Required('locales'): str,
+                Required('branch'): str,
+                Required('platform'): str,
+                Required('version'): str,
+                Required('revision'): str,
+                Required('build_number'): str,
+            },
+            Required('signing'): {
+                Required('signature'): str,
+            }
+        },
+        Required('payload'): {
+            Optional('properties'): {
+                Required('version'): str,
+                Required('build_number'): str,
+                Required('release_promotion'): str,
+                Required('revision'): str,
+                Required('product'): str,
+            }
+        },
+        Required('routes'): [str],
+    }
+}, extra=True)
+
+
+def generate_signature_schema(task):
+    return {
+        Required('taskId'): jwt.decode(task["extra"]["signing"]["signature"], PUB_KEY, algorithms=[ALGORITHMS.RS512])['taskId']
+    }
+
+PROVISIONER_ID_EXTENSIONS = {
+    'buildbot-bridge': {},
+    'aws-provisioner-v1': {
+        Required('provisionerId'): 'aws-provisioner-v1',
+        Required('extra'): {
+            Required('treeherder'): str,
+            Required('treeherderEnv'): str,
+        }
+    }
+}
 
 
 def do_common_assertions(graph):
+    _cached_taskIDs = set()
+    if graph['tasks']:
+        for t in graph['tasks']:
+            assert t['taskId'] not in _cached_taskIDs
+
+            rel_routes = [r.startswith("index.releases.") for r in t['task']["routes"]]
+            assert len(rel_routes) >= 2, "At least 2 release index routes required"
+
+            if t['task']["provisionerId"] == "buildbot-bridge":
+                assert "treeherder" not in t['task']["extra"]
+                assert "treeherderEnv" not in t['task']["extra"]
+                assert not any([r.startswith("tc-treeherder") for r in t['task']["routes"]])
+
+            if t['task']["provisionerId"] == "aws-provisioner-v1":
+                assert "treeherder" in t['task']["extra"]
+                assert "treeherderEnv" in t['task']["extra"]
+                assert len([r for r in t['task']["routes"] if r.startswith("tc-treeherder")]) == 2
+
+            correct_schema = TASK_SCHEMA.extend(generate_signature_schema(t['task']))
+            correct_schema = correct_schema.extend(PROVISIONER_ID_EXTENSIONS.get(t['task']['provisionerId']))
+
+            assert t == correct_schema(t)
+
+            _cached_taskIDs.add(t['taskId'])
+
+
+def do_common_assertions_2(graph):
     _cached_taskIDs = set()
     if graph["tasks"]:
         for t in graph["tasks"]:
@@ -43,8 +125,6 @@ def do_common_assertions(graph):
             #        #    Can use from taskcluster.utils import decryptMessage
             assert t["taskId"] not in _cached_taskIDs
             assert "routes" in task
-            rel_routes = [r.startswith("index.releases.") for r in task["routes"]]
-            assert len(rel_routes) >= 2, "At least 2 release index routes required"
 
             if task["provisionerId"] == "buildbot-bridge":
                 assert "treeherder" not in task["extra"], \
