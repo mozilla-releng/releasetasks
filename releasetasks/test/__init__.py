@@ -1,4 +1,5 @@
 import os
+import yaml
 
 
 def read_file(path):
@@ -12,3 +13,18 @@ PUB_KEY = read_file(os.path.join(os.path.dirname(__file__), "id_rsa.pub"))
 OTHER_PUB_KEY = read_file(os.path.join(os.path.dirname(__file__),
                                        "other_rsa.pub"))
 DUMMY_PUBLIC_KEY = os.path.join(os.path.dirname(__file__), "public.key")
+
+
+def create_test_args(non_standard_arguments, permitted_defaults=None):
+    with open(os.path.join(os.path.dirname(__file__), 'test_graph_parameters.yml')) as f:
+        default_arguments = yaml.safe_load(f)
+    default_arguments.update(non_standard_arguments)
+
+    if permitted_defaults is not None:
+        default_arguments = {
+            key: val
+            for key, val in default_arguments.items()
+            if key in non_standard_arguments or key in permitted_defaults
+        }
+
+    return default_arguments

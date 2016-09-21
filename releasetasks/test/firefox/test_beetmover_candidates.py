@@ -2,7 +2,7 @@ import unittest
 
 from releasetasks.test.firefox import make_task_graph, do_common_assertions, \
     get_task_by_name
-from releasetasks.test import PVT_KEY_FILE
+from releasetasks.test import PVT_KEY_FILE, create_test_args
 from releasetasks.util import buildbot2ftp
 
 
@@ -55,47 +55,18 @@ class TestBeetmoverEnUSCandidates(unittest.TestCase, BaseTestBeetmoverCandidates
     }
 
     def setUp(self):
-        self.graph = make_task_graph(
-            version="42.0b2",
-            next_version="42.0b3",
-            appVersion="42.0",
-            buildNumber=3,
-            source_enabled=False,
-            checksums_enabled=False,
-            updates_enabled=False,
-            bouncer_enabled=False,
-            push_to_candidates_enabled=True,
-            beetmover_candidates_bucket='mozilla-releng-beet-mover-dev',
-            push_to_releases_enabled=False,
-            uptake_monitoring_enabled=False,
-            postrelease_version_bump_enabled=False,
-            postrelease_mark_as_shipped_enabled=False,
-            postrelease_bouncer_aliases_enabled=False,
-            en_US_config=self.en_US_config,
-            l10n_config={},
-            partial_updates={
-                "38.0": {
-                    "buildNumber": 1,
-                    "locales": ["de", "en-GB", "zh-TW"],
-                },
-                "37.0": {
-                    "buildNumber": 2,
-                    "locales": ["de", "en-GB", "zh-TW"],
-                },
-            },
-            branch="mozilla-beta",
-            repo_path="releases/mozilla-beta",
-            product="firefox",
-            revision="abcdef123456",
-            mozharness_changeset="abcd",
-            balrog_api_root="https://balrog.real/api",
-            funsize_balrog_api_root="http://balrog/api",
-            signing_class="release-signing",
-            verifyConfigs={},
-            signing_pvt_key=PVT_KEY_FILE,
-            build_tools_repo_path='build/tools',
-            publish_to_balrog_channels=None,
-        )
+        test_kwargs = create_test_args({
+            'push_to_candidates_enabled': True,
+            'beetmover_candidates_bucket': 'mozilla-releng-beet-mover-dev',
+            'en_US_config': self.en_US_config,
+            'l10n_config': {},
+            'branch': "mozilla-beta",
+            'repo_path': "releases/mozilla-beta",
+            'signing_pvt_key': PVT_KEY_FILE,
+            'build_tools_repo_path': 'build/tools',
+        })
+        self.graph = make_task_graph(**test_kwargs)
+
         self.tasks = {
             'win32': get_task_by_name(
                 self.graph, "release-{}_{}_{}_complete_en-US_beetmover_candidates".format(
@@ -174,48 +145,18 @@ class TestBeetmover110nCandidates(unittest.TestCase, BaseTestBeetmoverCandidates
     }
 
     def setUp(self):
-        self.graph = make_task_graph(
-            version="42.0b2",
-            next_version="42.0b3",
-            appVersion="42.0",
-            buildNumber=3,
-            source_enabled=False,
-            checksums_enabled=False,
-            updates_enabled=False,
-            bouncer_enabled=False,
-            push_to_candidates_enabled=True,
-            beetmover_candidates_bucket='mozilla-releng-beet-mover-dev',
-            push_to_releases_enabled=False,
-            uptake_monitoring_enabled=False,
-            postrelease_version_bump_enabled=False,
-            postrelease_mark_as_shipped_enabled=False,
-            postrelease_bouncer_aliases_enabled=False,
-            en_US_config=self.en_US_config,
-            l10n_config=self.l10n_config,
-            partial_updates={
-                "38.0": {
-                    "buildNumber": 1,
-                    "locales": ["de", "en-GB", "zh-TW"],
-                },
-                "37.0": {
-                    "buildNumber": 2,
-                    "locales": ["de", "en-GB", "zh-TW"],
-                },
-            },
-            balrog_api_root="https://balrog.real/api",
-            funsize_balrog_api_root="http://balrog/api",
-            signing_class="release-signing",
-            branch="mozilla-beta",
-            product="firefox",
-            repo_path="releases/mozilla-beta",
-            revision="abcdef123456",
-            mozharness_changeset="abcd",
-            release_channels=["beta"],
-            final_verify_channels=["beta"],
-            signing_pvt_key=PVT_KEY_FILE,
-            build_tools_repo_path='build/tools',
-            publish_to_balrog_channels=None,
-        )
+        test_kwargs = create_test_args({
+            'push_to_candidates_enabled': True,
+            'beetmover_candidates_bucket': 'mozilla-releng-beet-mover-dev',
+            'branch': 'mozilla-beta',
+            'repo_path': 'releases/mozilla-beta',
+            'release_channels': ['beta'],
+            'final_verify_channels': ['beta'],
+            'signing_pvt_key': PVT_KEY_FILE,
+            'en_US_config': self.en_US_config,
+            'l10n_config': self.l10n_config,
+        })
+        self.graph = make_task_graph(**test_kwargs)
         self.tasks = {
             'win32': get_task_by_name(
                 self.graph, "release-{}_{}_{}_l10n_repack_beetmover_candidates_1".format("mozilla-beta",
@@ -277,47 +218,17 @@ class TestBeetmoverEnUSPartialsCandidates(unittest.TestCase, BaseTestBeetmoverCa
     }
 
     def setUp(self):
-        self.graph = make_task_graph(
-            version="42.0b2",
-            next_version="42.0b3",
-            appVersion="42.0",
-            buildNumber=3,
-            source_enabled=False,
-            checksums_enabled=False,
-            updates_enabled=True,
-            bouncer_enabled=False,
-            push_to_candidates_enabled=True,
-            beetmover_candidates_bucket='mozilla-releng-beet-mover-dev',
-            push_to_releases_enabled=False,
-            uptake_monitoring_enabled=False,
-            postrelease_version_bump_enabled=False,
-            postrelease_mark_as_shipped_enabled=False,
-            postrelease_bouncer_aliases_enabled=False,
-            en_US_config=self.en_US_config,
-            l10n_config={},
-            partial_updates={
-                "38.0": {
-                    "buildNumber": 1,
-                    "locales": ["de", "en-GB", "zh-TW"],
-                },
-                "37.0": {
-                    "buildNumber": 2,
-                    "locales": ["de", "en-GB", "zh-TW"],
-                },
-            },
-            branch="mozilla-beta",
-            repo_path="releases/mozilla-beta",
-            product="firefox",
-            revision="abcdef123456",
-            mozharness_changeset="abcd",
-            balrog_api_root="https://balrog.real/api",
-            funsize_balrog_api_root="http://balrog/api",
-            signing_class="release-signing",
-            verifyConfigs={},
-            signing_pvt_key=PVT_KEY_FILE,
-            build_tools_repo_path='build/tools',
-            publish_to_balrog_channels=None,
-        )
+        test_kwargs = create_test_args({
+            'updates_enabled': True,
+            'push_to_candidates_enabled': True,
+            'beetmover_candidates_bucket': 'mozilla-releng-beet-mover-dev',
+            'branch': 'mozilla-beta',
+            'repo_path:': 'mozilla/beta',
+            'l10n_config': {},
+            'signing_pvt_key': PVT_KEY_FILE,
+            'en_US_config': self.en_US_config,
+        })
+        self.graph = make_task_graph(**test_kwargs)
         self.tasks = {
             'win32': get_task_by_name(
                 self.graph, "release-{}_{}_{}_partial_en-US_{}build{}_beetmover_candidates".format(
@@ -388,48 +299,19 @@ class TestBeetmoverl10nPartialsCandidates(unittest.TestCase, BaseTestBeetmoverCa
     }
 
     def setUp(self):
-        self.graph = make_task_graph(
-            version="42.0b2",
-            next_version="42.0b3",
-            appVersion="42.0",
-            buildNumber=3,
-            source_enabled=False,
-            checksums_enabled=False,
-            updates_enabled=True,
-            bouncer_enabled=False,
-            push_to_candidates_enabled=True,
-            beetmover_candidates_bucket='mozilla-releng-beet-mover-dev',
-            push_to_releases_enabled=False,
-            uptake_monitoring_enabled=False,
-            postrelease_version_bump_enabled=False,
-            postrelease_mark_as_shipped_enabled=False,
-            postrelease_bouncer_aliases_enabled=False,
-            en_US_config=self.en_US_config,
-            l10n_config=self.l10n_config,
-            partial_updates={
-                "38.0": {
-                    "buildNumber": 1,
-                    "locales": ["de", "en-GB", "zh-TW"],
-                },
-                "37.0": {
-                    "buildNumber": 2,
-                    "locales": ["de", "en-GB", "zh-TW"],
-                },
-            },
-            balrog_api_root="https://balrog.real/api",
-            funsize_balrog_api_root="http://balrog/api",
-            signing_class="release-signing",
-            branch="mozilla-beta",
-            product="firefox",
-            repo_path="releases/mozilla-beta",
-            revision="abcdef123456",
-            mozharness_changeset="abcd",
-            release_channels=["beta"],
-            final_verify_channels=["beta"],
-            signing_pvt_key=PVT_KEY_FILE,
-            build_tools_repo_path='build/tools',
-            publish_to_balrog_channels=None,
-        )
+        test_kwargs = create_test_args({
+            'updates_enabled': True,
+            'push_to_candidates_enabled': True,
+            'beetmover_candidates_bucket': 'mozilla-releng-beet-mover-dev',
+            'en_US_config': self.en_US_config,
+            'l10n_config': self.l10n_config,
+            'branch': 'mozilla-beta',
+            'repo_path': 'releases/mozilla-beta',
+            'signing_pvt_key': PVT_KEY_FILE,
+            'final_verify_channels': ['beta'],
+            'release_channels': ['beta']
+        })
+        self.graph = make_task_graph(**test_kwargs)
         self.tasks = {
             'win32': get_task_by_name(
                 self.graph, "release-{}_{}_{}_l10n_repack_partial_{}build{}_beetmover_candidates_{}".format(

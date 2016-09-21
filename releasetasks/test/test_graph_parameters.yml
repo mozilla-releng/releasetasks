@@ -1,0 +1,91 @@
+# Globals - never change for all tests
+product: firefox
+version: '42.0b2'
+next_version: '42.0b3'
+appVersion: '42.0'
+buildNumber: 3
+build_tools_repo_path: build/tools
+revision: abcdef123456
+mozharness_changeset: abcd
+beetmover_candidates_bucket: fake_bucket
+balrog_api_root: https://balrog.real/api
+funsize_balrog_api_root: http://balrog/api
+signing_class: release-signing  # TODO: Overwrite instance of dev-signing
+tuxedo_server_url: https://bouncer.real.allizom.org/api
+verifyConfigs: {}
+l10n_config: {}
+partial_updates:  # TODO: overwrite single instance of different partial_updates (l10n)
+    38.0:
+        buildNumber: 1
+        locales:
+            - de
+            - en-GB
+            - zh-TW
+    37.0:
+        buildNumber: 2
+        locales:
+            - de
+            - en-GB
+            - zh-TW
+uptake_monitoring_platforms:
+    - macosx
+    - win32
+    - win64
+    - linux
+    - linux64
+
+# Default - change for some tests but needed for all
+source_enabled: False
+checksums_enabled: False
+bouncer_enabled: False
+push_to_candidates_enabled: False
+push_to_releases_enabled: False
+push_to_releases_automatic: False
+uptake_monitoring_enabled: False
+checksums_enabled: False
+postrelease_version_bump_enabled: False
+postrelease_mark_as_shipped_enabled: False
+postrelease_bouncer_aliases_enabled: False
+updates_enabled: False
+update_verify_enabled: False
+updates_builder_enabled: False
+publish_to_balrog_channels: null
+
+# Other
+
+# TODO: Create unique file for en_US_configs
+en_US_config:
+    platforms:
+        macosx64:
+            task_id: xyz
+        win32:
+            task_id: xyy
+        win64:
+            task_id: xyw
+
+#  Same for every test file
+repo_path: releases/mozilla-beta
+
+#  Either foo/mozilla-beta/beta
+branch: beta
+
+#  Different per test (maybe len(release_channels) is only what matters?)
+release_channels:
+    - beta
+
+#  Same as above
+final_verify_channels:
+    - beta
+
+
+#  Unique for each test
+enUS_platforms:
+    - linux
+    - linux64
+    - win64
+    - win32
+    - macosx64
+
+partner_repacks_platforms:
+    - win32
+    - linux

@@ -2,7 +2,7 @@ import unittest
 
 from releasetasks.test.firefox import make_task_graph, do_common_assertions, \
     get_task_by_name
-from releasetasks.test import PVT_KEY_FILE
+from releasetasks.test import PVT_KEY_FILE, create_test_args
 
 
 class TestChecksums(unittest.TestCase):
@@ -12,54 +12,25 @@ class TestChecksums(unittest.TestCase):
     payload = None
 
     def setUp(self):
-        self.graph = make_task_graph(
-            version="42.0b2",
-            next_version="42.0b3",
-            appVersion="42.0",
-            buildNumber=3,
-            source_enabled=False,
-            en_US_config={
+        test_kwargs = create_test_args({
+            'push_to_candidates_enabled': True,
+            'checksums_enabled': True,
+            'updates_enabled': True,
+            'branch': 'foo',
+            'beetmover_candidates_bucket': 'mozilla-releng-beet-mover-dev',
+            'repo_path': 'releases/foo',
+            'signing_pvt_key': PVT_KEY_FILE,
+            'release_channels': ['foo'],
+            'final_verify_channels': ['foo'],
+            'en_US_config': {
                 "platforms": {
                     "macosx64": {"task_id": "abc"},
                     "win64": {"task_id": "jgh"},
                     "linux64": {"task_id": "lmn"},
                 }
             },
-            l10n_config={},
-            repo_path="releases/foo",
-            build_tools_repo_path='build/tools',
-            product="firefox",
-            revision="fedcba654321",
-            mozharness_changeset="abcd",
-            partial_updates={
-                "38.0": {
-                    "buildNumber": 1,
-                    "locales": ["de", "en-GB", "zh-TW"],
-                },
-                "37.0": {
-                    "buildNumber": 2,
-                    "locales": ["de", "en-GB", "zh-TW"],
-                },
-            },
-            branch="foo",
-            updates_enabled=True,
-            bouncer_enabled=False,
-            checksums_enabled=True,
-            push_to_candidates_enabled=True,
-            beetmover_candidates_bucket='mozilla-releng-beet-mover-dev',
-            push_to_releases_enabled=False,
-            uptake_monitoring_enabled=False,
-            postrelease_version_bump_enabled=False,
-            postrelease_mark_as_shipped_enabled=False,
-            postrelease_bouncer_aliases_enabled=False,
-            signing_class="release-signing",
-            release_channels=["foo"],
-            final_verify_channels=["foo"],
-            balrog_api_root="https://balrog.real/api",
-            funsize_balrog_api_root="http://balrog/api",
-            signing_pvt_key=PVT_KEY_FILE,
-            publish_to_balrog_channels=None,
-        )
+        })
+        self.graph = make_task_graph(**test_kwargs)
         self.task = get_task_by_name(self.graph, "release-foo-firefox_chcksms")
         self.payload = self.task["task"]["payload"]
 

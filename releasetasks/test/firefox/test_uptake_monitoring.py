@@ -2,7 +2,7 @@ import unittest
 
 from releasetasks.test.firefox import make_task_graph, do_common_assertions, \
     get_task_by_name
-from releasetasks.test import PVT_KEY_FILE
+from releasetasks.test import PVT_KEY_FILE, create_test_args
 
 
 class TestUptakeMonitoring(unittest.TestCase):
@@ -12,13 +12,18 @@ class TestUptakeMonitoring(unittest.TestCase):
     payload = None
 
     def setUp(self):
-        self.graph = make_task_graph(
-            version="42.0b2",
-            next_version="42.0b3",
-            appVersion="42.0",
-            buildNumber=3,
-            source_enabled=False,
-            en_US_config={
+        test_kwargs = create_test_args({
+            'push_to_candidates_enabled': True,
+            'push_to_releases_enabled': True,
+            'uptake_monitoring_enabled': True,
+            'repo_path': 'releases/foo',
+            'branch': 'foo',
+            'beetmover_candidates_bucket': 'mozilla-releng-beet-mover-dev',
+            'signing_pvt_key': PVT_KEY_FILE,
+            'uptake_monitoring_platforms': ["macosx64", "win32", "win64", "linux", "linux64"],
+            'release_channels': ['foo'],
+            'final_verify_channels': ['foo'],
+            'en_US_config': {
                 "platforms": {
                     "macosx64": {"task_id": "abc"},
                     "win32": {"task_id": "def"},
@@ -27,44 +32,8 @@ class TestUptakeMonitoring(unittest.TestCase):
                     "linux64": {"task_id": "lmn"},
                 }
             },
-            l10n_config={},
-            repo_path="releases/foo",
-            build_tools_repo_path='build/tools',
-            product="firefox",
-            revision="fedcba654321",
-            mozharness_changeset="abcd",
-            partial_updates={
-                "38.0": {
-                    "buildNumber": 1,
-                    "locales": ["de", "en-GB", "zh-TW"],
-                },
-                "37.0": {
-                    "buildNumber": 2,
-                    "locales": ["de", "en-GB", "zh-TW"],
-                },
-            },
-            branch="foo",
-            updates_enabled=False,
-            bouncer_enabled=False,
-            checksums_enabled=False,
-            push_to_candidates_enabled=True,
-            beetmover_candidates_bucket='mozilla-releng-beet-mover-dev',
-            push_to_releases_enabled=True,
-            push_to_releases_automatic=False,
-            uptake_monitoring_enabled=True,
-            postrelease_version_bump_enabled=False,
-            postrelease_mark_as_shipped_enabled=False,
-            postrelease_bouncer_aliases_enabled=False,
-            tuxedo_server_url="https://bouncer.real.allizom.org/api",
-            uptake_monitoring_platforms=["macosx64", "win32", "win64", "linux", "linux64"],
-            signing_class="release-signing",
-            release_channels=["foo"],
-            final_verify_channels=["foo"],
-            balrog_api_root="https://balrog.real/api",
-            funsize_balrog_api_root="http://balrog/api",
-            signing_pvt_key=PVT_KEY_FILE,
-            publish_to_balrog_channels=None,
-        )
+        })
+        self.graph = make_task_graph(**test_kwargs)
         self.task = get_task_by_name(self.graph, "release-foo-firefox_uptake_monitoring")
         self.payload = self.task["task"]["payload"]
 
@@ -106,7 +75,7 @@ class TestUptakeMonitoring(unittest.TestCase):
 
     def test_revision(self):
         self.assertEqual(self.payload["properties"]["revision"],
-                         "fedcba654321")
+                         "abcdef123456")
 
     def test_tuxedo_server_url(self):
         self.assertEqual(self.payload["properties"]["tuxedo_server_url"],

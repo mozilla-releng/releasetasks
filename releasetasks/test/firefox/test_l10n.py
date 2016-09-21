@@ -2,7 +2,7 @@ import unittest
 
 from releasetasks.test.firefox import make_task_graph, get_task_by_name, \
     do_common_assertions
-from releasetasks.test import PVT_KEY_FILE
+from releasetasks.test import PVT_KEY_FILE, create_test_args
 
 
 class TestL10NSingleChunk(unittest.TestCase):
@@ -13,25 +13,22 @@ class TestL10NSingleChunk(unittest.TestCase):
     properties = None
 
     def setUp(self):
-        self.graph = make_task_graph(
-            version="42.0b2",
-            next_version="42.0b3",
-            appVersion="42.0",
-            buildNumber=3,
-            source_enabled=False,
-            checksums_enabled=False,
-            updates_enabled=True,
-            bouncer_enabled=False,
-            push_to_candidates_enabled=False,
-            push_to_releases_enabled=False,
-            uptake_monitoring_enabled=False,
-            postrelease_version_bump_enabled=False,
-            postrelease_mark_as_shipped_enabled=False,
-            postrelease_bouncer_aliases_enabled=False,
-            en_US_config={"platforms": {
-                "win32": {"task_id": "xyy"}
-            }},
-            l10n_config={
+        test_arguments = create_test_args({
+            'updates_enabled': True,
+            'signing_pvt_key': PVT_KEY_FILE,
+            'branch': "mozilla-beta",
+            'repo_path': "releases/mozilla-beta",
+            'release_channels': ["beta"],
+            'final_verify_channels': ["beta"],
+
+            'en_US_config': {
+                "platforms": {
+                    "win32": {
+                        "task_id": "xyy"
+                    }
+                }
+            },
+            'l10n_config': {
                 "platforms": {
                     "win32": {
                         "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.exe",
@@ -49,32 +46,10 @@ class TestL10NSingleChunk(unittest.TestCase):
                     "de": "default",
                     "en-GB": "default",
                     "zh-TW": "default",
-                },
+                }
             },
-            partial_updates={
-                "38.0": {
-                    "buildNumber": 1,
-                    "locales": ["de", "en-GB", "zh-TW"],
-                },
-                "37.0": {
-                    "buildNumber": 2,
-                    "locales": ["de", "en-GB", "zh-TW"],
-                },
-            },
-            balrog_api_root="https://balrog.real/api",
-            funsize_balrog_api_root="http://balrog/api",
-            signing_class="release-signing",
-            branch="mozilla-beta",
-            product="firefox",
-            repo_path="releases/mozilla-beta",
-            revision="abcdef123456",
-            mozharness_changeset="abcd",
-            release_channels=["beta"],
-            final_verify_channels=["beta"],
-            signing_pvt_key=PVT_KEY_FILE,
-            build_tools_repo_path='build/tools',
-            publish_to_balrog_channels=None,
-        )
+        })
+        self.graph = make_task_graph(**test_arguments)
         self.task = get_task_by_name(self.graph, "release-mozilla-beta_firefox_win32_l10n_repack_1")
         self.payload = self.task["task"]["payload"]
         self.properties = self.payload["properties"]
@@ -165,26 +140,20 @@ class TestL10NMultipleChunks(unittest.TestCase):
     chunk2_properties = None
 
     def setUp(self):
-        self.graph = make_task_graph(
-            version="42.0b2",
-            next_version="42.0b3",
-            appVersion="42.0",
-            buildNumber=3,
-            source_enabled=False,
-            checksums_enabled=False,
-            updates_enabled=True,
-            bouncer_enabled=False,
-            push_to_candidates_enabled=False,
-            push_to_releases_enabled=False,
-            uptake_monitoring_enabled=False,
-            postrelease_version_bump_enabled=False,
-            postrelease_mark_as_shipped_enabled=False,
-            postrelease_bouncer_aliases_enabled=False,
-            enUS_platforms=["win32"],
-            en_US_config={"platforms": {
-                "win32": {"task_id": "xyy"}
-            }},
-            l10n_config={
+        test_kwargs = create_test_args({
+            'updates_enabled': True,
+            'repo_path': 'releases/mozilla-beta',
+            'branch': 'mozilla-beta',
+            'signing_pvt_key': PVT_KEY_FILE,
+            'release_channels': ['beta'],
+            'final_verify_channels': ['beta'],
+            'en_US_platforms': ['win32'],
+            'en_US_config': {
+                "platforms": {
+                    "win32": {"task_id": "xyy"}
+                }
+            },
+            'l10n_config': {
                 "platforms": {
                     "win32": {
                         "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.exe",
@@ -205,30 +174,8 @@ class TestL10NMultipleChunks(unittest.TestCase):
                     "zh-TW": "default",
                 },
             },
-            partial_updates={
-                "38.0": {
-                    "buildNumber": 1,
-                    "locales": ["de", "en-GB", "zh-TW"],
-                },
-                "37.0": {
-                    "buildNumber": 2,
-                    "locales": ["de", "en-GB", "zh-TW"],
-                },
-            },
-            signing_class="release-signing",
-            balrog_api_root="https://balrog.real/api",
-            funsize_balrog_api_root="http://balrog/api",
-            branch="mozilla-beta",
-            product="firefox",
-            repo_path="releases/mozilla-beta",
-            revision="abcdef123456",
-            mozharness_changeset="abcd",
-            release_channels=["beta"],
-            final_verify_channels=["beta"],
-            signing_pvt_key=PVT_KEY_FILE,
-            build_tools_repo_path='build/tools',
-            publish_to_balrog_channels=None,
-        )
+        })
+        self.graph = make_task_graph(**test_kwargs)
         self.chunk1 = get_task_by_name(
             self.graph, "release-mozilla-beta_firefox_win32_l10n_repack_1")
         self.chunk2 = get_task_by_name(
@@ -342,27 +289,22 @@ class TestL10NNewLocales(unittest.TestCase):
     graph = None
 
     def setUp(self):
-        self.graph = make_task_graph(
-            version="42.0b2",
-            next_version="42.0b3",
-            appVersion="42.0",
-            buildNumber=3,
-            source_enabled=False,
-            checksums_enabled=False,
-            updates_enabled=True,
-            bouncer_enabled=False,
-            push_to_candidates_enabled=True,
-            push_to_releases_enabled=False,
-            uptake_monitoring_enabled=False,
-            beetmover_candidates_bucket="bucket",
-            postrelease_version_bump_enabled=False,
-            postrelease_mark_as_shipped_enabled=False,
-            postrelease_bouncer_aliases_enabled=False,
-            enUS_platforms=["win32"],
-            en_US_config={"platforms": {
-                "win32": {"task_id": "xyy"}
-            }},
-            l10n_config={
+        test_kwargs = create_test_args({
+            'updates_enabled': True,
+            'push_to_candidates_enabled': True,
+            'beetmover_candidates_bucket': 'bucket',
+            'branch': 'mozilla-beta',
+            'repo_path': 'releases/mozilla-beta',
+            'signing_pvt_key': PVT_KEY_FILE,
+            'release_channels': ['beta'],
+            'final_verify_channels': ['beta'],
+            'enUS_platforms': ['win32'],
+            'en_US_config': {
+                "platforms": {
+                    "win32": {"task_id": "xyy"}
+                }
+            },
+            'l10n_config': {
                 "platforms": {
                     "win32": {
                         "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.exe",
@@ -383,30 +325,22 @@ class TestL10NNewLocales(unittest.TestCase):
                     "zh-TW": "default",
                 },
             },
-            partial_updates={
-                "38.0": {
-                    "buildNumber": 1,
-                    "locales": ["de", "en-GB", "ru", "uk", "zh-TW"],
+            'partial_updates': {
+                '38.0': {
+                    'buildNumber': 1,
+                    'locales': [
+                        'de', 'en-GB', 'ru', 'uk', 'zh-TW'
+                    ]
                 },
-                "37.0": {
-                    "buildNumber": 2,
-                    "locales": ["de", "en-GB", "ru", "uk"],
-                },
-            },
-            signing_class="release-signing",
-            balrog_api_root="https://balrog.real/api",
-            funsize_balrog_api_root="http://balrog/api",
-            branch="mozilla-beta",
-            product="firefox",
-            repo_path="releases/mozilla-beta",
-            revision="abcdef123456",
-            mozharness_changeset="abcd",
-            release_channels=["beta"],
-            final_verify_channels=["beta"],
-            signing_pvt_key=PVT_KEY_FILE,
-            build_tools_repo_path='build/tools',
-            publish_to_balrog_channels=None,
-        )
+                '37.0': {
+                    'buildNumber': 2,
+                    'locales': [
+                        'de', 'en-GB', 'ru', 'uk'
+                    ]
+                }
+            }
+        })
+        self.graph = make_task_graph(**test_kwargs)
 
     def test_common_assertions(self):
         do_common_assertions(self.graph)

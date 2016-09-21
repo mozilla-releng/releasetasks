@@ -2,7 +2,7 @@ import unittest
 
 from releasetasks.test.firefox import do_common_assertions, get_task_by_name, \
     make_task_graph
-from releasetasks.test import PVT_KEY_FILE
+from releasetasks.test import PVT_KEY_FILE, create_test_args
 
 
 class TestL10NChangesets(unittest.TestCase):
@@ -12,19 +12,24 @@ class TestL10NChangesets(unittest.TestCase):
     task_beet = None
 
     def setUp(self):
-        self.graph = make_task_graph(
-            product="firefox",
-            version="42.0b2",
-            next_version="42.0b3",
-            appVersion="42.0",
-            buildNumber=3,
-            source_enabled=True,
-            checksums_enabled=False,
-            en_US_config={"platforms": {
-                "linux": {"task_id": "xyz"},
-                "win32": {"task_id": "xyy"}
-            }},
-            l10n_config={
+        test_kwargs = create_test_args({
+            'source_enabled': True,
+            'push_to_candidates_enabled': True,
+            'push_to_releases_enabled': True,
+            'push_to_releases_automatic': True,
+            'beetmover_candidates_bucket': 'mozilla-releng-beet-mover-dev',
+            'branch': 'foo',
+            'repo_path': 'releases/foo',
+            'signing_pvt_key': PVT_KEY_FILE,
+            'release_channels': ['foo', 'bar'],
+            'partner_repacks_platforms': ['win32', 'linux'],
+            'l10n_changesets': {"ab": "cd", "ef": "gh", "ij": "kl"},
+            'en_US_config': {
+                "platforms": {
+                    "linux": {"task_id": "xyz"},
+                    "win32": {"task_id": "xyy"},
+                },
+            }, 'l10n_config': {
                 "platforms": {
                     "win32": {
                         "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.exe",
@@ -44,40 +49,8 @@ class TestL10NChangesets(unittest.TestCase):
                     "zh-TW": "default",
                 },
             },
-            partial_updates={
-                "38.0": {
-                    "buildNumber": 1,
-                    "locales": ["de", "en-GB", "zh-TW"],
-                },
-                "37.0": {
-                    "buildNumber": 2,
-                    "locales": ["de", "en-GB", "zh-TW"],
-                },
-            },
-            repo_path="releases/foo",
-            revision="fedcba654321",
-            mozharness_changeset="abcd",
-            branch="foo",
-            updates_enabled=False,
-            bouncer_enabled=False,
-            push_to_candidates_enabled=True,
-            beetmover_candidates_bucket='mozilla-releng-beet-mover-dev',
-            push_to_releases_enabled=True,
-            postrelease_version_bump_enabled=False,
-            postrelease_mark_as_shipped_enabled=False,
-            postrelease_bouncer_aliases_enabled=False,
-            push_to_releases_automatic=True,
-            uptake_monitoring_enabled=False,
-            release_channels=["foo", "bar"],
-            balrog_api_root="https://balrog.real/api",
-            signing_class="release-signing",
-            verifyConfigs={},
-            signing_pvt_key=PVT_KEY_FILE,
-            build_tools_repo_path='build/tools',
-            partner_repacks_platforms=["win32", "linux"],
-            l10n_changesets={"ab": "cd", "ef": "gh", "ij": "kl"},
-            publish_to_balrog_channels=None,
-        )
+        })
+        self.graph = make_task_graph(**test_kwargs)
         self.task = get_task_by_name(self.graph, "foo_l10n_changeset")
         self.task_beet = get_task_by_name(self.graph, "foo_l10n_changeset_beet")
 
