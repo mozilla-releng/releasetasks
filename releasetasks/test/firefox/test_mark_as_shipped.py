@@ -5,7 +5,7 @@ from releasetasks.test.firefox import make_task_graph, do_common_assertions, \
 from releasetasks.test import PVT_KEY_FILE
 
 
-class TestVersionBump(unittest.TestCase):
+class TestMarkAsShipped(unittest.TestCase):
     maxDiff = 30000
     graph = None
     task = None
@@ -15,10 +15,10 @@ class TestVersionBump(unittest.TestCase):
     def setUp(self):
         test_kwargs = create_firefox_test_args({
             'bouncer_enabled': True,
-            'postrelease_version_bump_enabled': True,
-            'release_channels': ['foo'],
-            'final_verify_channels': ['foo'],
+            'postrelease_mark_as_shipped_enabled': True,
             'signing_pvt_key': PVT_KEY_FILE,
+            'final_verify_channels': ['foo'],
+            'release_channels': ['foo'],
             'en_US_config': {
                 "platforms": {
                     "macosx64": {},
@@ -31,7 +31,7 @@ class TestVersionBump(unittest.TestCase):
         })
         self.graph = make_task_graph(**test_kwargs)
         self.task = get_task_by_name(
-            self.graph, "release-foo-firefox_version_bump")
+            self.graph, "release-foo-firefox_mark_as_shipped")
         self.human_task = get_task_by_name(
             self.graph, "publish_release_human_decision")
         self.payload = self.task["task"]["payload"]

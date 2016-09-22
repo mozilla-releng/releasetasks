@@ -14,7 +14,7 @@ build_props:
     revision: {{ revision }}
     mozharness_changeset: "{{ mozharness_changeset }}"
     build_number: {{ buildNumber }}
-    partials: {% set pipe = joiner(", ") %}{% for p, e in sorted(partial_updates.items()) %}{{ pipe() }}{{ "{}build{}".format(p, e["buildNumber"]) }}{% endfor %}
+    partials: {% set pipe = joiner(",") %}{% for p, e in sorted(partial_updates.items()) %}{{ pipe() }}{{ "{}build{}".format(p, e["buildNumber"]) }}{% endfor %}
 
 signing:
    signature: {{ sign_task(stableSlugId(taskname), valid_for=4 * 24 * 3600) }}

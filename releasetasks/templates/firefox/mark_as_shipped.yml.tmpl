@@ -1,10 +1,9 @@
-{% set buildername = "release-{}-{}_chcksms".format(branch, product) %}
+{% set buildername = "release-{}-{}_mark_as_shipped".format(branch, product) %}
+
 -
     taskId: "{{ stableSlugId(buildername) }}"
     requires:
-        {% for upstream_builder in artifact_completes_builders + artifact_partials_builders + push_to_releases_extra_upstream_builders %}
-        - {{ stableSlugId(upstream_builder) }}
-        {% endfor %}
+        - "{{ stableSlugId('publish_release_human_decision') }}"
     reruns: 5
     task:
         provisionerId: "buildbot-bridge"
@@ -16,10 +15,9 @@
         retries: 5
         scopes:
             - project:releng:buildbot-bridge:builder-name:{{ buildername }}
-
         routes:
-            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.checksums
-            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.checksums
+            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.mark_as_shipped
+            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.mark_as_shipped
 
         payload:
             buildername: "{{ buildername }}"
@@ -29,18 +27,19 @@
             properties:
                 product: "{{ product }}"
                 version: "{{ version }}"
-                build_number: "{{ buildNumber }}"
-                release_promotion: true
-                revision: "{{ mozharness_changeset }}"
+                build_number: {{ buildNumber }}
+                next_version: "{{ next_version }}"
                 repo_path: "{{ repo_path }}"
                 script_repo_revision: "{{ mozharness_changeset }}"
+                release_promotion: true
+                revision: "{{ revision }}"
 
         metadata:
-            name: "{{ product }} {{ branch }} checksums builder"
-            description: "Release Promotion checksums job"
+            name: "{{ product }} {{ branch }} mark release as shipped"
+            description: "Release Promotion mark release as shipped in Ship-It"
             owner: "release@mozilla.com"
             source: https://github.com/mozilla/releasetasks
 
         extra:
-            {{ task_notifications("{} {} checksums builder".format(product, branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
             {{ common_extras(taskname=buildername, locales=["null"], platform="null") | indent(12)}}
+            {{ task_notifications("{} {} mark release as shipped".format(product, branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}

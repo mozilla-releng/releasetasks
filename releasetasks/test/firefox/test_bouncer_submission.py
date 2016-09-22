@@ -1,7 +1,7 @@
 import unittest
 
 from releasetasks.test.firefox import make_task_graph, do_common_assertions, \
-    get_task_by_name
+    get_task_by_name, create_firefox_test_args
 from releasetasks.test import PVT_KEY_FILE
 
 
@@ -12,13 +12,12 @@ class TestBouncerSubmission(unittest.TestCase):
     payload = None
 
     def setUp(self):
-        self.graph = make_task_graph(
-            version="42.0b2",
-            next_version="42.0b3",
-            appVersion="42.0",
-            buildNumber=3,
-            source_enabled=False,
-            en_US_config={
+        test_kwargs = create_firefox_test_args({
+            'bouncer_enabled': True,
+            'release_channels': ['foo'],
+            'final_verify_channels': ['foo'],
+            'signing_pvt_key': PVT_KEY_FILE,
+            'en_US_config': {
                 "platforms": {
                     "macosx64": {},
                     "win32": {},
@@ -27,39 +26,8 @@ class TestBouncerSubmission(unittest.TestCase):
                     "linux64": {},
                 }
             },
-            l10n_config={},
-            repo_path="releases/foo",
-            product="firefox",
-            revision="fedcba654321",
-            mozharness_changeset="abcd",
-            partial_updates={
-                "38.0": {
-                    "buildNumber": 1,
-                    "locales": ["de", "en-GB", "zh-TW"],
-                },
-                "37.0": {
-                    "buildNumber": 2,
-                    "locales": ["de", "en-GB", "zh-TW"],
-                },
-            },
-            branch="foo",
-            updates_enabled=False,
-            bouncer_enabled=True,
-            checksums_enabled=False,
-            push_to_candidates_enabled=False,
-            push_to_releases_enabled=False,
-            uptake_monitoring_enabled=False,
-            postrelease_version_bump_enabled=False,
-            postrelease_bouncer_aliases_enabled=False,
-            signing_class="release-signing",
-            release_channels=["foo"],
-            final_verify_channels=["foo"],
-            balrog_api_root="https://balrog.real/api",
-            funsize_balrog_api_root="http://balrog/api",
-            signing_pvt_key=PVT_KEY_FILE,
-            build_tools_repo_path='build/tools',
-            publish_to_balrog_channels=None,
-        )
+        })
+        self.graph = make_task_graph(**test_kwargs)
         self.task = get_task_by_name(self.graph,
                                      "release-foo_firefox_bncr_sub")
         self.payload = self.task["task"]["payload"]

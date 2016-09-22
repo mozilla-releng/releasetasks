@@ -11,7 +11,7 @@ specific to the task.
 notifications:
     {% if completed is iterable %}
     task-completed:
-        subject: "{{ taskname }} completed"
+        subject: "Completed: {{ taskname }}"
         message: "{{ taskname }} has completed successfully! Yay!"
         ids:
             {% for id in completed %}
@@ -20,7 +20,7 @@ notifications:
     {% endif %}
     {% if failed is iterable %}
     task-failed:
-        subject: "{{ taskname }} failed"
+        subject: "Failed: {{ taskname }}"
         message: "Uh-oh! {{ taskname }} failed."
         ids:
             {% for id in failed %}
@@ -29,7 +29,7 @@ notifications:
     {% endif %}
     {% if artifact is iterable %}
     artifact-created:
-        subject: "{{ taskname }} artifact created"
+        subject: "Artifact created: {{ taskname }}"
         message: "{{ taskname }} has resulted in the creation of an artifact."
         ids:
             {% for id in artifact%}
@@ -38,7 +38,7 @@ notifications:
     {% endif %}
     {% if exception is iterable %}
     task-exception:
-        subject: "{{ taskname }} exception"
+        subject: "Exception: {{ taskname }}"
         message: "Uh-oh! {{ taskname }} resulted in an exception."
         ids:
             {% for id in exception %}
