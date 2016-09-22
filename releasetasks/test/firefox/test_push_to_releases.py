@@ -1,7 +1,7 @@
 import unittest
 
 from releasetasks.test.firefox import make_task_graph, do_common_assertions, \
-    get_task_by_name
+    get_task_by_name, create_firefox_test_args
 from releasetasks.test import PVT_KEY_FILE
 
 EN_US_CONFIG = {
@@ -34,55 +34,6 @@ L10N_CONFIG = {
 }
 
 
-AUTO_INIT_ITEMS = dict(
-    version="42.0b2",
-    next_version="42.0b3",
-    appVersion="42.0",
-    buildNumber=3,
-    source_enabled=False,
-    checksums_enabled=True,
-    updates_enabled=True,
-    bouncer_enabled=False,
-    push_to_candidates_enabled=True,
-    push_to_releases_enabled=True,
-    uptake_monitoring_enabled=False,
-    beetmover_candidates_bucket='fake_bucket',
-    postrelease_version_bump_enabled=False,
-    postrelease_mark_as_shipped_enabled=False,
-    postrelease_bouncer_aliases_enabled=False,
-    en_US_config=EN_US_CONFIG,
-    l10n_config=L10N_CONFIG,
-    partial_updates={
-        "38.0": {
-            "buildNumber": 1,
-            "locales": ["de", "en-GB", "zh-TW"],
-        },
-        "37.0": {
-            "buildNumber": 2,
-            "locales": ["de", "en-GB", "zh-TW"],
-        },
-    },
-    branch="mozilla-beta",
-    repo_path="releases/mozilla-beta",
-    product="firefox",
-    revision="abcdef123456",
-    mozharness_changeset="abcd",
-    balrog_api_root="https://balrog.real/api",
-    funsize_balrog_api_root="http://balrog/api",
-    signing_class="release-signing",
-    verifyConfigs={},
-    signing_pvt_key=PVT_KEY_FILE,
-    release_channels=["beta", "release"],
-    final_verify_channels=["beta", "release"],
-    build_tools_repo_path='build/tools',
-    partner_repacks_platforms=["win32", "macosx64"],
-    publish_to_balrog_channels=None,
-)
-HUMAN_INIT_ITEMS = AUTO_INIT_ITEMS.copy()
-HUMAN_INIT_ITEMS["push_to_releases_automatic"] = False
-AUTO_INIT_ITEMS["push_to_releases_automatic"] = True
-
-
 class TestPushToMirrorsHuman(unittest.TestCase):
     maxDiff = 30000
     graph = None
@@ -92,7 +43,21 @@ class TestPushToMirrorsHuman(unittest.TestCase):
                                                                              "firefox")
 
     def setUp(self):
-        self.graph = make_task_graph(**HUMAN_INIT_ITEMS)
+        test_kwargs = create_firefox_test_args({
+            'checksums_enabled': True,
+            'updates_enabled': True,
+            'push_to_candidates_enabled': True,
+            'push_to_releases_enabled': True,
+            'branch': 'mozilla-beta',
+            'repo_path': 'releases/mozilla-beta',
+            'signing_pvt_key': PVT_KEY_FILE,
+            'release_channels': ['beta', 'release'],
+            'final_verify_channels': ['beta', 'release'],
+            'partner_repacks_platforms': ['win32', 'macosx64'],
+            'en_US_config': EN_US_CONFIG,
+            'l10n_config': L10N_CONFIG,
+        })
+        self.graph = make_task_graph(**test_kwargs)
         self.task = get_task_by_name(
             self.graph, "release-{}_{}_push_to_releases".format("mozilla-beta", "firefox")
         )
@@ -166,7 +131,22 @@ class TestPushToMirrorsAutomatic(unittest.TestCase):
                                                                              "firefox")
 
     def setUp(self):
-        self.graph = make_task_graph(**AUTO_INIT_ITEMS)
+        test_kwargs = create_firefox_test_args({
+            'checksums_enabled': True,
+            'updates_enabled': True,
+            'push_to_candidates_enabled': True,
+            'push_to_releases_enabled': True,
+            'push_to_releases_automatic': True,
+            'branch': 'mozilla-beta',
+            'repo_path': 'releases/mozilla-beta',
+            'signing_pvt_key': PVT_KEY_FILE,
+            'release_channels': ['beta', 'release'],
+            'final_verify_channels': ['beta', 'release'],
+            'partner_repacks_platforms': ['win32', 'macosx64'],
+            'en_US_config': EN_US_CONFIG,
+            'l10n_config': L10N_CONFIG,
+        })
+        self.graph = make_task_graph(**test_kwargs)
         self.task = get_task_by_name(
             self.graph, "release-{}_{}_push_to_releases".format("mozilla-beta", "firefox")
         )
@@ -240,10 +220,23 @@ class TestPushToMirrorsGraph2(unittest.TestCase):
                                                                              "firefox")
 
     def setUp(self):
-        kwargs = AUTO_INIT_ITEMS.copy()
-        kwargs["partner_repacks_platforms"] = []
+        test_kwargs = create_firefox_test_args({
+            'checksums_enabled': True,
+            'updates_enabled': True,
+            'push_to_candidates_enabled': True,
+            'push_to_releases_enabled': True,
+            'push_to_releases_automatic': True,
+            'branch': 'mozilla-beta',
+            'repo_path': 'releases/mozilla-beta',
+            'signing_pvt_key': PVT_KEY_FILE,
+            'release_channels': ['beta', 'release'],
+            'final_verify_channels': ['beta', 'release'],
+            'partner_repacks_platforms': [],
+            'en_US_config': EN_US_CONFIG,
+            'l10n_config': L10N_CONFIG,
+        })
+        self.graph = make_task_graph(**test_kwargs)
 
-        self.graph = make_task_graph(**kwargs)
         self.task = get_task_by_name(
             self.graph, "release-{}_{}_push_to_releases".format("mozilla-beta", "firefox")
         )
