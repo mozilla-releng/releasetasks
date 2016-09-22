@@ -28,7 +28,7 @@
 
         payload:
             maxRunTime: 7200
-            image: rail/source-builder@sha256:20ea2d9aff06740d6a35ff2f42af98c8d8b65efec9d0dea48692fbb3025d5d8c
+            image: taskcluster/desktop-build:0.1.11
             cache:
                 build-{{ branch }}-release-workspace: /home/worker/workspace
                 tooltool-cache: /home/worker/tooltool-cache
