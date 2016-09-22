@@ -1,12 +1,12 @@
 import unittest
-from releasetasks.test import PVT_KEY_FILE, create_test_args
-from releasetasks.test.firefox import make_task_graph
+from releasetasks.test import PVT_KEY_FILE
+from releasetasks.test.firefox import make_task_graph, create_firefox_test_args
 
 
-class TestTaskNotifications(unittest.TestCase):
+class TestFirefoxTaskNotifications(unittest.TestCase):
 
     def setUp(self):
-        test_kwargs = create_test_args({
+        test_kwargs = create_firefox_test_args({
             'source_enabled': True,
             'updates_enabled': True,
             'bouncer_enabled': True,

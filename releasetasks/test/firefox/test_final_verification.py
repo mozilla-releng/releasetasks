@@ -2,7 +2,8 @@ import unittest
 
 from releasetasks.test.firefox import make_task_graph, do_common_assertions, \
     get_task_by_name
-from releasetasks.test import PVT_KEY_FILE, create_test_args
+from releasetasks.test import PVT_KEY_FILE
+from releasetasks.test.firefox import create_firefox_test_args
 
 
 class TestFinalVerification(unittest.TestCase):
@@ -13,7 +14,7 @@ class TestFinalVerification(unittest.TestCase):
     payload = None
 
     def setUp(self):
-        test_args = create_test_args({
+        test_args = create_firefox_test_args({
             'push_to_releases_enabled': True,
             'uptake_monitoring_enabled': True,
             'release_channels': ['foo'],
@@ -81,7 +82,7 @@ class TestFinalVerificationMultiChannel(unittest.TestCase):
     graph = None
 
     def setUp(self):
-        test_kwargs = create_test_args({
+        test_kwargs = create_firefox_test_args({
             'push_to_releases_enabled': True,
             'release_channels': ['beta', 'release'],
             'final_verify_channels': ['beta', 'release'],
@@ -133,7 +134,7 @@ class TestFinalVerifyNoMirrors(unittest.TestCase):
     payload = None
 
     def setUp(self):
-        test_kwargs = create_test_args({
+        test_kwargs = create_firefox_test_args({
             'updates_enabled': True,
             'push_to_candidates_enabled': True,
             'repo_path': 'releases/mozilla-beta',

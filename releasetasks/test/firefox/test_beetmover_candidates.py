@@ -1,8 +1,8 @@
 import unittest
 
 from releasetasks.test.firefox import make_task_graph, do_common_assertions, \
-    get_task_by_name
-from releasetasks.test import PVT_KEY_FILE, create_test_args
+    get_task_by_name, create_firefox_test_args
+from releasetasks.test import PVT_KEY_FILE
 from releasetasks.util import buildbot2ftp
 
 
@@ -57,7 +57,7 @@ class TestBeetmoverEnUSCandidates(unittest.TestCase, BaseTestBeetmoverCandidates
     tasks = None
 
     def setUp(self):
-        test_kwargs = create_test_args({
+        test_kwargs = create_firefox_test_args({
             'push_to_candidates_enabled': True,
             'en_US_config': EN_US_CONFIG,
             'branch': "mozilla-beta",
@@ -139,7 +139,7 @@ class TestBeetmover110nCandidates(unittest.TestCase, BaseTestBeetmoverCandidates
     }
 
     def setUp(self):
-        test_kwargs = create_test_args({
+        test_kwargs = create_firefox_test_args({
             'push_to_candidates_enabled': True,
             'branch': 'mozilla-beta',
             'repo_path': 'releases/mozilla-beta',
@@ -205,7 +205,7 @@ class TestBeetmoverEnUSPartialsCandidates(unittest.TestCase, BaseTestBeetmoverCa
     tasks = None
 
     def setUp(self):
-        test_kwargs = create_test_args({
+        test_kwargs = create_firefox_test_args({
             'updates_enabled': True,
             'push_to_candidates_enabled': True,
             'branch': 'mozilla-beta',
@@ -278,7 +278,7 @@ class TestBeetmoverl10nPartialsCandidates(unittest.TestCase, BaseTestBeetmoverCa
     }
 
     def setUp(self):
-        test_kwargs = create_test_args({
+        test_kwargs = create_firefox_test_args({
             'updates_enabled': True,
             'push_to_candidates_enabled': True,
             'en_US_config': EN_US_CONFIG,

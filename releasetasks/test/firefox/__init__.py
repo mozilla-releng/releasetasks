@@ -2,9 +2,18 @@
 import mock
 from jose import jwt
 from jose.constants import ALGORITHMS
+import os
+import yaml
 
 from releasetasks import make_task_graph as make_task_graph_orig
 from releasetasks.test import PUB_KEY, DUMMY_PUBLIC_KEY
+
+
+def create_firefox_test_args(non_standard_arguments):
+    with open(os.path.join(os.path.dirname(__file__), 'default_graph_parameters.yml')) as f:
+        default_arguments = yaml.safe_load(f)
+    default_arguments.update(non_standard_arguments)
+    return default_arguments
 
 
 def do_common_assertions(graph):

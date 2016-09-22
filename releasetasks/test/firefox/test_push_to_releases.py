@@ -1,8 +1,8 @@
 import unittest
 
 from releasetasks.test.firefox import make_task_graph, do_common_assertions, \
-    get_task_by_name
-from releasetasks.test import PVT_KEY_FILE, create_test_args
+    get_task_by_name, create_firefox_test_args
+from releasetasks.test import PVT_KEY_FILE
 
 EN_US_CONFIG = {
     "platforms": {
@@ -43,7 +43,7 @@ class TestPushToMirrorsHuman(unittest.TestCase):
                                                                              "firefox")
 
     def setUp(self):
-        test_kwargs = create_test_args({
+        test_kwargs = create_firefox_test_args({
             'checksums_enabled': True,
             'updates_enabled': True,
             'push_to_candidates_enabled': True,
@@ -131,7 +131,7 @@ class TestPushToMirrorsAutomatic(unittest.TestCase):
                                                                              "firefox")
 
     def setUp(self):
-        test_kwargs = create_test_args({
+        test_kwargs = create_firefox_test_args({
             'checksums_enabled': True,
             'updates_enabled': True,
             'push_to_candidates_enabled': True,
@@ -220,7 +220,7 @@ class TestPushToMirrorsGraph2(unittest.TestCase):
                                                                              "firefox")
 
     def setUp(self):
-        test_kwargs = create_test_args({
+        test_kwargs = create_firefox_test_args({
             'checksums_enabled': True,
             'updates_enabled': True,
             'push_to_candidates_enabled': True,

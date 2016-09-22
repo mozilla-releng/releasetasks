@@ -1,7 +1,7 @@
 import unittest
 
-from releasetasks.test.firefox import make_task_graph, do_common_assertions
-from releasetasks.test import PVT_KEY_FILE, create_test_args
+from releasetasks.test.firefox import make_task_graph, do_common_assertions, create_firefox_test_args
+from releasetasks.test import PVT_KEY_FILE
 
 
 class TestFullGraph(unittest.TestCase):
@@ -9,7 +9,7 @@ class TestFullGraph(unittest.TestCase):
     graph = None
 
     def setUp(self):
-        test_args = create_test_args({
+        test_args = create_firefox_test_args({
             'source_enabled': True,
             'checksums_enabled': True,
             'updates_enabled': True,

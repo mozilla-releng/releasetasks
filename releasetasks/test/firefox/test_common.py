@@ -4,9 +4,9 @@ from jose import jwt, jws
 from jose.constants import ALGORITHMS
 
 from releasetasks import sign_task
-from releasetasks.test import PVT_KEY_FILE, PVT_KEY, PUB_KEY, OTHER_PUB_KEY, create_test_args
+from releasetasks.test import PVT_KEY_FILE, PVT_KEY, PUB_KEY, OTHER_PUB_KEY
 from releasetasks.test.firefox import make_task_graph, do_common_assertions, \
-    get_task_by_name
+    get_task_by_name, create_firefox_test_args
 
 
 class TestTaskSigning(unittest.TestCase):
@@ -41,7 +41,7 @@ class TestEncryption(unittest.TestCase):
     maxDiff = 30000
 
     def test_encryption(self):
-        test_kwargs = create_test_args({
+        test_kwargs = create_firefox_test_args({
             'updates_enabled': True,
             'repo_path': 'foo/bar',
             'branch': 'mozilla-beta',
@@ -72,7 +72,7 @@ class TestGraphScopes(unittest.TestCase):
     graph = None
 
     def setUp(self):
-        test_kwargs = create_test_args({
+        test_kwargs = create_firefox_test_args({
             'signing_pvt_key': PVT_KEY_FILE,
             'en_US_config': {
                 "platforms": {
