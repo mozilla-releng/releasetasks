@@ -1,4 +1,3 @@
-# Globals - never change for all tests
 product: firefox
 version: '42.0b2'
 next_version: '42.0b3'
@@ -10,13 +9,13 @@ mozharness_changeset: abcd
 beetmover_candidates_bucket: fake_bucket
 balrog_api_root: https://balrog.real/api
 funsize_balrog_api_root: http://balrog/api
-signing_class: release-signing  # TODO: Overwrite instance of dev-signing
+signing_class: release-signing
 tuxedo_server_url: https://bouncer.real.allizom.org/api
 verifyConfigs: {}
 l10n_config: {}
 branch: foo
 repo_path: releases/foo
-partial_updates:  # TODO: overwrite single instance of different partial_updates (l10n)
+partial_updates:
     38.0:
         buildNumber: 1
         locales:
