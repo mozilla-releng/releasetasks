@@ -4,6 +4,13 @@ from releasetasks.test.firefox import do_common_assertions, get_task_by_name, \
     make_task_graph
 from releasetasks.test import PVT_KEY_FILE, create_test_args
 
+EN_US_CONFIG = {
+    "platforms": {
+        "linux": {"task_id": "xyz"},
+        "win32": {"task_id": "xyy"}
+    }
+}
+
 
 class TestSourceBuilder(unittest.TestCase):
     maxDiff = 30000
@@ -15,16 +22,8 @@ class TestSourceBuilder(unittest.TestCase):
     def setUp(self):
         test_kwargs = create_test_args({
             'source_enabled': True,
-            'repo_path': 'releases/foo',
-            'branch': 'foo',
-            'beetmover_candidates_bucket': 'mozilla-releng-beet-mover-dev',
             'signing_pvt_key': PVT_KEY_FILE,
-            'en_US_config': {
-                "platforms": {
-                    "linux": {"task_id": "xyz"},
-                    "win32": {"task_id": "xyy"}
-                }
-            },
+            'en_US_config': EN_US_CONFIG,
         })
         self.graph = make_task_graph(**test_kwargs)
         self.task_def = get_task_by_name(self.graph, "foo_source")
@@ -125,17 +124,9 @@ class TestSourceBuilderPushToMirrors(unittest.TestCase):
             'push_to_candidates_enabled': True,
             'push_to_releases_enabled': True,
             'push_to_releases_automatic': True,
-            'repo_path': 'releases/foo',
-            'branch': 'foo',
-            'beetmover_candidates_bucket': 'mozilla-releng-beet-mover-dev',
             'release_channels': ['foo', 'bar'],
             'signing_pvt_key': PVT_KEY_FILE,
-            'en_US_config': {
-                "platforms": {
-                    "linux": {"task_id": "xyz"},
-                    "win32": {"task_id": "xyy"}
-                }
-            }
+            'en_US_config': EN_US_CONFIG,
         })
         self.graph = make_task_graph(**test_kwargs)
 

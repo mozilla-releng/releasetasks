@@ -17,9 +17,6 @@ class TestL10NChangesets(unittest.TestCase):
             'push_to_candidates_enabled': True,
             'push_to_releases_enabled': True,
             'push_to_releases_automatic': True,
-            'beetmover_candidates_bucket': 'mozilla-releng-beet-mover-dev',
-            'branch': 'foo',
-            'repo_path': 'releases/foo',
             'signing_pvt_key': PVT_KEY_FILE,
             'release_channels': ['foo', 'bar'],
             'partner_repacks_platforms': ['win32', 'linux'],
@@ -29,7 +26,8 @@ class TestL10NChangesets(unittest.TestCase):
                     "linux": {"task_id": "xyz"},
                     "win32": {"task_id": "xyy"},
                 },
-            }, 'l10n_config': {
+            },
+            'l10n_config': {
                 "platforms": {
                     "win32": {
                         "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.exe",

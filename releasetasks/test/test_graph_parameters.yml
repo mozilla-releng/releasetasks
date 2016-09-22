@@ -52,22 +52,8 @@ updates_builder_enabled: False
 publish_to_balrog_channels: null
 
 # Other
-
-# TODO: Create unique file for en_US_configs
-en_US_config:
-    platforms:
-        macosx64:
-            task_id: xyz
-        win32:
-            task_id: xyy
-        win64:
-            task_id: xyw
-
-#  Same for every test file
-repo_path: releases/mozilla-beta
-
-#  Either foo/mozilla-beta/beta
-branch: beta
+branch: foo
+repo_path: releases/foo
 
 #  Different per test (maybe len(release_channels) is only what matters?)
 release_channels:
@@ -77,14 +63,6 @@ release_channels:
 final_verify_channels:
     - beta
 
-
-#  Unique for each test
-enUS_platforms:
-    - linux
-    - linux64
-    - win64
-    - win32
-    - macosx64
 
 partner_repacks_platforms:
     - win32

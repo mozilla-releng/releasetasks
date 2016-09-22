@@ -73,8 +73,6 @@ class TestGraphScopes(unittest.TestCase):
 
     def setUp(self):
         test_kwargs = create_test_args({
-            'branch': 'foo',
-            'repo_path': 'foo/bar',
             'signing_pvt_key': PVT_KEY_FILE,
             'en_US_config': {
                 "platforms": {

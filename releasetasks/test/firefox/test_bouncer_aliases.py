@@ -15,8 +15,6 @@ class TestBouncerAliases(unittest.TestCase):
     def setUp(self):
         test_kwargs = create_test_args({
             'postrelease_bouncer_aliases_enabled': True,
-            'branch': 'foo',
-            'repo_path': 'releases/foo',
             'release_channels': ['foo'],
             'signing_pvt_key': PVT_KEY_FILE,
             'en_US_config': {

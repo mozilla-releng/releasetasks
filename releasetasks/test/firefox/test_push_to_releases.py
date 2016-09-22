@@ -34,20 +34,6 @@ L10N_CONFIG = {
 }
 
 
-AUTO_INIT_ITEMS = dict(
-    beetmover_candidates_bucket='fake_bucket',
-    branch="mozilla-beta",
-    repo_path="releases/mozilla-beta",
-    signing_pvt_key=PVT_KEY_FILE,
-    release_channels=["beta", "release"],
-    final_verify_channels=["beta", "release"],
-    partner_repacks_platforms=["win32", "macosx64"],
-)
-HUMAN_INIT_ITEMS = AUTO_INIT_ITEMS.copy()
-HUMAN_INIT_ITEMS["push_to_releases_automatic"] = False
-AUTO_INIT_ITEMS["push_to_releases_automatic"] = True
-
-
 class TestPushToMirrorsHuman(unittest.TestCase):
     maxDiff = 30000
     graph = None
@@ -64,7 +50,6 @@ class TestPushToMirrorsHuman(unittest.TestCase):
             'push_to_releases_enabled': True,
             'branch': 'mozilla-beta',
             'repo_path': 'releases/mozilla-beta',
-            'beetmover_candidates_bucket': 'fake_bucket',
             'signing_pvt_key': PVT_KEY_FILE,
             'release_channels': ['beta', 'release'],
             'final_verify_channels': ['beta', 'release'],
@@ -154,7 +139,6 @@ class TestPushToMirrorsAutomatic(unittest.TestCase):
             'push_to_releases_automatic': True,
             'branch': 'mozilla-beta',
             'repo_path': 'releases/mozilla-beta',
-            'beetmover_candidates_bucket': 'fake_bucket',
             'signing_pvt_key': PVT_KEY_FILE,
             'release_channels': ['beta', 'release'],
             'final_verify_channels': ['beta', 'release'],
@@ -244,7 +228,6 @@ class TestPushToMirrorsGraph2(unittest.TestCase):
             'push_to_releases_automatic': True,
             'branch': 'mozilla-beta',
             'repo_path': 'releases/mozilla-beta',
-            'beetmover_candidates_bucket': 'fake_bucket',
             'signing_pvt_key': PVT_KEY_FILE,
             'release_channels': ['beta', 'release'],
             'final_verify_channels': ['beta', 'release'],

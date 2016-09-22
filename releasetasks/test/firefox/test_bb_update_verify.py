@@ -5,6 +5,46 @@ from releasetasks.test.firefox import make_task_graph, do_common_assertions, \
 from releasetasks.test import PVT_KEY_FILE, create_test_args
 
 
+L10N_CONFIG = {
+    'platforms': {
+        'win32': {
+            'en_us_binary_url': 'https://queue.taskcluster.net/something/firefox.exe',
+            'locales': ['de', 'en-GB', 'zh-TW'],
+            'chunks': 1
+        },
+        'win64': {
+            'en_us_binary_url': 'https://queue.taskcluster.net/something/firefox.exe',
+            'locales': ['de', 'en-GB', 'zh-TW'],
+            'chunks': 1
+        },
+        'macosx64': {
+            'en_us_binary_url': 'https://queue.taskcluster.net/something/firefox.exe',
+            'locales': ['de', 'en-GB', 'zh-TW'],
+            'chunks': 1
+        },
+    },
+    'changesets': {
+        'de': 'default',
+        'en-GB': 'default',
+        'zh-TW': 'default',
+    }
+}
+
+EN_US_CONFIG = {
+    'platforms': {
+        'macosx64': {
+            'task_id': 'xyz'
+        },
+        'win32': {
+            'task_id': 'xyz'
+        },
+        'win64': {
+            'task_id': 'xyz'
+        }
+    }
+}
+
+
 class TestBB_UpdateVerify(unittest.TestCase):
     maxDiff = 30000
     graph = None
@@ -18,48 +58,11 @@ class TestBB_UpdateVerify(unittest.TestCase):
             'update_verify_enabled': True,
             'updates_builder_enabled': True,
             'signing_pvt_key': PVT_KEY_FILE,
-            'repo_path': 'releases/mozilla-beta',
             'branch': 'beta',
             'release_channels': ['beta'],
             'final_verify_channels': ['beta'],
-            'en_US_platforms': ['linux', 'linux64', 'win64', 'win32', 'macosx64'],
-            'l10n_config': {
-                'platforms': {
-                    'win32': {
-                        'en_us_binary_url': 'https://queue.taskcluster.net/something/firefox.exe',
-                        'locales': ['de', 'en-GB', 'zh-TW'],
-                        'chunks': 1
-                    },
-                    'win64': {
-                        'en_us_binary_url': 'https://queue.taskcluster.net/something/firefox.exe',
-                        'locales': ['de', 'en-GB', 'zh-TW'],
-                        'chunks': 1
-                    },
-                    'macosx64': {
-                        'en_us_binary_url': 'https://queue.taskcluster.net/something/firefox.exe',
-                        'locales': ['de', 'en-GB', 'zh-TW'],
-                        'chunks': 1
-                    },
-                },
-                'changesets': {
-                    'de': 'default',
-                    'en-GB': 'default',
-                    'zh-TW': 'default',
-                }
-            },
-            'en_US_config': {
-                'platforms': {
-                    'macosx64': {
-                        'task_id': 'xyz'
-                    },
-                    'win32': {
-                        'task_id': 'xyz'
-                    },
-                    'win64': {
-                        'task_id': 'xyz'
-                    }
-                }
-            }
+            'l10n_config': L10N_CONFIG,
+            'en_US_config': EN_US_CONFIG,
         })
         self.graph = make_task_graph(**test_args)
         self.task = get_task_by_name(self.graph, "release-beta_firefox_win32_update_verify_beta_3")
@@ -135,43 +138,12 @@ class TestBB_UpdateVerifyMultiChannel(unittest.TestCase):
             'updates_enabled': True,
             'push_to_candidates_enabled': True,
             'update_verify_enabled': True,
-            'repo_path': 'releases/mozilla-beta',
             'branch': 'beta',
             'release_channels': ["beta", "release"],
             'enUS_platforms': ["linux", "linux64", "win64", "win32", "macosx64"],
             'signing_pvt_key': PVT_KEY_FILE,
-            'en_US_config': {
-                "platforms": {
-                    "macosx64": {"task_id": "xyz"},
-                    "win32": {"task_id": "xyy"},
-                    "win64": {"task_id": "xyw"}
-                }
-            },
-            'l10n_config': {
-                "platforms": {
-                    "win32": {
-                        "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.exe",
-                        "locales": ["de", "en-GB", "zh-TW"],
-                        "chunks": 1,
-                    },
-                    "win64": {
-                        "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.exe",
-                        "locales": ["de", "en-GB", "zh-TW"],
-                        "chunks": 1,
-                    },
-                    "macosx64": {
-                        "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.tar.xz",
-                        "locales": ["de", "en-GB", "zh-TW"],
-                        "chunks": 1,
-                    },
-
-                },
-                "changesets": {
-                    "de": "default",
-                    "en-GB": "default",
-                    "zh-TW": "default",
-                },
-            },
+            'en_US_config': EN_US_CONFIG,
+            'l10n_config': L10N_CONFIG,
         })
         self.graph = make_task_graph(**test_kwargs)
 

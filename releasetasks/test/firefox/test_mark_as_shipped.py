@@ -16,8 +16,6 @@ class TestMarkAsShipped(unittest.TestCase):
         test_kwargs = create_test_args({
             'bouncer_enabled': True,
             'postrelease_mark_as_shipped_enabled': True,
-            'repo_path': 'releases/foo',
-            'branch': 'foo',
             'signing_pvt_key': PVT_KEY_FILE,
             'final_verify_channels': ['foo'],
             'release_channels': ['foo'],

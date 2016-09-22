@@ -16,8 +16,6 @@ class TestVersionBump(unittest.TestCase):
         test_kwargs = create_test_args({
             'bouncer_enabled': True,
             'postrelease_version_bump_enabled': True,
-            'repo_path': 'releases/foo',
-            'branch': 'foo',
             'release_channels': ['foo'],
             'final_verify_channels': ['foo'],
             'signing_pvt_key': PVT_KEY_FILE,

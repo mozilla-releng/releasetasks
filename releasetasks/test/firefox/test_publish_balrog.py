@@ -15,9 +15,6 @@ class TestPublishBalrog(unittest.TestCase):
         test_kwargs = create_test_args({
             'push_to_candidates_enabled': True,
             'push_to_releases_enabled': True,
-            'repo_path': 'releases/foo',
-            'branch': 'foo',
-            'beetmover_candidates_bucket': 'mozilla-releng-beet-mover-dev',
             'signing_pvt_key': PVT_KEY_FILE,
             'release_channels': ['foo'],
             'final_verify_channels': ['foo'],

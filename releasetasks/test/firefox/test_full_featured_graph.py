@@ -22,8 +22,6 @@ class TestFullGraph(unittest.TestCase):
             'postrelease_bouncer_aliases_enabled': True,
             'push_to_releases_automatic': True,
             'signing_pvt_key': PVT_KEY_FILE,
-            'repo_path': 'releases/foo',
-            'branch': 'foo',
             'publish_to_balrog_channels': ['foo'],
             'partner_repacks_platforms': [
                 'win32',

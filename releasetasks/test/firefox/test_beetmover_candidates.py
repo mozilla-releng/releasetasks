@@ -6,6 +6,14 @@ from releasetasks.test import PVT_KEY_FILE, create_test_args
 from releasetasks.util import buildbot2ftp
 
 
+EN_US_CONFIG = {
+    "platforms": {
+        "macosx64": {"task_id": "xyz"},
+        "win32": {"task_id": "xyy"}
+    }
+}
+
+
 class BaseTestBeetmoverCandidates(object):
 
     def test_common_assertions(self):
@@ -47,19 +55,11 @@ class TestBeetmoverEnUSCandidates(unittest.TestCase, BaseTestBeetmoverCandidates
     graph = None
     # we will end up with one task for each platform
     tasks = None
-    en_US_config = {
-        "platforms": {
-            "macosx64": {"task_id": "xyz"},
-            "win32": {"task_id": "xyy"}
-        }
-    }
 
     def setUp(self):
         test_kwargs = create_test_args({
             'push_to_candidates_enabled': True,
-            'beetmover_candidates_bucket': 'mozilla-releng-beet-mover-dev',
-            'en_US_config': self.en_US_config,
-            'l10n_config': {},
+            'en_US_config': EN_US_CONFIG,
             'branch': "mozilla-beta",
             'repo_path': "releases/mozilla-beta",
             'signing_pvt_key': PVT_KEY_FILE,
@@ -92,14 +92,14 @@ class TestBeetmoverEnUSCandidates(unittest.TestCase, BaseTestBeetmoverCandidates
 
     def test_taskid_in_command(self):
         for platform, task in self.tasks.iteritems():
-            en_US_taskid = self.en_US_config['platforms'][platform]['task_id']
+            en_US_taskid = EN_US_CONFIG['platforms'][platform]['task_id']
             command = task['task']['payload']['command']
             self.assertTrue("--taskid {}".format(en_US_taskid) in "".join(command))
 
     def test_bucket_in_command(self):
         for platform, task in self.tasks.iteritems():
             command = task['task']['payload']['command']
-            self.assertTrue("--bucket {}".format("mozilla-releng-beet-mover-dev") in "".join(command))
+            self.assertTrue("--bucket {}".format("fake_bucket") in "".join(command))
 
     def test_extra_build_props(self):
         for platform, task in self.tasks.iteritems():
@@ -117,12 +117,6 @@ class TestBeetmover110nCandidates(unittest.TestCase, BaseTestBeetmoverCandidates
     graph = None
     # we will end up with one task for each platform
     tasks = None
-    en_US_config = {
-        "platforms": {
-            "macosx64": {"task_id": "xyz"},
-            "win32": {"task_id": "xyy"}
-        }
-    }
     l10n_config = {
         "platforms": {
             "win32": {
@@ -147,13 +141,12 @@ class TestBeetmover110nCandidates(unittest.TestCase, BaseTestBeetmoverCandidates
     def setUp(self):
         test_kwargs = create_test_args({
             'push_to_candidates_enabled': True,
-            'beetmover_candidates_bucket': 'mozilla-releng-beet-mover-dev',
             'branch': 'mozilla-beta',
             'repo_path': 'releases/mozilla-beta',
             'release_channels': ['beta'],
             'final_verify_channels': ['beta'],
             'signing_pvt_key': PVT_KEY_FILE,
-            'en_US_config': self.en_US_config,
+            'en_US_config': EN_US_CONFIG,
             'l10n_config': self.l10n_config,
         })
         self.graph = make_task_graph(**test_kwargs)
@@ -183,7 +176,7 @@ class TestBeetmover110nCandidates(unittest.TestCase, BaseTestBeetmoverCandidates
     def test_bucket_in_command(self):
         for platform, task in self.tasks.iteritems():
             command = task['task']['payload']['command']
-            self.assertTrue("--bucket {}".format("mozilla-releng-beet-mover-dev") in "".join(command))
+            self.assertTrue("--bucket {}".format("fake_bucket") in "".join(command))
 
     def test_taskid_in_command(self):
         for platform, task in self.tasks.iteritems():
@@ -210,23 +203,15 @@ class TestBeetmoverEnUSPartialsCandidates(unittest.TestCase, BaseTestBeetmoverCa
     graph = None
     # we will end up with one task for each platform
     tasks = None
-    en_US_config = {
-        "platforms": {
-            "macosx64": {"task_id": "xyz"},
-            "win32": {"task_id": "xyy"}
-        }
-    }
 
     def setUp(self):
         test_kwargs = create_test_args({
             'updates_enabled': True,
             'push_to_candidates_enabled': True,
-            'beetmover_candidates_bucket': 'mozilla-releng-beet-mover-dev',
             'branch': 'mozilla-beta',
             'repo_path:': 'mozilla/beta',
-            'l10n_config': {},
             'signing_pvt_key': PVT_KEY_FILE,
-            'en_US_config': self.en_US_config,
+            'en_US_config': EN_US_CONFIG,
         })
         self.graph = make_task_graph(**test_kwargs)
         self.tasks = {
@@ -271,12 +256,6 @@ class TestBeetmoverl10nPartialsCandidates(unittest.TestCase, BaseTestBeetmoverCa
     graph = None
     # we will end up with one task for each platform
     tasks = None
-    en_US_config = {
-        "platforms": {
-            "macosx64": {"task_id": "xyz"},
-            "win32": {"task_id": "xyy"}
-        }
-    }
     l10n_config = {
         "platforms": {
             "win32": {
@@ -302,8 +281,7 @@ class TestBeetmoverl10nPartialsCandidates(unittest.TestCase, BaseTestBeetmoverCa
         test_kwargs = create_test_args({
             'updates_enabled': True,
             'push_to_candidates_enabled': True,
-            'beetmover_candidates_bucket': 'mozilla-releng-beet-mover-dev',
-            'en_US_config': self.en_US_config,
+            'en_US_config': EN_US_CONFIG,
             'l10n_config': self.l10n_config,
             'branch': 'mozilla-beta',
             'repo_path': 'releases/mozilla-beta',

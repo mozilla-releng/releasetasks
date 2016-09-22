@@ -16,8 +16,6 @@ class TestFinalVerification(unittest.TestCase):
         test_args = create_test_args({
             'push_to_releases_enabled': True,
             'uptake_monitoring_enabled': True,
-            'branch': 'foo',
-            'repo_path': 'releases/foo',
             'release_channels': ['foo'],
             'final_verify_channels': ['foo'],
             'final_verify_platforms': ["macosx64", "win32", "win64", "linux", "linux64"],
@@ -83,13 +81,13 @@ class TestFinalVerificationMultiChannel(unittest.TestCase):
     graph = None
 
     def setUp(self):
-        self.graph = make_task_graph(
-            version="42.0b2",
-            next_version="42.0b3",
-            appVersion="42.0",
-            buildNumber=3,
-            source_enabled=False,
-            en_US_config={
+        test_kwargs = create_test_args({
+            'push_to_releases_enabled': True,
+            'release_channels': ['beta', 'release'],
+            'final_verify_channels': ['beta', 'release'],
+            'final_verify_platforms': ["macosx64", "win32", "win64", "linux", "linux64"],
+            'signing_pvt_key': PVT_KEY_FILE,
+            'en_US_config': {
                 "platforms": {
                     "macosx64": {},
                     "win32": {},
@@ -98,43 +96,8 @@ class TestFinalVerificationMultiChannel(unittest.TestCase):
                     "linux64": {},
                 }
             },
-            partial_updates={
-                "38.0": {
-                    "buildNumber": 1,
-                    "locales": ["de", "en-GB", "zh-TW"],
-                },
-                "37.0": {
-                    "buildNumber": 2,
-                    "locales": ["de", "en-GB", "zh-TW"],
-                },
-            },
-            l10n_config={},
-            repo_path="releases/foo",
-            revision="fedcba654321",
-            mozharness_changeset="abcd",
-            branch="foo",
-            updates_enabled=False,
-            checksums_enabled=False,
-            bouncer_enabled=False,
-            push_to_candidates_enabled=False,
-            push_to_releases_enabled=True,
-            push_to_releases_automatic=False,
-            uptake_monitoring_enabled=False,
-            beetmover_candidates_bucket='fake_bucket',
-            postrelease_version_bump_enabled=False,
-            postrelease_mark_as_shipped_enabled=False,
-            postrelease_bouncer_aliases_enabled=False,
-            product="firefox",
-            signing_class="release-signing",
-            release_channels=["beta", "release"],
-            final_verify_channels=["beta", "release"],
-            final_verify_platforms=["macosx64", "win32", "win64", "linux", "linux64"],
-            balrog_api_root="https://balrog.real/api",
-            funsize_balrog_api_root="http://balrog/api",
-            signing_pvt_key=PVT_KEY_FILE,
-            build_tools_repo_path='build/tools',
-            publish_to_balrog_channels=None,
-        )
+        })
+        self.graph = make_task_graph(**test_kwargs)
 
     def test_common_assertions(self):
         do_common_assertions(self.graph)
@@ -170,30 +133,23 @@ class TestFinalVerifyNoMirrors(unittest.TestCase):
     payload = None
 
     def setUp(self):
-        self.graph = make_task_graph(
-            version="42.0b2",
-            next_version="42.0b3",
-            appVersion="42.0",
-            buildNumber=3,
-            source_enabled=False,
-            checksums_enabled=False,
-            en_US_config={
+        test_kwargs = create_test_args({
+            'updates_enabled': True,
+            'push_to_candidates_enabled': True,
+            'repo_path': 'releases/mozilla-beta',
+            'branch': 'mozilla-beta',
+            'signing_pvt_key': PVT_KEY_FILE,
+            'enUS_platforms': ["win32", "macosx64"],
+            'final_verify_platforms': ["macosx64", "win32"],
+            'release_channels': ['beta'],
+            'final_verify_channels': ['beta'],
+            'en_US_config': {
                 "platforms": {
                     "macosx64": {"task_id": "xyz"},
                     "win32": {"task_id": "xyy"}
                 }
             },
-            partial_updates={
-                "38.0": {
-                    "buildNumber": 1,
-                    "locales": ["de", "en-GB", "zh-TW"],
-                },
-                "37.0": {
-                    "buildNumber": 2,
-                    "locales": ["de", "en-GB", "zh-TW"],
-                },
-            },
-            l10n_config={
+            'l10n_config': {
                 "platforms": {
                     "win32": {
                         "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.exe",
@@ -213,32 +169,8 @@ class TestFinalVerifyNoMirrors(unittest.TestCase):
                     "zh-TW": "default",
                 },
             },
-            repo_path="releases/mozilla-beta",
-            revision="fedcba654321",
-            mozharness_changeset="abcd",
-            branch="mozilla-beta",
-            updates_enabled=True,
-            bouncer_enabled=False,
-            push_to_candidates_enabled=True,
-            push_to_releases_enabled=False,
-            push_to_releases_automatic=False,
-            uptake_monitoring_enabled=False,
-            beetmover_candidates_bucket='fake_bucket',
-            postrelease_version_bump_enabled=False,
-            postrelease_mark_as_shipped_enabled=False,
-            postrelease_bouncer_aliases_enabled=False,
-            product="firefox",
-            signing_class="release-signing",
-            release_channels=["beta"],
-            final_verify_channels=["beta"],
-            final_verify_platforms=["macosx64", "win32"],
-            balrog_api_root="https://balrog.real/api",
-            funsize_balrog_api_root="http://balrog/api",
-            enUS_platforms=["win32", "macosx64"],
-            signing_pvt_key=PVT_KEY_FILE,
-            build_tools_repo_path='build/tools',
-            publish_to_balrog_channels=None,
-        )
+        })
+        self.graph = make_task_graph(**test_kwargs)
         self.task_def = get_task_by_name(self.graph, "beta_final_verify")
         self.task = self.task_def["task"]
         self.payload = self.task["payload"]

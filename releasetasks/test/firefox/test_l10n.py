@@ -292,7 +292,6 @@ class TestL10NNewLocales(unittest.TestCase):
         test_kwargs = create_test_args({
             'updates_enabled': True,
             'push_to_candidates_enabled': True,
-            'beetmover_candidates_bucket': 'bucket',
             'branch': 'mozilla-beta',
             'repo_path': 'releases/mozilla-beta',
             'signing_pvt_key': PVT_KEY_FILE,
