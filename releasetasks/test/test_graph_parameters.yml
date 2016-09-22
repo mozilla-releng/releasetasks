@@ -14,6 +14,8 @@ signing_class: release-signing  # TODO: Overwrite instance of dev-signing
 tuxedo_server_url: https://bouncer.real.allizom.org/api
 verifyConfigs: {}
 l10n_config: {}
+branch: foo
+repo_path: releases/foo
 partial_updates:  # TODO: overwrite single instance of different partial_updates (l10n)
     38.0:
         buildNumber: 1
@@ -34,7 +36,6 @@ uptake_monitoring_platforms:
     - linux
     - linux64
 
-# Default - change for some tests but needed for all
 source_enabled: False
 checksums_enabled: False
 bouncer_enabled: False
@@ -50,20 +51,3 @@ updates_enabled: False
 update_verify_enabled: False
 updates_builder_enabled: False
 publish_to_balrog_channels: null
-
-# Other
-branch: foo
-repo_path: releases/foo
-
-#  Different per test (maybe len(release_channels) is only what matters?)
-release_channels:
-    - beta
-
-#  Same as above
-final_verify_channels:
-    - beta
-
-
-partner_repacks_platforms:
-    - win32
-    - linux
