@@ -40,7 +40,8 @@
                     type: directory
             command:
                 - /bin/bash
-                - bin/build.sh
+                - -c
+                - bin/build.sh || JOB_SCRIPT=testing/taskcluster/scripts/builder/build-linux.sh bin/build.sh
             env:
                 GECKO_REPOSITORY: "https://hg.mozilla.org/{{ repo_path }}"
                 GECKO_HEAD_REV: "{{ revision }}"
