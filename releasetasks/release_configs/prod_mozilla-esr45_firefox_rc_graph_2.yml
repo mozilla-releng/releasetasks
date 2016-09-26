@@ -45,3 +45,4 @@ build_tools_repo_path: "build/tools"
 tuxedo_server_url: "https://bounceradmin.mozilla.com/api"
 push_to_releases_automatic: true
 beetmover_candidates_bucket: "net-mozaws-prod-delivery-firefox"
+snap_enabled: false

@@ -45,3 +45,4 @@ build_tools_repo_path: "users/raliiev_mozilla.com/tools"
 tuxedo_server_url: "https://admin-bouncer.stage.mozaws.net/api"
 push_to_releases_automatic: true
 beetmover_candidates_bucket: "net-mozaws-stage-delivery-firefox"
+snap_enabled: false

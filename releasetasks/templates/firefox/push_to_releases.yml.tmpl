@@ -80,7 +80,7 @@
                 - >
                   wget -O mozharness.tar.bz2 https://hg.mozilla.org/{{ repo_path }}/archive/{{ mozharness_changeset }}.tar.bz2/testing/mozharness &&
                   mkdir mozharness && tar xvfj mozharness.tar.bz2 -C mozharness --strip-components 3 && cd mozharness &&
-                  python scripts/release/push-candidate-to-releases.py --product {{ product }} --version {{ version }} --build-number {{ buildNumber }} --bucket {{ beetmover_candidates_bucket }} {% if partner_repacks_platforms is defined  and partner_repacks_platforms %}--exclude '.*-EME-free/.*' --exclude '.*/win32-sha1/.*'{% endif %}
+                  python scripts/release/push-candidate-to-releases.py --product {{ product }} --version {{ version }} --build-number {{ buildNumber }} --bucket {{ beetmover_candidates_bucket }} {% if partner_repacks_platforms is defined  and partner_repacks_platforms %}--exclude '.*-EME-free/.*' --exclude '.*/win32-sha1/.*'{% endif %} --exclude '.*/snap/.*'
             env:
                 DUMMY_ENV_FOR_ENCRYPT: "fake"
             encryptedEnv:
