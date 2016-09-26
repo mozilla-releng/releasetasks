@@ -43,7 +43,7 @@ class TestSourceBuilder(unittest.TestCase):
         assert self.task["workerType"] == "opt-linux64"
 
     def test_image_name(self):
-        assert self.payload["image"].startswith("taskcluster/desktop-build:")
+        assert self.payload["image"].startswith("rail/source-builder@sha256")
 
     def test_cache_in_payload(self):
         assert "cache" in self.payload
