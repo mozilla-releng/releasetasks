@@ -37,7 +37,7 @@
                 - -c
                 - >
                   curl -o scripts.tar.bz2 https://hg.mozilla.org/{{ repo_path }}/archive/{{ mozharness_changeset }}.tar.bz2/release/docker/firefox-snap/ &&
-                  mkdir scripts && tar xvfj scripts.tar.bz2 -C scripts --strip-components 4 && cd scripts &&
+                  mkdir scripts && tar xvfj scripts.tar.bz2 -C scripts --strip-components 4 && cd scripts && apt-get update
                   ./runme.sh
             env:
                 VERSION: "{{ version }}"
