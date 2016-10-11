@@ -77,3 +77,61 @@ class TestUptakeMonitoring(unittest.TestCase):
     def test_tuxedo_server_url(self):
         self.assertEqual(self.payload["properties"]["tuxedo_server_url"],
                          "https://bouncer.real.allizom.org/api")
+
+
+class TestUptakeMonitoringSHA1(unittest.TestCase):
+    maxDiff = 30000
+    graph = None
+    task = None
+    payload = None
+
+    def setUp(self):
+        test_kwargs = create_firefox_test_args({
+            'push_to_candidates_enabled': True,
+            'push_to_releases_enabled': True,
+            'uptake_monitoring_enabled': True,
+            'signing_pvt_key': PVT_KEY_FILE,
+            'uptake_monitoring_platforms': ["macosx64", "win32", "win64", "linux", "linux64"],
+            'partner_repacks_platforms': ["macosx64", "win32", "win64", "linux", "linux64"],
+            'release_channels': ['foo'],
+            'final_verify_channels': ['foo'],
+            'en_US_config': {
+                "platforms": {
+                    "macosx64": {"task_id": "abc"},
+                    "win32": {"task_id": "def"},
+                    "win64": {"task_id": "jgh"},
+                    "linux": {"task_id": "ijk"},
+                    "linux64": {"task_id": "lmn"},
+                }
+            },
+            'l10n_config': {
+                "platforms": {
+                    "win32": {
+                        "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.exe",
+                        "locales": ["de", "en-GB", "zh-TW"],
+                        "chunks": 1,
+                    },
+                    "linux64": {
+                        "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.tar.xz",
+                        "locales": ["de", "en-GB", "zh-TW"],
+                        "chunks": 1,
+                    },
+
+                },
+                "changesets": {
+                    "de": "default",
+                    "en-GB": "default",
+                    "zh-TW": "default",
+                },
+            },
+        })
+        self.graph = make_task_graph(**test_kwargs)
+        self.task = get_task_by_name(self.graph, "release-foo-firefox_uptake_monitoring")
+        self.payload = self.task["task"]["payload"]
+
+    def test_requires_sha1(self):
+        requires = [
+            get_task_by_name(self.graph, "release-foo_firefox_push_to_releases")["taskId"],
+            get_task_by_name(self.graph, "release-foo-firefox_partner_repacks_copy_to_releases")["taskId"],
+        ]
+        self.assertEqual(sorted(self.task["requires"]), sorted(requires))

@@ -4,6 +4,10 @@
     requires:
         # tests will catch if this buildername changes
         - {{ stableSlugId("release-{}_{}_push_to_releases".format(branch, product)) }}
+    {% if partner_repacks_platforms is defined and push_to_candidates_enabled and l10n_config.get("platforms") %}
+    {# Make sure partner repacks, including SHA1 repacks are copied #}
+        - {{ stableSlugId("release-{}-{}_partner_repacks_copy_to_releases".format(branch, product)) }}
+    {% endif %}
     reruns: 5
     task:
         provisionerId: "buildbot-bridge"
