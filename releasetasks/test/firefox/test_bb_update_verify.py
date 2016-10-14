@@ -112,7 +112,7 @@ class TestBB_UpdateVerify(unittest.TestCase):
         l10n_tmpl = "release-beta_firefox_{}_l10n_repack_beetmover_candidates_1"
         l10n_partials_tmpl = "release-beta_firefox_{p}_l10n_repack_partial_{v}build{n}_beetmover_candidates_1"
         en_US_balrog_tmpl = "{p}_en-US_{v}build{n}_funsize_balrog_task"
-        l10n_balrog_tmpl ="release-beta_firefox_{p}_l10n_repack_1_{v}_balrog_task"
+        l10n_balrog_tmpl = "release-beta_firefox_{p}_l10n_repack_1_{v}_balrog_task"
 
         requires = []
         for completes in (en_US_tmpl, l10n_tmpl):
