@@ -299,6 +299,7 @@
         payload:
             signingManifest: "https://queue.taskcluster.net/v1/task/{{ stableSlugId('{}_{}_{}_update_generator'.format(buildername, chunk, partial_version)) }}/artifacts/public/env/manifest.json"
 
+{% do balrog_submission_builders.append('{}_{}_{}_balrog_task'.format(buildername, chunk, partial_version)) %}
 -
     taskId: "{{ stableSlugId('{}_{}_{}_balrog_task'.format(buildername, chunk, partial_version)) }}"
     reruns: 5

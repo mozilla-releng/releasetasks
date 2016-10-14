@@ -108,18 +108,21 @@ class TestBB_UpdateVerify(unittest.TestCase):
 
     def test_requires(self):
         en_US_tmpl = "release-beta_firefox_{}_complete_en-US_beetmover_candidates"
-        en_US_partials_tmpl = "release-beta_firefox_{}_partial_en-US_{}build{}_beetmover_candidates"
+        en_US_partials_tmpl = "release-beta_firefox_{p}_partial_en-US_{v}build{n}_beetmover_candidates"
         l10n_tmpl = "release-beta_firefox_{}_l10n_repack_beetmover_candidates_1"
-        l10n_partials_tmpl = "release-beta_firefox_{}_l10n_repack_partial_{}build{}_beetmover_candidates_1"
+        l10n_partials_tmpl = "release-beta_firefox_{p}_l10n_repack_partial_{v}build{n}_beetmover_candidates_1"
+        en_US_balrog_tmpl = "{p}_en-US_{v}build{n}_funsize_balrog_task"
+        l10n_balrog_tmpl ="release-beta_firefox_{p}_l10n_repack_1_{v}_balrog_task"
+
         requires = []
         for completes in (en_US_tmpl, l10n_tmpl):
             requires.extend([
                 get_task_by_name(self.graph, completes.format(p))["taskId"]
                 for p in ("macosx64", "win32", "win64")
             ])
-        for partials in (en_US_partials_tmpl, l10n_partials_tmpl):
+        for partials in (en_US_partials_tmpl, l10n_partials_tmpl, en_US_balrog_tmpl, l10n_balrog_tmpl):
             requires.extend([
-                get_task_by_name(self.graph, partials.format(platform, p_version, p_build_num))["taskId"]
+                get_task_by_name(self.graph, partials.format(p=platform, v=p_version, n=p_build_num))["taskId"]
                 for platform in ("macosx64", "win32", "win64")
                 for p_version, p_build_num in (('38.0', '1'), ('37.0', '2'))
             ])
