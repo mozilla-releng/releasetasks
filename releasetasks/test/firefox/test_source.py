@@ -30,7 +30,7 @@ class TestSourceBuilder(unittest.TestCase):
             'provisionerId': 'signing-provisioner-v1',
             'workerType': 'signing-worker-v1',
         }
-    }, extra=True, required=True)
+    }, extra=True)
 
     GRAPH_SCHEMA = Schema({
         'scopes': scope_check_factory(scopes={
@@ -70,7 +70,7 @@ class TestSourceBuilder(unittest.TestCase):
                 }
             }
         }
-    }, extra=True, required=True)
+    }, extra=True)
 
     def setUp(self):
         test_kwargs = create_firefox_test_args({

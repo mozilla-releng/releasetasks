@@ -81,6 +81,12 @@ class TestPushToMirrorsHuman(unittest.TestCase):
     def test_common_assertions(self):
         do_common_assertions(self.graph)
 
+    def test_task_schema(self):
+        assert validate_with_humanized_errors(self.task, TestPushToMirrorsHuman.TASK_SCHEMA)
+
+    def test_human_task_schema(self):
+        assert validate_with_humanized_errors(self.human_task, TestPushToMirrorsHuman.HUMAN_TASK_SCHEMA)
+
     def test_scopes_present(self):
         self.assertFalse("scopes" in self.task["task"])
 
@@ -138,7 +144,7 @@ class TestPushToMirrorsAutomatic(unittest.TestCase):
             'provisionerId': 'aws-provisioner-v1',
             'workerType': 'opt-linux64',
         }
-    })
+    }, extra=True, required=True)
 
     def setUp(self):
         test_kwargs = create_firefox_test_args({
@@ -163,6 +169,9 @@ class TestPushToMirrorsAutomatic(unittest.TestCase):
 
     def test_common_assertions(self):
         do_common_assertions(self.graph)
+
+    def test_task_schema(self):
+        assert validate_with_humanized_errors(self.task, TestPushToMirrorsAutomatic.TASK_SCHEMA)
 
     def test_scopes_present(self):
         self.assertFalse("scopes" in self.task["task"])

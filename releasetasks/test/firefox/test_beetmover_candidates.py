@@ -18,20 +18,20 @@ EN_US_CONFIG = {
 
 class BaseTestBeetmoverCandidates(object):
 
-    GRAPH_SCHEMA = {
+    GRAPH_SCHEMA = Schema({
         'scopes': scope_check_factory(scopes={
             'queue:task-priority:high',
             'queue:define-task:aws-provisioner-v1/opt-linux64',
             'queue:create-task:aws-provisioner-v1/opt-linux64',
         })
-    }
+    }, extra=True, required=True)
 
-    BASE_SCHEMA = {
+    BASE_SCHEMA = Schema({
         'task': {
             'provisionerId': 'aws-provisioner-v1',
             'workerType': 'opt-linux64',
         }
-    }
+    }, extra=True, required=True)
 
     def test_common_assertions(self):
         do_common_assertions(self.graph)
@@ -210,7 +210,7 @@ class TestBeetmover110nCandidates(unittest.TestCase, BaseTestBeetmoverCandidates
                         }
                     }
                 }
-            })
+            }, extra=True, required=True)
             assert validate_with_humanized_errors(task, schema)
             self.assertTrue("platform" in task['task']['extra']['build_props'])
 

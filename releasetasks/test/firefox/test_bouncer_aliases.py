@@ -7,13 +7,6 @@ from voluptuous import Schema, truth
 from voluptuous.humanize import validate_with_humanized_errors
 
 
-@truth
-def passes_graph_scopes_test(graph_scopes):
-    expected_graph_scopes = {"queue:task-priority:high"}
-    assert expected_graph_scopes.issubset(graph_scopes)
-    return True
-
-
 class TestBouncerAliases(unittest.TestCase):
     maxDiff = 30000
     graph = None
@@ -23,7 +16,7 @@ class TestBouncerAliases(unittest.TestCase):
 
     def setUp(self):
         self.GRAPH_SCHEMA = Schema({
-            'scopes': passes_graph_scopes_test,
+            'scopes': TestBouncerAliases.passes_graph_scopes_test,
         }, required=True, extra=True)
 
         self.HUMAN_TASK_SCHEMA = Schema({
@@ -73,6 +66,13 @@ class TestBouncerAliases(unittest.TestCase):
 
     def test_human_task(self):
         assert validate_with_humanized_errors(self.human_task, self.HUMAN_TASK_SCHEMA)
+
+    @staticmethod
+    @truth
+    def passes_graph_scopes_test(graph_scopes):
+        expected_graph_scopes = {"queue:task-priority:high"}
+        assert expected_graph_scopes.issubset(graph_scopes)
+        return True
 
     def test_task(self):
         assert validate_with_humanized_errors(self.task, self.TASK_SCHEMA)

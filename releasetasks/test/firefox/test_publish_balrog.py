@@ -24,7 +24,7 @@ class TestPublishBalrog(unittest.TestCase):
                 }
             }
         }
-    })
+    }, extra=True, required=True)
 
     def setUp(self):
         test_kwargs = create_firefox_test_args({

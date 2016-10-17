@@ -7,7 +7,7 @@ from releasetasks import sign_task
 from releasetasks.test import PVT_KEY_FILE, PVT_KEY, PUB_KEY, OTHER_PUB_KEY
 from releasetasks.test.firefox import make_task_graph, do_common_assertions, \
     get_task_by_name, create_firefox_test_args, scope_check_factory
-from voluptuous import All, Schema
+from voluptuous import Schema
 from voluptuous.humanize import validate_with_humanized_errors
 
 
@@ -73,14 +73,14 @@ class TestGraphScopes(unittest.TestCase):
     maxDiff = 30000
     graph = None
 
-    GRAPH_SCHEMA = Schema(All(lambda graph: 'scopes' not in graph, Schema({
+    GRAPH_SCHEMA = Schema({
         'scopes': scope_check_factory(scopes={
             "project:releng:signing:format:gpg",
             "queue:define-task:buildbot-bridge/buildbot-bridge",
             "queue:create-task:buildbot-bridge/buildbot-bridge",
             "queue:task-priority:high"
         })
-    }, extra=True, required=True)))
+    }, extra=True, required=True)
 
     def setUp(self):
         test_kwargs = create_firefox_test_args({
@@ -96,6 +96,9 @@ class TestGraphScopes(unittest.TestCase):
 
     def test_common_assertions(self):
         do_common_assertions(self.graph)
+
+    def test_graph_schema(self):
+        assert validate_with_humanized_errors(self.graph, TestGraphScopes.GRAPH_SCHEMA)
 
     def test_no_tasks(self):
         self.assertIsNone(self.graph["tasks"])

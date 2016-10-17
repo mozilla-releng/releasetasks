@@ -21,7 +21,7 @@ class TestL10NChangesets(unittest.TestCase):
                 'l10n_changesets': 'ab cd\nef gh\nij kl\n',
             },
         },
-    })
+    }, extra=True, required=True)
 
     def setUp(self):
         test_kwargs = create_firefox_test_args({

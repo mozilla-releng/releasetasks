@@ -3,7 +3,7 @@ import unittest
 from releasetasks.test.firefox import make_task_graph, do_common_assertions, \
     get_task_by_name, create_firefox_test_args, scope_check_factory
 from releasetasks.test import PVT_KEY_FILE
-from voluptuous import All, Schema, truth
+from voluptuous import All, Schema
 from voluptuous.humanize import validate_with_humanized_errors
 
 
