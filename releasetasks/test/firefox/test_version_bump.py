@@ -3,6 +3,8 @@ import unittest
 from releasetasks.test.firefox import make_task_graph, do_common_assertions, \
     get_task_by_name, create_firefox_test_args
 from releasetasks.test import PVT_KEY_FILE
+from voluptuous import Schema
+from voluptuous.humanize import validate_with_humanized_errors
 
 
 class TestVersionBump(unittest.TestCase):
@@ -11,6 +13,27 @@ class TestVersionBump(unittest.TestCase):
     task = None
     human_task = None
     payload = None
+
+    TASK_SCHEMA = Schema({
+        'task': {
+            'provisionerId': 'buildbot-bridge',
+            'workerType': 'buildbot-bridge',
+            'payload': {
+                'properties': {
+                    'next_version': '42.0b3',
+                    'repo_path': 'releases/foo',
+                    'script_repo_revision': 'abcd',
+                }
+            }
+        }
+    }, extra=True, required=True)
+
+    HUMAN_TASK_SCHEMA = Schema({
+        'task': {
+            'provisionerId': 'null-provisioner',
+            'workerType': 'human-decision',
+        }
+    }, extra=True, required=True)
 
     def setUp(self):
         test_kwargs = create_firefox_test_args({
@@ -39,23 +62,11 @@ class TestVersionBump(unittest.TestCase):
     def test_common_assertions(self):
         do_common_assertions(self.graph)
 
-    def test_provisioner(self):
-        self.assertEqual(self.task["task"]["provisionerId"],
-                         "buildbot-bridge")
+    def test_version_bump_task(self):
+        assert validate_with_humanized_errors(self.task, TestVersionBump.TASK_SCHEMA)
 
-    def test_human_provisioner(self):
-        self.assertEqual(self.human_task["task"]["provisionerId"],
-                         "null-provisioner")
-
-    def test_worker_type(self):
-        self.assertEqual(self.task["task"]["workerType"], "buildbot-bridge")
-
-    def test_human_worker_type(self):
-        self.assertEqual(self.human_task["task"]["workerType"],
-                         "human-decision")
-
-    def test_next_version(self):
-        self.assertEqual(self.payload["properties"]["next_version"], "42.0b3")
+    def test_version_bump_human_task(self):
+        assert validate_with_humanized_errors(self.human_task, TestVersionBump.HUMAN_TASK_SCHEMA)
 
     def test_graph_scopes(self):
         expected_graph_scopes = set([
@@ -65,11 +76,3 @@ class TestVersionBump(unittest.TestCase):
 
     def test_requires(self):
         self.assertIn(self.human_task["taskId"], self.task["requires"])
-
-    def test_repo_path(self):
-        self.assertEqual(self.payload["properties"]["repo_path"],
-                         "releases/foo")
-
-    def test_script_repo_revision(self):
-        self.assertEqual(self.payload["properties"]["script_repo_revision"],
-                         "abcd")

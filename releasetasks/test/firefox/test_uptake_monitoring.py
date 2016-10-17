@@ -3,6 +3,8 @@ import unittest
 from releasetasks.test.firefox import make_task_graph, do_common_assertions, \
     get_task_by_name, create_firefox_test_args
 from releasetasks.test import PVT_KEY_FILE
+from voluptuous import Schema
+from voluptuous.humanize import validate_with_humanized_errors
 
 
 class TestUptakeMonitoring(unittest.TestCase):
@@ -10,6 +12,24 @@ class TestUptakeMonitoring(unittest.TestCase):
     graph = None
     task = None
     payload = None
+
+    TASK_SCHEMA = Schema({
+        'task': {
+            'provisionerId': 'buildbot-bridge',
+            'workerType': 'buildbot-bridge',
+            'payload': {
+                'properties': {
+                    'product': 'firefox',
+                    'version': '42.0b2',
+                    'build_number': 3,
+                    'repo_path': 'releases/foo',
+                    'script_repo_revision': 'abcd',
+                    'revision': 'abcdef123456',
+                    'tuxedo_server_url': 'https://bouncer.real.allizom.org/api',
+                }
+            }
+        }
+    }, extra=True, required=True)
 
     def setUp(self):
         test_kwargs = create_firefox_test_args({
@@ -37,12 +57,8 @@ class TestUptakeMonitoring(unittest.TestCase):
     def test_common_assertions(self):
         do_common_assertions(self.graph)
 
-    def test_provisioner(self):
-        self.assertEqual(self.task["task"]["provisionerId"],
-                         "buildbot-bridge")
-
-    def test_worker_type(self):
-        self.assertEqual(self.task["task"]["workerType"], "buildbot-bridge")
+    def test_uptake_monitoring_task(self):
+        assert validate_with_humanized_errors(self.task, TestUptakeMonitoring.TASK_SCHEMA)
 
     def test_scopes_present(self):
         self.assertTrue("scopes" in self.task['task'])
@@ -50,30 +66,3 @@ class TestUptakeMonitoring(unittest.TestCase):
     def test_requires(self):
         requires = [get_task_by_name(self.graph, "release-foo_firefox_push_to_releases")["taskId"]]
         self.assertEqual(sorted(self.task["requires"]), sorted(requires))
-
-    def test_product(self):
-        self.assertEqual(self.payload["properties"]["product"],
-                         "firefox")
-
-    def test_version(self):
-        self.assertEqual(self.payload["properties"]["version"],
-                         "42.0b2")
-
-    def test_build_number(self):
-        self.assertEqual(self.payload["properties"]["build_number"], 3)
-
-    def test_repo_path(self):
-        self.assertEqual(self.payload["properties"]["repo_path"],
-                         "releases/foo")
-
-    def test_script_repo_revision(self):
-        self.assertEqual(self.payload["properties"]["script_repo_revision"],
-                         "abcd")
-
-    def test_revision(self):
-        self.assertEqual(self.payload["properties"]["revision"],
-                         "abcdef123456")
-
-    def test_tuxedo_server_url(self):
-        self.assertEqual(self.payload["properties"]["tuxedo_server_url"],
-                         "https://bouncer.real.allizom.org/api")

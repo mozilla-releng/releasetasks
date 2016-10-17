@@ -38,9 +38,10 @@ def passes_index_route_requirement(task_routes):
 
 TASK_SCHEMA = Schema(All({
     Required('reruns'): int,
-    Required('taskId'): Any(int, str),
+    Required('taskId'): str,
     Required('task'): All(
         Schema({
+            Required('routes'): passes_index_route_requirement,
             Required('priority'): 'high',
             Required('metadata'): {
                 Required('name'): str,
@@ -63,14 +64,14 @@ TASK_SCHEMA = Schema(All({
             Required('payload'): {
                 Optional('properties'): {
                     Required('version'): str,
-                    Required('build_number'): Any(str, int),  # TODO: ask rail about this being string/int, or set in specific test
+                    Required('build_number'): int,
                     Required('release_promotion'): bool,
                     Required('revision'): str,
                     Required('product'): str,
                 }
             },
-            Required('routes'): passes_index_route_requirement,
-        }, extra=True), passes_task_provisionerId_test)
+        }, extra=True),
+        passes_task_provisionerId_test)
 }, extra=True), passes_task_signature_test)
 
 
@@ -86,19 +87,16 @@ def do_common_assertions(graph):
     if graph['tasks']:
         for t in graph['tasks']:
             assert t['taskId'] not in _cached_taskIDs
-            assert t == validate_with_humanized_errors(t, TASK_SCHEMA)
+            assert validate_with_humanized_errors(t, TASK_SCHEMA)
 
             _cached_taskIDs.add(t['taskId'])
 
 
-def verify(graph, schema):
-    _cached_task_ids = set()
-    if graph['tasks']:
-        test_schema = TASK_SCHEMA.update(schema)
-        for t in graph['tasks']:
-            assert t == validate_with_humanized_errors(test_schema(t))
-            assert t['taskId'] not in _cached_task_ids
-            _cached_task_ids.add(t['taskId'])
+def scope_check_factory(scopes=None):
+    @truth
+    def check_scopes(schema_input):
+        return scopes.issubset(schema_input)
+    return check_scopes
 
 
 def get_task_by_name(graph, name):

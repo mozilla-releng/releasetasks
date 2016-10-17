@@ -1,9 +1,11 @@
 import unittest
 
 from releasetasks.test.firefox import make_task_graph, do_common_assertions, \
-    get_task_by_name, create_firefox_test_args
+    get_task_by_name, create_firefox_test_args, scope_check_factory
 from releasetasks.test import PVT_KEY_FILE
 from releasetasks.util import buildbot2ftp
+from voluptuous import Schema
+from voluptuous.humanize import validate_with_humanized_errors
 
 
 EN_US_CONFIG = {
@@ -16,28 +18,27 @@ EN_US_CONFIG = {
 
 class BaseTestBeetmoverCandidates(object):
 
+    GRAPH_SCHEMA = {
+        'scopes': scope_check_factory(scopes={
+            'queue:task-priority:high',
+            'queue:define-task:aws-provisioner-v1/opt-linux64',
+            'queue:create-task:aws-provisioner-v1/opt-linux64',
+        })
+    }
+
+    BASE_SCHEMA = {
+        'task': {
+            'provisionerId': 'aws-provisioner-v1',
+            'workerType': 'opt-linux64',
+        }
+    }
+
     def test_common_assertions(self):
         do_common_assertions(self.graph)
-
-    def test_provisioner(self):
-        for platform, task in self.tasks.iteritems():
-            self.assertEqual(task["task"]["provisionerId"], "aws-provisioner-v1")
-
-    def test_worker_type(self):
-        for platform, task in self.tasks.iteritems():
-            self.assertEqual(task["task"]["workerType"], "opt-linux64")
 
     def test_scopes_present(self):
         for platform, task in self.tasks.iteritems():
             self.assertFalse("scopes" in task)
-
-    def test_graph_scopes(self):
-        expected_graph_scopes = set([
-            "queue:task-priority:high",
-            "queue:define-task:aws-provisioner-v1/opt-linux64",
-            "queue:create-task:aws-provisioner-v1/opt-linux64"
-        ])
-        self.assertTrue(expected_graph_scopes.issubset(self.graph["scopes"]))
 
     def test_platform_in_command(self):
         for platform, task in self.tasks.iteritems():
@@ -163,6 +164,14 @@ class TestBeetmover110nCandidates(unittest.TestCase, BaseTestBeetmoverCandidates
             ),
         }
 
+    TASK_SCHEMA = Schema({
+        'task': {
+            'payload': {
+                'command': lambda command: '--app-version 42.0' in ''.join(command),
+            }
+        }
+    })
+
     def test_app_version_in_command(self):
         for platform, task in self.tasks.iteritems():
             command = task['task']['payload']['command']
@@ -189,13 +198,21 @@ class TestBeetmover110nCandidates(unittest.TestCase, BaseTestBeetmoverCandidates
 
     def test_extra_build_props(self):
         for platform, task in self.tasks.iteritems():
-            build_props = task['task']['extra']['build_props']
-            self.assertEqual(build_props["product"], "firefox")
-            self.assertEqual(build_props["locales"], ["de", "en-GB", "zh-TW"])
-            self.assertEqual(build_props["branch"], "mozilla-beta")
-            self.assertTrue("platform" in build_props)
-            self.assertEqual(build_props["version"], "42.0b2")
-            self.assertEqual(build_props["revision"], "abcdef123456")
+            schema = Schema({
+                'task': {
+                    'extra': {
+                        'build_props': {
+                            'product': 'firefox',
+                            'locales': ["de", "en-GB", "zh-TW"],
+                            'branch': 'mozilla-beta',
+                            'version': '42.0b2',
+                            'revision': 'abcdef123456'
+                        }
+                    }
+                }
+            })
+            assert validate_with_humanized_errors(task, schema)
+            self.assertTrue("platform" in task['task']['extra']['build_props'])
 
 
 class TestBeetmoverEnUSPartialsCandidates(unittest.TestCase, BaseTestBeetmoverCandidates):

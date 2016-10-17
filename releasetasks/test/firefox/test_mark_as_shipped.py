@@ -3,6 +3,7 @@ import unittest
 from releasetasks.test.firefox import make_task_graph, do_common_assertions, \
     get_task_by_name, create_firefox_test_args
 from releasetasks.test import PVT_KEY_FILE
+from voluptuous import Schema
 
 
 class TestMarkAsShipped(unittest.TestCase):
@@ -11,6 +12,27 @@ class TestMarkAsShipped(unittest.TestCase):
     task = None
     human_task = None
     payload = None
+
+    HUMAN_TASK_SCHEMA = Schema({
+        'task': {
+            'provisionerId': 'null-provisioner',
+            'workerType': 'human-decision',
+        }
+    })
+
+    TASK_SCHEMA = Schema({
+        'task': {
+            'provisionerId': 'buildbot-bridge',
+            'workerType': 'buildbot-bridge',
+            'payload': {
+                'next_version': '42.0b3',
+                'properties': {
+                    'repo_path': 'releases/foo',
+                    'script_repo_revision': 'abcd',
+                }
+            }
+        }
+    })
 
     def setUp(self):
         test_kwargs = create_firefox_test_args({
@@ -39,24 +61,6 @@ class TestMarkAsShipped(unittest.TestCase):
     def test_common_assertions(self):
         do_common_assertions(self.graph)
 
-    def test_provisioner(self):
-        self.assertEqual(self.task["task"]["provisionerId"],
-                         "buildbot-bridge")
-
-    def test_human_provisioner(self):
-        self.assertEqual(self.human_task["task"]["provisionerId"],
-                         "null-provisioner")
-
-    def test_worker_type(self):
-        self.assertEqual(self.task["task"]["workerType"], "buildbot-bridge")
-
-    def test_human_worker_type(self):
-        self.assertEqual(self.human_task["task"]["workerType"],
-                         "human-decision")
-
-    def test_next_version(self):
-        self.assertEqual(self.payload["properties"]["next_version"], "42.0b3")
-
     def test_graph_scopes(self):
         expected_graph_scopes = set([
             "queue:task-priority:high",
@@ -65,11 +69,3 @@ class TestMarkAsShipped(unittest.TestCase):
 
     def test_requires(self):
         self.assertIn(self.human_task["taskId"], self.task["requires"])
-
-    def test_repo_path(self):
-        self.assertEqual(self.payload["properties"]["repo_path"],
-                         "releases/foo")
-
-    def test_script_repo_revision(self):
-        self.assertEqual(self.payload["properties"]["script_repo_revision"],
-                         "abcd")

@@ -6,7 +6,9 @@ from jose.constants import ALGORITHMS
 from releasetasks import sign_task
 from releasetasks.test import PVT_KEY_FILE, PVT_KEY, PUB_KEY, OTHER_PUB_KEY
 from releasetasks.test.firefox import make_task_graph, do_common_assertions, \
-    get_task_by_name, create_firefox_test_args
+    get_task_by_name, create_firefox_test_args, scope_check_factory
+from voluptuous import All, Schema
+from voluptuous.humanize import validate_with_humanized_errors
 
 
 class TestTaskSigning(unittest.TestCase):
@@ -70,6 +72,15 @@ class TestEncryption(unittest.TestCase):
 class TestGraphScopes(unittest.TestCase):
     maxDiff = 30000
     graph = None
+
+    GRAPH_SCHEMA = Schema(All(lambda graph: 'scopes' not in graph, Schema({
+        'scopes': scope_check_factory(scopes={
+            "project:releng:signing:format:gpg",
+            "queue:define-task:buildbot-bridge/buildbot-bridge",
+            "queue:create-task:buildbot-bridge/buildbot-bridge",
+            "queue:task-priority:high"
+        })
+    }, extra=True, required=True)))
 
     def setUp(self):
         test_kwargs = create_firefox_test_args({

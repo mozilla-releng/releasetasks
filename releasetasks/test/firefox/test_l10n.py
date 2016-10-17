@@ -4,6 +4,7 @@ from releasetasks.test.firefox import make_task_graph, get_task_by_name, \
     do_common_assertions
 from releasetasks.test import PVT_KEY_FILE
 from releasetasks.test.firefox import create_firefox_test_args
+from voluptuous import Schema
 
 
 class TestL10NSingleChunk(unittest.TestCase):
@@ -12,6 +13,22 @@ class TestL10NSingleChunk(unittest.TestCase):
     task = None
     payload = None
     properties = None
+
+    TASK_SCHEMA = Schema({
+        'task': {
+            'provisionerId': 'buildbot-bridge',
+            'workerType': 'buildbot-bridge',
+            'payload': {
+                'properties': {
+                    'repo_path': 'releases/mozilla-beta',
+                    'script_repo_revision': 'abcd',
+                    'builderName': 'release-mozilla-beta_firefox_win32_l10n_repack',
+                    'locales': 'de:default en-GB:default zh-TW:default',
+                    'en_us_binary_url': 'https://queue.taskcluster.net/something/firefox.exe',
+                }
+            }
+        }
+    })
 
     def setUp(self):
         test_arguments = create_firefox_test_args({
@@ -60,29 +77,6 @@ class TestL10NSingleChunk(unittest.TestCase):
 
     def test_task_present(self):
         self.assertIsNotNone(self.task)
-
-    def test_provisioner(self):
-        self.assertEqual(self.task["task"]["provisionerId"], "buildbot-bridge")
-
-    def test_worker_type(self):
-        self.assertEqual(self.task["task"]["workerType"], "buildbot-bridge")
-
-    def test_repo_path(self):
-        self.assertEqual(self.payload["properties"]["repo_path"],
-                         "releases/mozilla-beta")
-
-    def test_script_repo_revision(self):
-        self.assertEqual(self.payload["properties"]["script_repo_revision"],
-                         "abcd")
-
-    def test_buildername(self):
-        self.assertEqual(self.payload["buildername"], "release-mozilla-beta_firefox_win32_l10n_repack")
-
-    def test_locales(self):
-        self.assertEqual(self.properties["locales"], "de:default en-GB:default zh-TW:default")
-
-    def test_en_us_binary_url(self):
-        self.assertEqual(self.properties["en_us_binary_url"], "https://queue.taskcluster.net/something/firefox.exe")
 
     def test_only_one_chunk_1(self):
         self.assertIsNone(get_task_by_name(self.graph, "release-mozilla-beta_firefox_win32_l10n_repack_0"))
@@ -141,6 +135,29 @@ class TestL10NMultipleChunks(unittest.TestCase):
     chunk2_properties = None
 
     def setUp(self):
+        self.chunk1_schema = Schema({
+            'task': {
+                'payload': {
+                    'builderName': 'release-mozilla-beta_firefox_win32_l10n_repack',
+                    'locales': 'de:default en-GB:default ru:default',
+                    'en_us_binary_url': 'https://queue.taskcluster.net/something/firefox.exe',
+                    'repo_path': 'releases/mozilla-beta',
+                    'script_repo_revision': 'abcd',
+                }
+            }
+        })
+
+        self.chunk2_schema = Schema({
+            'task': {
+                'payload': {
+                    'builderName': 'release-mozilla-beta_firefox_win32_l10n_repack',
+                    'locales': 'uk:default zh-TW:default',
+                    'en_us_binary_url': 'https://queue.taskcluster.net/something/firefox.exe',
+                    'repo_path': 'releases/mozilla-beta',
+                    'script_repo_revision': 'abcd'
+                }
+            }
+        })
         test_kwargs = create_firefox_test_args({
             'updates_enabled': True,
             'repo_path': 'releases/mozilla-beta',
@@ -186,46 +203,6 @@ class TestL10NMultipleChunks(unittest.TestCase):
 
     def test_common_assertions(self):
         do_common_assertions(self.graph)
-
-    def test_chunk1_buildername(self):
-        self.assertEqual(
-            self.chunk1["task"]["payload"]["buildername"],
-            "release-mozilla-beta_firefox_win32_l10n_repack")
-
-    def test_chunk1_locales(self):
-        self.assertEqual(self.chunk1_properties["locales"],
-                         "de:default en-GB:default ru:default")
-
-    def test_chunk1_en_us_binary_url(self):
-        self.assertEqual(
-            self.chunk1_properties["en_us_binary_url"],
-            "https://queue.taskcluster.net/something/firefox.exe")
-
-    def test_chunk2_buildername(self):
-        self.assertEqual(
-            self.chunk2["task"]["payload"]["buildername"],
-            "release-mozilla-beta_firefox_win32_l10n_repack")
-
-    def test_chunk2_locales(self):
-        self.assertEqual(self.chunk2_properties["locales"],
-                         "uk:default zh-TW:default")
-
-    def test_chunk2_en_us_binary_url(self):
-        self.assertEqual(
-            self.chunk2_properties["en_us_binary_url"],
-            "https://queue.taskcluster.net/something/firefox.exe")
-
-    def test_chunk1_repo_path(self):
-        self.assertEqual(self.chunk1_properties["repo_path"],
-                         "releases/mozilla-beta")
-
-    def test_chunk1_script_repo_revision(self):
-        self.assertEqual(self.chunk1_properties["script_repo_revision"],
-                         "abcd")
-
-    def test_chunk2_repo_path(self):
-        self.assertEqual(self.chunk2_properties["repo_path"],
-                         "releases/mozilla-beta")
 
     def test_chunk2_script_repo_revision(self):
         self.assertEqual(self.chunk2_properties["script_repo_revision"],

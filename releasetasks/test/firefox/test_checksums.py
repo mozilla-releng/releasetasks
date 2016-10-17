@@ -3,6 +3,7 @@ import unittest
 from releasetasks.test.firefox import make_task_graph, do_common_assertions, \
     get_task_by_name, create_firefox_test_args
 from releasetasks.test import PVT_KEY_FILE
+from voluptuous import Schema
 
 
 class TestChecksums(unittest.TestCase):
@@ -12,6 +13,18 @@ class TestChecksums(unittest.TestCase):
     payload = None
 
     def setUp(self):
+        self.test_schema = Schema({
+            'task': {
+                'provisionerId': 'buildbot-bridge',
+                'workerType': 'buildbot-bridge',
+                'payload': {
+                    'properties': {
+                        'version': '42.0b2',
+                        'build_number': 3,
+                    }
+                }
+            }
+        })
         test_kwargs = create_firefox_test_args({
             'push_to_candidates_enabled': True,
             'checksums_enabled': True,
@@ -34,12 +47,6 @@ class TestChecksums(unittest.TestCase):
     def test_common_assertions(self):
         do_common_assertions(self.graph)
 
-    def test_provisioner(self):
-        self.assertEqual(self.task["task"]["provisionerId"], "buildbot-bridge")
-
-    def test_worker_type(self):
-        self.assertEqual(self.task["task"]["workerType"], "buildbot-bridge")
-
     def test_scopes_present(self):
         self.assertFalse("scopes" in self.task)
 
@@ -48,12 +55,6 @@ class TestChecksums(unittest.TestCase):
             "queue:task-priority:high",
         ])
         self.assertTrue(expected_graph_scopes.issubset(self.graph["scopes"]))
-
-    def test_version(self):
-        self.assertEqual(self.payload["properties"]["version"], "42.0b2")
-
-    def test_build_number(self):
-        self.assertEqual(self.payload["properties"]["build_number"], "3")
 
     def test_requires(self):
         tmpl = "release-foo_firefox_{p}_complete_en-US_beetmover_candidates"

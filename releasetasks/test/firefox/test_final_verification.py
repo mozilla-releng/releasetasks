@@ -3,7 +3,8 @@ import unittest
 from releasetasks.test.firefox import make_task_graph, do_common_assertions, \
     get_task_by_name
 from releasetasks.test import PVT_KEY_FILE
-from releasetasks.test.firefox import create_firefox_test_args
+from releasetasks.test.firefox import create_firefox_test_args, scope_check_factory
+from voluptuous import Match, Schema
 
 
 class TestFinalVerification(unittest.TestCase):
@@ -12,6 +13,22 @@ class TestFinalVerification(unittest.TestCase):
     task_def = None
     task = None
     payload = None
+
+    GRAPH_SCHEMA = Schema({
+        'scopes': scope_check_factory(scopes={'queue:task-priority:high'}),
+    }, extra=True, required=True)
+
+    TASK_SCHEMA = Schema({
+        'task': {
+            'provisionerId': 'aws-provisioner-v1',
+            'workerType': 'b2gtest',
+            'payload': {
+                'command': [str],
+                'env': str,
+                'image': Match(r'^rail/python-test-runner'),
+            }
+        }
+    }, extra=True, required=True)
 
     def setUp(self):
         test_args = create_firefox_test_args({
@@ -29,7 +46,7 @@ class TestFinalVerification(unittest.TestCase):
                     "win64": {},
                     "linux": {},
                     "linux64": {},
-                }
+                },
             },
         })
         self.graph = make_task_graph(**test_args)
@@ -40,37 +57,14 @@ class TestFinalVerification(unittest.TestCase):
     def test_common_assertions(self):
         do_common_assertions(self.graph)
 
-    def test_provisioner(self):
-        self.assertEqual(self.task["provisionerId"], "aws-provisioner-v1")
-
-    def test_worker_type(self):
-        self.assertEqual(self.task["workerType"], "b2gtest")
-
     def test_no_scopes_in_task(self):
         self.assertFalse("scopes" in self.task)
-
-    def test_image(self):
-        # XXX: Change the image name once it's in-tree.
-        self.assertTrue(
-            self.payload["image"].startswith("rail/python-test-runner"))
 
     def test_no_cache(self):
         self.assertFalse("cache" in self.payload)
 
     def test_no_artifacts(self):
         self.assertFalse("artifacts" in self.payload)
-
-    def test_no_env(self):
-        self.assertTrue("env" in self.payload)
-
-    def test_command_present(self):
-        self.assertTrue("command" in self.payload)
-
-    def test_graph_scopes(self):
-        expected_graph_scopes = set([
-            "queue:task-priority:high",
-        ])
-        self.assertTrue(expected_graph_scopes.issubset(self.graph["scopes"]))
 
     def test_requires(self):
         requires = [get_task_by_name(self.graph, "release-foo-firefox_uptake_monitoring")["taskId"]]
@@ -80,6 +74,10 @@ class TestFinalVerification(unittest.TestCase):
 class TestFinalVerificationMultiChannel(unittest.TestCase):
     maxDiff = 30000
     graph = None
+
+    GRAPH_SCHEMA = Schema({
+        'scopes': scope_check_factory(scopes={'queue:task-priority:high'})
+    })
 
     def setUp(self):
         test_kwargs = create_firefox_test_args({
@@ -118,12 +116,6 @@ class TestFinalVerificationMultiChannel(unittest.TestCase):
             self.assertFalse("artifacts" in payload)
             self.assertTrue("env" in payload)
             self.assertTrue("command" in payload)
-
-    def test_graph_scopes(self):
-        expected_graph_scopes = set([
-            "queue:task-priority:high",
-        ])
-        self.assertTrue(expected_graph_scopes.issubset(self.graph["scopes"]))
 
 
 class TestFinalVerifyNoMirrors(unittest.TestCase):

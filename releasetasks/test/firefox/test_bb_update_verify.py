@@ -1,8 +1,10 @@
 import unittest
 
 from releasetasks.test.firefox import make_task_graph, do_common_assertions, \
-    get_task_by_name, create_firefox_test_args
+    get_task_by_name, create_firefox_test_args, scope_check_factory
 from releasetasks.test import PVT_KEY_FILE
+from voluptuous import All, Schema, truth
+from voluptuous.humanize import validate_with_humanized_errors
 
 
 L10N_CONFIG = {
@@ -51,6 +53,29 @@ class TestBB_UpdateVerify(unittest.TestCase):
     task = None
     payload = None
 
+    GRAPH_SCHEMA = Schema({
+        'scopes': scope_check_factory(scopes={'queue:task-priority:high'}),
+    }, extra=True, required=True)
+
+    SCHEMA = Schema(
+                All(
+                    Schema({
+                        'task': {
+                            'provisionerId': 'buildbot-bridge',
+                            'workerType':  'buildbot-bridge',
+                            'payload': {
+                                'properties': {
+                                    'NO_BBCONFIG': '1',
+                                    'VERIFY_CONFIG': 'beta-firefox-win32.cfg',
+                                    'TOTAL_CHUNKS': '12',
+                                    'THIS_CHUNK': '3'
+                                }
+                            }
+                        }
+                    }, extra=True, required=True),
+                )
+    )
+
     def setUp(self):
         test_args = create_firefox_test_args({
             'updates_enabled': True,
@@ -72,33 +97,15 @@ class TestBB_UpdateVerify(unittest.TestCase):
     def test_common_assertions(self):
         do_common_assertions(self.graph)
 
-    def test_provisioner(self):
-        self.assertEqual(self.task["task"]["provisionerId"], "buildbot-bridge")
+    def test_bb_update_verify_task(self):
+        assert validate_with_humanized_errors(self.task, self.SCHEMA)
 
-    def test_worker_type(self):
-        self.assertEqual(self.task["task"]["workerType"], "buildbot-bridge")
-
-    def test_scopes_present(self):
-        self.assertFalse("scopes" in self.task)
-
-    def test_graph_scopes(self):
-        expected_graph_scopes = set([
-            "queue:task-priority:high",
-        ])
-        self.assertTrue(expected_graph_scopes.issubset(self.graph["scopes"]))
-
-    def test_required_property(self):
-        self.assertEqual(self.payload['properties']['NO_BBCONFIG'], "1")
-        self.assertEqual(self.payload['properties']['VERIFY_CONFIG'],
-                         "beta-firefox-win32.cfg")
-
-    def test_chunking_info(self):
-        self.assertEqual(self.payload['properties']['TOTAL_CHUNKS'], "12")
-        self.assertEqual(self.payload['properties']['THIS_CHUNK'], "3")
+    def test_bb_update_verify_graph(self):
+        assert validate_with_humanized_errors(self.graph, self.GRAPH_SCHEMA)
 
     def test_all_builders_exist(self):
         for p in ['win32', 'win64', 'macosx64']:
-            for i in range(1, 7):  # test full chunk size
+            for i in xrange(1, 7):  # test full chunk size
                 self.assertIsNotNone(
                     get_task_by_name(
                         self.graph,
@@ -152,11 +159,21 @@ class TestBB_UpdateVerifyMultiChannel(unittest.TestCase):
 
     def test_multichannel(self):
         for chan in ["beta", "release"]:
-            task = get_task_by_name(
-                self.graph, "release-beta_firefox_win32_update_verify_{chan}_3".format(chan=chan)
+            multichan_schema = Schema(All(
+                Schema({
+                    'task': {
+                        'provisionerId': 'buildbot-bridge',
+                        'workerType': 'buildbot-bridge',
+                        'payload': {
+                            'properties': {
+                                'VERIFY_CONFIG': "{chan}-firefox-win32.cfg".format(chan=chan),
+                            }
+                        }
+                    }
+                }, extra=True, required=True),
+                lambda task: 'scopes' not in task)
             )
-            self.assertEqual(task["task"]["provisionerId"], "buildbot-bridge")
-            self.assertEqual(task["task"]["workerType"], "buildbot-bridge")
-            self.assertFalse("scopes" in task)
-            self.assertEqual(task["task"]["payload"]['properties']['VERIFY_CONFIG'],
-                             "{chan}-firefox-win32.cfg".format(chan=chan))
+
+            assert validate_with_humanized_errors(get_task_by_name(
+                self.graph, "release-beta_firefox_win32_update_verify_{chan}_3".format(chan=chan)
+            ), multichan_schema)

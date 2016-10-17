@@ -1,9 +1,32 @@
 import unittest
 from releasetasks.test import PVT_KEY_FILE
 from releasetasks.test.firefox import make_task_graph, create_firefox_test_args
+from voluptuous import Any, Schema
+from voluptuous.humanize import validate_with_humanized_errors
 
 
 class TestFirefoxTaskNotifications(unittest.TestCase):
+
+    NOTIFICATIONS_SCHEMA = Schema({
+        'task': {
+            'extra': {
+                #  Notification section is either 'no notifications' or the below schema
+                'notifications': Any(
+                    Schema({
+                        Any(
+                            'task-completed',
+                            'task-exception',
+                            'task-failed',
+                        ): {
+                                'subject': str,
+                                'message': str,
+                        }
+                    }, extra=True, required=True),
+                    'no notifications'
+                )
+            }
+        }
+    }, required=True, extra=True)
 
     def setUp(self):
         test_kwargs = create_firefox_test_args({
@@ -32,36 +55,6 @@ class TestFirefoxTaskNotifications(unittest.TestCase):
         })
         self.graph = make_task_graph(**test_kwargs)
 
-    def test_notifications_exist(self):
+    def test_notification_configuration(self):
         for task in self.graph['tasks']:
-            name = task['task']['metadata']['name']
-
-            #  Make sure the extra/notifications section is present
-            self.assertTrue('notifications' in task['task']['extra'],
-                            'No extra/notifications section in task {name}'.format(name=name))
-
-    def test_subject_exists(self):
-        for task in self.graph['tasks']:
-            name = task['task']['metadata']['name']
-            if isinstance(task['task']['extra']['notifications'], dict):
-                for exchange in task['task']['extra']['notifications'].values():
-                    self.assertTrue('subject' in exchange,
-                                    'No subject in {exchange} notification section for {name}'.format(exchange=exchange,
-                                                                                                      name=name))
-
-    def test_message_exists(self):
-        for task in self.graph['tasks']:
-            name = task['task']['metadata']['name']
-            if isinstance(task['task']['extra']['notifications'], dict):
-                for exchange in task['task']['extra']['notifications'].values():
-                    self.assertTrue('message' in exchange,
-                                    'No subject in {exchange} notification section for {name}'.format(exchange=exchange,
-                                                                                                      name=name))
-
-    def test_no_notification_string(self):
-        for task in self.graph['tasks']:
-            name = task['task']['metadata']['name']
-            if isinstance(task['task']['extra']['notifications'], str):
-                self.assertEquals(task['task']['extra']['notifications'], 'no notifications',
-                                  'Notifications section for {task} is string, should be \'no notifications\' not {wrong_string}'
-                                  .format(wrong_string=task['task']['extra']['notifications'], task=name))
+            assert validate_with_humanized_errors(task, self.NOTIFICATIONS_SCHEMA)

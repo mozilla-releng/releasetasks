@@ -3,6 +3,8 @@ import unittest
 from releasetasks.test.firefox import make_task_graph, do_common_assertions, \
     get_task_by_name, create_firefox_test_args
 from releasetasks.test import PVT_KEY_FILE
+from voluptuous import Schema
+from voluptuous.humanize import validate_with_humanized_errors
 
 
 class TestPublishBalrog(unittest.TestCase):
@@ -10,6 +12,19 @@ class TestPublishBalrog(unittest.TestCase):
     graph = None
     task = None
     payload = None
+
+    TASK_SCHEMA = Schema({
+        'task': {
+            'provisionerId': 'buildbot-bridge',
+            'workerType': 'buildbot-bridge',
+            'payload': {
+                'properties': {
+                    'balrog_api_root': 'https://balrog.real/api',
+                    'channels': 'alpha, release-dev',
+                }
+            }
+        }
+    })
 
     def setUp(self):
         test_kwargs = create_firefox_test_args({
@@ -31,26 +46,13 @@ class TestPublishBalrog(unittest.TestCase):
         })
         self.graph = make_task_graph(**test_kwargs)
         self.task = get_task_by_name(self.graph, "release-foo-firefox_publish_balrog")
-        self.payload = self.task["task"]["payload"]
+
+    def test_publish_balrog_task(self):
+        assert validate_with_humanized_errors(self.task, TestPublishBalrog.TASK_SCHEMA)
 
     def test_common_assertions(self):
         do_common_assertions(self.graph)
 
-    def test_provisioner(self):
-        self.assertEqual(self.task["task"]["provisionerId"],
-                         "buildbot-bridge")
-
-    def test_worker_type(self):
-        self.assertEqual(self.task["task"]["workerType"], "buildbot-bridge")
-
     def test_requires(self):
         requires = [get_task_by_name(self.graph, "publish_release_human_decision")["taskId"]]
         self.assertEqual(sorted(self.task["requires"]), sorted(requires))
-
-    def test_balrog_api(self):
-        self.assertEqual(self.payload["properties"]["balrog_api_root"],
-                         "https://balrog.real/api")
-
-    def test_channels(self):
-        self.assertEqual(self.payload["properties"]["channels"],
-                         "alpha, release-dev")

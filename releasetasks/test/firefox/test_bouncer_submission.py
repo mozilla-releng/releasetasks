@@ -3,6 +3,8 @@ import unittest
 from releasetasks.test.firefox import make_task_graph, do_common_assertions, \
     get_task_by_name, create_firefox_test_args
 from releasetasks.test import PVT_KEY_FILE
+from voluptuous import Schema
+from voluptuous.humanize import validate_with_humanized_errors
 
 
 class TestBouncerSubmission(unittest.TestCase):
@@ -10,6 +12,24 @@ class TestBouncerSubmission(unittest.TestCase):
     graph = None
     task = None
     payload = None
+
+    TASK_SCHEMA = Schema({
+        'task': {
+            'provisionerId': 'buildbot-bridge',
+            'workerType': 'buildbot-bridge',
+            'payload': {
+                'properties': {
+                    'build_number': 3,
+                    'repo_path': 'releases/foo',
+                    'script_repo_revision': 'abcd',
+                    'partial_versions': ', '.join([
+                        '37.0build2',
+                        '38.0build1',
+                    ]),
+                }
+            }
+        }
+    }, required=True, extra=True)
 
     def setUp(self):
         test_kwargs = create_firefox_test_args({
@@ -35,32 +55,8 @@ class TestBouncerSubmission(unittest.TestCase):
     def test_common_assertions(self):
         do_common_assertions(self.graph)
 
-    def test_provisioner(self):
-        self.assertEqual(self.task["task"]["provisionerId"], "buildbot-bridge")
-
-    def test_worker_type(self):
-        self.assertEqual(self.task["task"]["workerType"], "buildbot-bridge")
+    def test_bouncer_submission_task(self):
+        assert validate_with_humanized_errors(self.task, self.TASK_SCHEMA)
 
     def test_scopes_present(self):
         self.assertFalse("scopes" in self.task)
-
-    def test_partials(self):
-        self.assertEqual(self.payload["properties"]["partial_versions"],
-                         "37.0build2, 38.0build1")
-
-    def test_build_number(self):
-        self.assertEqual(self.payload["properties"]["build_number"], 3)
-
-    def test_graph_scopes(self):
-        expected_graph_scopes = set([
-            "queue:task-priority:high",
-        ])
-        self.assertTrue(expected_graph_scopes.issubset(self.graph["scopes"]))
-
-    def test_repo_path(self):
-        self.assertEqual(self.payload["properties"]["repo_path"],
-                         "releases/foo")
-
-    def test_script_repo_revision(self):
-        self.assertEqual(self.payload["properties"]["script_repo_revision"],
-                         "abcd")

@@ -3,6 +3,8 @@ import unittest
 from releasetasks.test.firefox import make_task_graph, do_common_assertions, \
     get_task_by_name, create_firefox_test_args
 from releasetasks.test import PVT_KEY_FILE
+from voluptuous import Schema
+from voluptuous.humanize import validate_with_humanized_errors
 
 EN_US_CONFIG = {
     "platforms": {
@@ -41,6 +43,19 @@ class TestPushToMirrorsHuman(unittest.TestCase):
     tasks = None
     human_task_name = "release-{}_{}_push_to_releases_human_decision".format("mozilla-beta",
                                                                              "firefox")
+    HUMAN_TASK_SCHEMA = Schema({
+        'task': {
+            'provisionerId': 'null-provisioner',
+            'workerType': 'human-decision',
+        }
+    }, extra=True, required=True)
+
+    TASK_SCHEMA = Schema({
+        'task': {
+            'provisionerId': 'aws-provisioner-v1',
+            'workerType': 'opt-linux64',
+        }
+    }, extra=True, required=True)
 
     def setUp(self):
         test_kwargs = create_firefox_test_args({
@@ -66,12 +81,6 @@ class TestPushToMirrorsHuman(unittest.TestCase):
     def test_common_assertions(self):
         do_common_assertions(self.graph)
 
-    def test_provisioner(self):
-        self.assertEqual(self.task["task"]["provisionerId"], "aws-provisioner-v1")
-
-    def test_worker_type(self):
-        self.assertEqual(self.task["task"]["workerType"], "opt-linux64")
-
     def test_scopes_present(self):
         self.assertFalse("scopes" in self.task["task"])
 
@@ -94,12 +103,6 @@ class TestPushToMirrorsHuman(unittest.TestCase):
     def test_requires(self):
         requires = [get_task_by_name(self.graph, self.human_task_name)["taskId"]]
         self.assertEqual(self.task["requires"], requires)
-
-    def test_human_provisioner(self):
-        self.assertEqual(self.human_task["task"]["provisionerId"], "null-provisioner")
-
-    def test_human_worker_type(self):
-        self.assertEqual(self.human_task["task"]["workerType"], "human-decision")
 
     def test_human_requires(self):
         en_US_tmpl = "release-mozilla-beta_firefox_{}_complete_en-US_beetmover_candidates"
@@ -130,6 +133,13 @@ class TestPushToMirrorsAutomatic(unittest.TestCase):
     human_task_name = "release-{}_{}_push_to_releases_human_decision".format("mozilla-beta",
                                                                              "firefox")
 
+    TASK_SCHEMA = Schema({
+        'task': {
+            'provisionerId': 'aws-provisioner-v1',
+            'workerType': 'opt-linux64',
+        }
+    })
+
     def setUp(self):
         test_kwargs = create_firefox_test_args({
             'checksums_enabled': True,
@@ -153,12 +163,6 @@ class TestPushToMirrorsAutomatic(unittest.TestCase):
 
     def test_common_assertions(self):
         do_common_assertions(self.graph)
-
-    def test_provisioner(self):
-        self.assertEqual(self.task["task"]["provisionerId"], "aws-provisioner-v1")
-
-    def test_worker_type(self):
-        self.assertEqual(self.task["task"]["workerType"], "opt-linux64")
 
     def test_scopes_present(self):
         self.assertFalse("scopes" in self.task["task"])

@@ -1,8 +1,10 @@
 import unittest
 
 from releasetasks.test.firefox import do_common_assertions, get_task_by_name, \
-    make_task_graph, create_firefox_test_args
+    make_task_graph, create_firefox_test_args, scope_check_factory
 from releasetasks.test import PVT_KEY_FILE
+from voluptuous import Match, Schema
+from voluptuous.humanize import validate_with_humanized_errors
 
 EN_US_CONFIG = {
     "platforms": {
@@ -18,6 +20,57 @@ class TestSourceBuilder(unittest.TestCase):
     task_def = None
     task = None
     payload = None
+
+    SIGNING_TASK_SCHEMA = Schema({
+        'scopes': scope_check_factory(scopes={
+            "project:releng:signing:format:gpg",
+            "project:releng:signing:cert:release-signing",
+        }),
+        'task': {
+            'provisionerId': 'signing-provisioner-v1',
+            'workerType': 'signing-worker-v1',
+        }
+    }, extra=True, required=True)
+
+    GRAPH_SCHEMA = Schema({
+        'scopes': scope_check_factory(scopes={
+            "docker-worker:cache:tc-vcs",
+            "docker-worker:image:taskcluster/builder:*",
+            "queue:define-task:aws-provisioner-v1/opt-linux64",
+            "queue:create-task:aws-provisioner-v1/opt-linux64",
+            "queue:define-task:aws-provisioner-v1/build-c4-2xlarge",
+            "queue:create-task:aws-provisioner-v1/build-c4-2xlarge",
+            "docker-worker:cache:build-foo-release-workspace",
+            "docker-worker:cache:tooltool-cache",
+            "project:releng:signing:format:gpg",
+            "project:releng:signing:cert:release-signing",
+            "docker-worker:relengapi-proxy:tooltool.download.public",
+        })
+    }, extra=True, required=True)
+
+    TASK_SCHEMA = Schema({
+        'scopes': scope_check_factory(scopes={
+            "docker-worker:cache:tc-vcs",
+            "docker-worker:image:taskcluster/builder:0.5.9",
+            "queue:define-task:aws-provisioner-v1/opt-linux64",
+            "queue:create-task:aws-provisioner-v1/opt-linux64",
+            "queue:define-task:aws-provisioner-v1/build-c4-2xlarge",
+            "queue:create-task:aws-provisioner-v1/build-c4-2xlarge",
+            "docker-worker:cache:build-foo-release-workspace",
+            "docker-worker:cache:tooltool-cache",
+            "docker-worker:relengapi-proxy:tooltool.download.public",
+        }),
+        'task': {
+            'provisionerId': 'opt-linux64',
+            'workerType': 'aws-provisioner-v1',
+            'payload': {
+                'image': Match(r'^rail/source-builder@sha256'),
+                'env': {
+                    'MOZ_PKG_VERSION': '42.0b2',
+                }
+            }
+        }
+    }, extra=True, required=True)
 
     def setUp(self):
         test_kwargs = create_firefox_test_args({
@@ -36,14 +89,11 @@ class TestSourceBuilder(unittest.TestCase):
     def test_common_assertions(self):
         do_common_assertions(self.graph)
 
-    def test_provisioner_id(self):
-        assert self.task["provisionerId"] == "aws-provisioner-v1"
+    def test_source_builder_task(self):
+        assert validate_with_humanized_errors(self.task, TestSourceBuilder.TASK_SCHEMA)
 
-    def test_worker_type(self):
-        assert self.task["workerType"] == "opt-linux64"
-
-    def test_image_name(self):
-        assert self.payload["image"].startswith("rail/source-builder@sha256")
+    def test_source_builder_signing_task(self):
+        assert validate_with_humanized_errors(self.signing_task, TestSourceBuilder.SIGNING_TASK_SCHEMA)
 
     def test_cache_in_payload(self):
         assert "cache" in self.payload
@@ -57,61 +107,14 @@ class TestSourceBuilder(unittest.TestCase):
     def test_command_in_payload(self):
         assert "command" in self.payload
 
-    def test_graph_scopes(self):
-
-        expected_graph_scopes = set([
-            "docker-worker:cache:tc-vcs",
-            "docker-worker:image:taskcluster/builder:*",
-            "queue:define-task:aws-provisioner-v1/opt-linux64",
-            "queue:create-task:aws-provisioner-v1/opt-linux64",
-            "queue:define-task:aws-provisioner-v1/build-c4-2xlarge",
-            "queue:create-task:aws-provisioner-v1/build-c4-2xlarge",
-            "docker-worker:cache:build-foo-release-workspace",
-            "docker-worker:cache:tooltool-cache",
-            "project:releng:signing:format:gpg",
-            "project:releng:signing:cert:release-signing",
-            "docker-worker:relengapi-proxy:tooltool.download.public"
-        ])
-        assert expected_graph_scopes.issubset(self.graph["scopes"])
-
-    def test_task_scopes(self):
-        expected_task_scopes = set([
-            "docker-worker:cache:tc-vcs",
-            "docker-worker:image:taskcluster/builder:0.5.9",
-            "queue:define-task:aws-provisioner-v1/opt-linux64",
-            "queue:create-task:aws-provisioner-v1/opt-linux64",
-            "queue:define-task:aws-provisioner-v1/build-c4-2xlarge",
-            "queue:create-task:aws-provisioner-v1/build-c4-2xlarge",
-            "docker-worker:cache:build-foo-release-workspace",
-            "docker-worker:cache:tooltool-cache",
-            "docker-worker:relengapi-proxy:tooltool.download.public",
-        ])
-        assert expected_task_scopes.issubset(self.task["scopes"])
-
     def test_signing_task_requirements(self):
         assert self.signing_task_def["requires"][0] == self.task_def["taskId"]
-
-    def test_signing_task_provisioner(self):
-        assert self.signing_task["provisionerId"] == "signing-provisioner-v1"
-
-    def test_signing_task_worker_type(self):
-        assert self.signing_task["workerType"] == "signing-worker-v1"
-
-    def test_signing_task_scopes(self):
-        expected_task_scopes = set([
-            "project:releng:signing:format:gpg",
-            "project:releng:signing:cert:release-signing"
-        ])
-        assert expected_task_scopes.issubset(self.signing_task["scopes"])
 
     def test_signing_manifest(self):
         assert "signingManifest" in self.signing_task["payload"]
 
     def test_signing_task_payload_length(self):
         assert len(self.signing_task["payload"]) == 1
-
-    def test_pkg_version_in_payload(self):
-        self.assertEqual(self.payload["env"]["MOZ_PKG_VERSION"], "42.0b2")
 
 
 class TestSourceBuilderPushToMirrors(unittest.TestCase):
