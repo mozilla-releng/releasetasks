@@ -2,9 +2,8 @@ import unittest
 
 from releasetasks.test.firefox import make_task_graph, do_common_assertions, \
     get_task_by_name, create_firefox_test_args
-from releasetasks.test import PVT_KEY_FILE
-from voluptuous import Schema
-from voluptuous.humanize import validate_with_humanized_errors
+from releasetasks.test import PVT_KEY_FILE, verify
+from voluptuous import Schema, truth
 
 
 class TestBouncerSubmission(unittest.TestCase):
@@ -31,6 +30,11 @@ class TestBouncerSubmission(unittest.TestCase):
         }
     }, required=True, extra=True)
 
+    @staticmethod
+    @truth
+    def not_allowed(task):
+        return "scopes" not in task
+
     def setUp(self):
         test_kwargs = create_firefox_test_args({
             'bouncer_enabled': True,
@@ -56,7 +60,4 @@ class TestBouncerSubmission(unittest.TestCase):
         do_common_assertions(self.graph)
 
     def test_bouncer_submission_task(self):
-        assert validate_with_humanized_errors(self.task, self.TASK_SCHEMA)
-
-    def test_scopes_present(self):
-        self.assertFalse("scopes" in self.task)
+        verify(self.task, self.TASK_SCHEMA, TestBouncerSubmission.not_allowed)

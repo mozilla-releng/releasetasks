@@ -4,11 +4,10 @@ from jose import jwt, jws
 from jose.constants import ALGORITHMS
 
 from releasetasks import sign_task
-from releasetasks.test import PVT_KEY_FILE, PVT_KEY, PUB_KEY, OTHER_PUB_KEY
+from releasetasks.test import PVT_KEY_FILE, PVT_KEY, PUB_KEY, OTHER_PUB_KEY, verify
 from releasetasks.test.firefox import make_task_graph, do_common_assertions, \
     get_task_by_name, create_firefox_test_args, scope_check_factory
-from voluptuous import Schema
-from voluptuous.humanize import validate_with_humanized_errors
+from voluptuous import Schema, truth
 
 
 class TestTaskSigning(unittest.TestCase):
@@ -73,16 +72,15 @@ class TestGraphScopes(unittest.TestCase):
     maxDiff = 30000
     graph = None
 
-    GRAPH_SCHEMA = Schema({
-        'scopes': scope_check_factory(scopes={
-            "project:releng:signing:format:gpg",
-            "queue:define-task:buildbot-bridge/buildbot-bridge",
-            "queue:create-task:buildbot-bridge/buildbot-bridge",
-            "queue:task-priority:high"
-        })
-    }, extra=True, required=True)
-
     def setUp(self):
+        self.graph_schema = Schema({
+            'scopes': scope_check_factory(scopes={
+                "project:releng:signing:format:gpg",
+                "queue:define-task:buildbot-bridge/buildbot-bridge",
+                "queue:create-task:buildbot-bridge/buildbot-bridge",
+                "queue:task-priority:high"
+            })
+        }, extra=True, required=True)
         test_kwargs = create_firefox_test_args({
             'signing_pvt_key': PVT_KEY_FILE,
             'en_US_config': {
@@ -94,20 +92,13 @@ class TestGraphScopes(unittest.TestCase):
         })
         self.graph = make_task_graph(**test_kwargs)
 
+    @staticmethod
+    @truth
+    def no_tasks(graph):
+        return graph['tasks'] is None
+
     def test_common_assertions(self):
         do_common_assertions(self.graph)
 
-    def test_graph_schema(self):
-        assert validate_with_humanized_errors(self.graph, TestGraphScopes.GRAPH_SCHEMA)
-
-    def test_no_tasks(self):
-        self.assertIsNone(self.graph["tasks"])
-
-    def test_scopes(self):
-        expected_scopes = set([
-            "project:releng:signing:format:gpg",
-            "queue:define-task:buildbot-bridge/buildbot-bridge",
-            "queue:create-task:buildbot-bridge/buildbot-bridge",
-            "queue:task-priority:high",
-        ])
-        self.assertTrue(expected_scopes.issubset(self.graph["scopes"]))
+    def test_graph(self):
+        verify(self.graph, self.graph_schema, TestGraphScopes.no_tasks)

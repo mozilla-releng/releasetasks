@@ -2,9 +2,9 @@ import unittest
 
 from releasetasks.test.firefox import make_task_graph, do_common_assertions, \
     get_task_by_name
-from releasetasks.test import PVT_KEY_FILE
+from releasetasks.test import PVT_KEY_FILE, verify
 from releasetasks.test.firefox import create_firefox_test_args, scope_check_factory
-from voluptuous import Match, Schema
+from voluptuous import Match, Schema, truth
 
 
 class TestFinalVerification(unittest.TestCase):
@@ -14,23 +14,23 @@ class TestFinalVerification(unittest.TestCase):
     task = None
     payload = None
 
-    GRAPH_SCHEMA = Schema({
-        'scopes': scope_check_factory(scopes={'queue:task-priority:high'}),
-    }, extra=True, required=True)
-
-    TASK_SCHEMA = Schema({
-        'task': {
-            'provisionerId': 'aws-provisioner-v1',
-            'workerType': 'b2gtest',
-            'payload': {
-                'command': [str],
-                'env': str,
-                'image': Match(r'^rail/python-test-runner'),
-            }
-        }
-    }, extra=True, required=True)
-
     def setUp(self):
+        self.task_schema = Schema({
+            'task': {
+                'provisionerId': 'aws-provisioner-v1',
+                'workerType': 'b2gtest',
+                'payload': {
+                    'command': [str],
+                    'env': dict,
+                    'image': Match(r'^rail/python-test-runner'),
+                }
+            }
+        }, extra=True, required=True)
+
+        self.graph_schema = Schema({
+            'scopes': scope_check_factory(scopes={'queue:task-priority:high'}),
+        }, extra=True, required=True)
+
         test_args = create_firefox_test_args({
             'push_to_releases_enabled': True,
             'uptake_monitoring_enabled': True,
@@ -50,36 +50,54 @@ class TestFinalVerification(unittest.TestCase):
             },
         })
         self.graph = make_task_graph(**test_args)
-        self.task_def = get_task_by_name(self.graph, "foo_final_verify")
-        self.task = self.task_def["task"]
-        self.payload = self.task["payload"]
+        self.task = get_task_by_name(self.graph, "foo_final_verify")
+
+    @staticmethod
+    @truth
+    def not_allowed(task):
+        for key in ('scopes', 'cache', 'artifacts',):
+            if key in task:
+                return False
+        else:
+            return True
+
+    # Returns validator for task dependencies
+    def dependency_test_factory(self):
+        requires = [get_task_by_name(self.graph, "release-foo-firefox_uptake_monitoring")["taskId"]]
+
+        @truth
+        def validate_dependencies(task):
+            return sorted(task['requires']) == sorted(requires)
+
+        return validate_dependencies
 
     def test_common_assertions(self):
         do_common_assertions(self.graph)
 
-    def test_no_scopes_in_task(self):
-        self.assertFalse("scopes" in self.task)
-
-    def test_no_cache(self):
-        self.assertFalse("cache" in self.payload)
-
-    def test_no_artifacts(self):
-        self.assertFalse("artifacts" in self.payload)
-
-    def test_requires(self):
-        requires = [get_task_by_name(self.graph, "release-foo-firefox_uptake_monitoring")["taskId"]]
-        self.assertEqual(sorted(self.task_def["requires"]), sorted(requires))
+    def test_task(self):
+        verify(self.task, self.task_schema, self.dependency_test_factory(), TestFinalVerification.not_allowed)
 
 
 class TestFinalVerificationMultiChannel(unittest.TestCase):
     maxDiff = 30000
     graph = None
 
-    GRAPH_SCHEMA = Schema({
-        'scopes': scope_check_factory(scopes={'queue:task-priority:high'})
-    })
-
     def setUp(self):
+        self.graph_schema = Schema({
+            'scopes': scope_check_factory(scopes={'queue:task-priority:high'})
+        }, extra=True, required=True)
+
+        self.task_schema = Schema({
+            'task': {
+                'provisionerId': 'aws-provisioner-v1',
+                'workerType': 'b2gtest',
+                'payload': {
+                    'image': Match(r'^rail/python-test-runner'),
+                    'command': [str],
+                    'env': dict,
+                }
+            }
+        }, extra=True, required=True)
         test_kwargs = create_firefox_test_args({
             'push_to_releases_enabled': True,
             'release_channels': ['beta', 'release'],
@@ -97,25 +115,29 @@ class TestFinalVerificationMultiChannel(unittest.TestCase):
             },
         })
         self.graph = make_task_graph(**test_kwargs)
+        self.tasks = [get_task_by_name(self.graph, "{chan}_final_verify".format(chan=chan)) for chan in ('beta', 'release',)]
+
+    @staticmethod
+    @truth
+    def not_allowed(task):
+        if 'scopes' in task:
+            return False
+
+        for key in ('cache', 'artifacts',):
+            if key in task['task']['payload']:
+                return False
+        else:
+            return True
 
     def test_common_assertions(self):
         do_common_assertions(self.graph)
 
-    def test_multichannel(self):
-        for chan in ["beta", "release"]:
-            task_def = get_task_by_name(
-                self.graph, "{chan}_final_verify".format(chan=chan))
-            task = task_def["task"]
-            payload = task["payload"]
-            self.assertEqual(task["provisionerId"], "aws-provisioner-v1")
-            self.assertEqual(task["workerType"], "b2gtest")
-            self.assertFalse("scopes" in task)
-            # XXX: Change the image name once it's in-tree.
-            self.assertTrue(payload["image"].startswith("rail/python-test-runner"))
-            self.assertFalse("cache" in payload)
-            self.assertFalse("artifacts" in payload)
-            self.assertTrue("env" in payload)
-            self.assertTrue("command" in payload)
+    def test_graph(self):
+        verify(self.graph, self.graph_schema)
+
+    def test_tasks(self):
+        for task in self.tasks:
+            verify(task, self.task_schema, TestFinalVerificationMultiChannel.not_allowed)
 
 
 class TestFinalVerifyNoMirrors(unittest.TestCase):
@@ -164,11 +186,10 @@ class TestFinalVerifyNoMirrors(unittest.TestCase):
             },
         })
         self.graph = make_task_graph(**test_kwargs)
-        self.task_def = get_task_by_name(self.graph, "beta_final_verify")
-        self.task = self.task_def["task"]
-        self.payload = self.task["payload"]
+        self.task = get_task_by_name(self.graph, "beta_final_verify")
 
-    def test_requires(self):
+    # Returns validator for task dependencies
+    def dependency_test_factory(self):
         en_US_tmpl = "release-mozilla-beta_firefox_{}_complete_en-US_beetmover_candidates"
         en_US_partials_tmpl = "release-mozilla-beta_firefox_{}_partial_en-US_{}build{}_beetmover_candidates"
         l10n_tmpl = "release-mozilla-beta_firefox_{}_l10n_repack_beetmover_candidates_1"
@@ -176,13 +197,22 @@ class TestFinalVerifyNoMirrors(unittest.TestCase):
         requires = []
         for completes in (en_US_tmpl, l10n_tmpl):
             requires.extend([
-                get_task_by_name(self.graph, completes.format(p))["taskId"]
-                for p in ("macosx64", "win32")
-            ])
+                                get_task_by_name(self.graph, completes.format(p))["taskId"]
+                                for p in ("macosx64", "win32")
+                                ])
         for partials in (en_US_partials_tmpl, l10n_partials_tmpl):
             requires.extend([
-                get_task_by_name(self.graph, partials.format(platform, p_version, p_build_num))["taskId"]
-                for platform in ("macosx64", "win32")
-                for p_version, p_build_num in (('38.0', '1'), ('37.0', '2'))
-            ])
-        self.assertEqual(sorted(self.task_def["requires"]), sorted(requires))
+                                get_task_by_name(self.graph, partials.format(platform, p_version, p_build_num))[
+                                    "taskId"]
+                                for platform in ("macosx64", "win32")
+                                for p_version, p_build_num in (('38.0', '1'), ('37.0', '2'))
+                                ])
+
+        @truth
+        def validate_dependencies(task):
+            return sorted(requires) == sorted(task['requires'])
+
+        return validate_dependencies
+
+    def test_task(self):
+        verify(self.task, self.dependency_test_factory())

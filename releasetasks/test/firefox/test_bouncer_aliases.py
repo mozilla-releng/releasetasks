@@ -1,10 +1,9 @@
 import unittest
 
 from releasetasks.test.firefox import make_task_graph, do_common_assertions, \
-    get_task_by_name, create_firefox_test_args
-from releasetasks.test import PVT_KEY_FILE
-from voluptuous import Schema, truth
-from voluptuous.humanize import validate_with_humanized_errors
+    get_task_by_name, create_firefox_test_args, scope_check_factory
+from releasetasks.test import PVT_KEY_FILE, verify
+from voluptuous import Schema
 
 
 class TestBouncerAliases(unittest.TestCase):
@@ -15,18 +14,18 @@ class TestBouncerAliases(unittest.TestCase):
     payload = None
 
     def setUp(self):
-        self.GRAPH_SCHEMA = Schema({
-            'scopes': TestBouncerAliases.passes_graph_scopes_test,
+        self.graph_schema = Schema({
+            'scopes': scope_check_factory({'queue:task-priority:high'}),
         }, required=True, extra=True)
 
-        self.HUMAN_TASK_SCHEMA = Schema({
+        self.human_task_schema = Schema({
             'task': {
                 'provisionerId': 'null-provisioner',
                 'workerType': 'human-decision',
             }
         }, required=True, extra=True)
 
-        self.TASK_SCHEMA = Schema({
+        self.task_schema = Schema({
             'task': {
                 'provisionerId': 'buildbot-bridge',
                 'workerType': 'buildbot-bridge',
@@ -65,20 +64,13 @@ class TestBouncerAliases(unittest.TestCase):
             self.graph, "publish_release_human_decision")
 
     def test_human_task(self):
-        assert validate_with_humanized_errors(self.human_task, self.HUMAN_TASK_SCHEMA)
-
-    @staticmethod
-    @truth
-    def passes_graph_scopes_test(graph_scopes):
-        expected_graph_scopes = {"queue:task-priority:high"}
-        assert expected_graph_scopes.issubset(graph_scopes)
-        return True
+        verify(self.human_task, self.human_task_schema)
 
     def test_task(self):
-        assert validate_with_humanized_errors(self.task, self.TASK_SCHEMA)
+        verify(self.task, self.task_schema)
 
     def test_graph(self):
-        assert validate_with_humanized_errors(self.graph, self.GRAPH_SCHEMA)
+        verify(self.graph, self.graph_schema)
 
     def test_common_assertions(self):
         do_common_assertions(self.graph)

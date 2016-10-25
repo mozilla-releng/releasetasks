@@ -1,10 +1,15 @@
 import os
+from voluptuous import All, Schema
+from voluptuous.humanize import validate_with_humanized_errors
 
 
 def read_file(path):
     with open(path) as f:
         return f.read()
 
+
+def verify(data, *validators):
+    assert validate_with_humanized_errors(data, Schema(All(*validators)))
 
 PVT_KEY_FILE = os.path.join(os.path.dirname(__file__), "id_rsa")
 PVT_KEY = read_file(PVT_KEY_FILE)

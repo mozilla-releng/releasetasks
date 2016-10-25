@@ -1,9 +1,9 @@
 import unittest
 
 from releasetasks.test.firefox import make_task_graph, do_common_assertions, \
-    get_task_by_name, create_firefox_test_args
-from releasetasks.test import PVT_KEY_FILE
-from voluptuous import Schema
+    get_task_by_name, create_firefox_test_args, scope_check_factory
+from releasetasks.test import PVT_KEY_FILE, verify
+from voluptuous import Schema, truth
 
 
 class TestChecksums(unittest.TestCase):
@@ -13,6 +13,10 @@ class TestChecksums(unittest.TestCase):
     payload = None
 
     def setUp(self):
+        self.graph_schema = Schema({
+            'scopes': scope_check_factory(scopes={'queue:task-priority:high'}),
+        }, extra=True, required=True)
+
         self.test_schema = Schema({
             'task': {
                 'provisionerId': 'buildbot-bridge',
@@ -24,7 +28,8 @@ class TestChecksums(unittest.TestCase):
                     }
                 }
             }
-        })
+        }, extra=True, required=True)
+
         test_kwargs = create_firefox_test_args({
             'push_to_candidates_enabled': True,
             'checksums_enabled': True,
@@ -42,21 +47,14 @@ class TestChecksums(unittest.TestCase):
         })
         self.graph = make_task_graph(**test_kwargs)
         self.task = get_task_by_name(self.graph, "release-foo-firefox_chcksms")
-        self.payload = self.task["task"]["payload"]
 
-    def test_common_assertions(self):
-        do_common_assertions(self.graph)
+    @staticmethod
+    @truth
+    def not_allowed(task):
+        return 'scopes' not in task
 
-    def test_scopes_present(self):
-        self.assertFalse("scopes" in self.task)
-
-    def test_graph_scopes(self):
-        expected_graph_scopes = set([
-            "queue:task-priority:high",
-        ])
-        self.assertTrue(expected_graph_scopes.issubset(self.graph["scopes"]))
-
-    def test_requires(self):
+    # Returns validator for task dependencies
+    def dependency_test_factory(self):
         tmpl = "release-foo_firefox_{p}_complete_en-US_beetmover_candidates"
         tmpl_partials = "release-foo_firefox_{p}_partial_en-US_{v}build{b}_beetmover_candidates"
         requires = [
@@ -67,4 +65,17 @@ class TestChecksums(unittest.TestCase):
             for p in ("linux64", "macosx64", "win64")
             for v, b in [("37.0", 2), ("38.0", 1)]
         ]
-        self.assertEqual(sorted(self.task["requires"]), sorted(requires))
+
+        @truth
+        def validate_dependencies(task):
+            return sorted(task['requires']) == sorted(requires)
+        return validate_dependencies
+
+    def test_common_assertions(self):
+        do_common_assertions(self.graph)
+
+    def test_task(self):
+        verify(self.task, self.test_schema, self.dependency_test_factory(), TestChecksums.not_allowed)
+
+    def test_graph(self):
+        verify(self.graph, self.graph_schema)
