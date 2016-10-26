@@ -6,9 +6,8 @@ import os
 import yaml
 
 from releasetasks import make_task_graph as make_task_graph_orig
-from releasetasks.test import PUB_KEY, DUMMY_PUBLIC_KEY
-from voluptuous import All, Any, Optional, Required, Schema, truth
-from voluptuous.humanize import validate_with_humanized_errors
+from releasetasks.test import PUB_KEY, DUMMY_PUBLIC_KEY, verify
+from voluptuous import All, Any, Optional, Schema, truth
 
 
 @truth
@@ -20,12 +19,12 @@ def passes_task_provisionerId_test(task):
     if task['provisionerId'] == "aws-provisioner-v1":
         assert {"treeherder", "treeherderEnv"}.intersection(task["extra"])
         assert len([r for r in task["routes"] if r.startswith("tc-treeherder")]) == 2
-    return True  # if this line is reached the schema is validated
+    return True  # if this line is reached the test passes
 
 
 @truth
 def passes_task_signature_test(task):
-    assert task['task']['taskId'] == jwt.decode(task['task']["extra"]["signing"]["signature"], PUB_KEY, algorithms=[ALGORITHMS.RS512])['taskId']
+    assert task['taskId'] == jwt.decode(task['task']["extra"]["signing"]["signature"], PUB_KEY, algorithms=[ALGORITHMS.RS512])['taskId']
     return True
 
 
@@ -36,43 +35,42 @@ def passes_index_route_requirement(task_routes):
     return True
 
 
-COMMON_TASK_SCHEMA = Schema(All({
-    Required('reruns'): int,
-    Required('taskId'): str,
-    Required('task'): All(
-        Schema({
-            Required('routes'): passes_index_route_requirement,
-            Required('priority'): 'high',
-            Required('metadata'): {
-                Required('name'): str,
-            },
-            Required('extra'): {
-                Required('task_name'): str,
-                Required('build_props'): {
-                    Required('product'): str,
-                    Required('locales'): Any([str], [None]),
-                    Required('branch'): str,
-                    Required('platform'): Any(str, None),
-                    Required('version'): str,
-                    Required('revision'): str,
-                    Required('build_number'): int,
-                },
-                Required('signing'): {
-                    Required('signature'): str,
-                }
-            },
-            Required('payload'): {
-                Optional('properties'): {
-                    Required('version'): str,
-                    Required('build_number'): int,
-                    Required('release_promotion'): bool,
-                    Required('revision'): str,
-                    Required('product'): str,
-                }
-            },
-        }, extra=True),
-        passes_task_provisionerId_test)
-}, extra=True), passes_task_signature_test)
+COMMON_TASK_SCHEMA = Schema(All(passes_task_signature_test, {  # Must pass task signature test, and the below Schema
+    'reruns': int,
+    'taskId': str,
+    'task': All(passes_task_provisionerId_test,  # Must pass provisionerId test, and the below Schema
+                Schema({
+                    'routes': passes_index_route_requirement,
+                    'priority': 'high',
+                    'metadata': {
+                        'name': str,
+                    },
+                    'extra': {
+                        'task_name': str,
+                        'build_props': {
+                            'product': str,
+                            'locales': Any([str], [None]),
+                            'branch': str,
+                            'platform': Any(str, None),
+                            'version': str,
+                            'revision': str,
+                            'build_number': int,
+                        },
+                        'signing': {
+                            'signature': str,
+                        }
+                    },
+                    'payload': {
+                        Optional('properties'): {
+                            'version': str,
+                            'build_number': int,
+                            'release_promotion': bool,
+                            'revision': str,
+                            'product': str,
+                        }
+                    },
+                }, extra=True, required=True))
+}, extra=True, required=True))
 
 
 def create_firefox_test_args(non_standard_arguments):
@@ -87,7 +85,7 @@ def do_common_assertions(graph):
     if graph['tasks']:
         for t in graph['tasks']:
             assert t['taskId'] not in _cached_taskIDs
-            assert validate_with_humanized_errors(t, COMMON_TASK_SCHEMA)
+            verify(t, COMMON_TASK_SCHEMA)
 
             _cached_taskIDs.add(t['taskId'])
 

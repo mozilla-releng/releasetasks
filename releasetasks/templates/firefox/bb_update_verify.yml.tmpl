@@ -6,7 +6,7 @@
 -
     taskId: "{{ stableSlugId(task_name) }}"
     requires:
-        {% for upstream_builder in artifact_completes_builders + artifact_partials_builders %}
+        {% for upstream_builder in artifact_completes_builders + artifact_partials_builders + balrog_submission_builders %}
         - {{ stableSlugId(upstream_builder) }}
         {% endfor %}
         - {{ stableSlugId("release-{}-{}_updates".format(branch, product)) }}

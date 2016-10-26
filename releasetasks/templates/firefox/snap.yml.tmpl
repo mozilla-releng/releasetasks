@@ -1,11 +1,14 @@
-{% set buildername = "{}_source".format(branch) %}
+{% set buildername = "{}_snap".format(branch) %}
 {% set buildername_signing = "{}_signing".format(buildername) %}
 {% set buildername_beet = "{}_beet".format(buildername) %}
 {% set buildername_beet_signing = "{}_beet".format(buildername_signing) %}
-{% do push_to_releases_extra_upstream_builders.append(buildername_beet) %}
-{% do push_to_releases_extra_upstream_builders.append(buildername_beet_signing) %}
 -
     taskId: "{{ stableSlugId(buildername) }}"
+    requires:
+        # TODO: Depend only on linux64
+        {% for upstream_builder in artifact_completes_builders %}
+        - {{ stableSlugId(upstream_builder) }}
+        {% endfor %}
     reruns: 5
     task:
         provisionerId: aws-provisioner-v1
@@ -16,23 +19,14 @@
         priority: "high"
         retries: 5
         scopes:
-            - docker-worker:cache:tc-vcs
-            - docker-worker:image:taskcluster/builder:0.5.9
             - queue:define-task:aws-provisioner-v1/opt-linux64
             - queue:create-task:aws-provisioner-v1/opt-linux64
             - queue:define-task:aws-provisioner-v1/build-c4-2xlarge
             - queue:create-task:aws-provisioner-v1/build-c4-2xlarge
-            - docker-worker:cache:build-{{ branch }}-release-workspace
-            - docker-worker:cache:tooltool-cache
-            - docker-worker:relengapi-proxy:tooltool.download.public
 
         payload:
             maxRunTime: 7200
-            image: rail/source-builder@sha256:20ea2d9aff06740d6a35ff2f42af98c8d8b65efec9d0dea48692fbb3025d5d8c
-            cache:
-                build-{{ branch }}-release-workspace: /home/worker/workspace
-                tooltool-cache: /home/worker/tooltool-cache
-                tc-vcs: /home/worker/.tc-vcs
+            image: rail/firefox-snapcraft@sha256:0de8cd459143719a6786bedfcd505403a935b31ee2299be85c4b3df10841a25f
             artifacts:
                 public/build:
                     path: /home/worker/artifacts/
@@ -41,46 +35,40 @@
             command:
                 - /bin/bash
                 - -c
-                - bin/build.sh || JOB_SCRIPT=testing/taskcluster/scripts/builder/build-linux.sh bin/build.sh
+                - >
+                  curl -o scripts.tar.bz2 https://hg.mozilla.org/{{ repo_path }}/archive/{{ mozharness_changeset }}.tar.bz2/release/docker/firefox-snap/ &&
+                  mkdir scripts && tar xvfj scripts.tar.bz2 -C scripts --strip-components 4 && cd scripts && apt-get update &&
+                  ./runme.sh
             env:
-                GECKO_REPOSITORY: "https://hg.mozilla.org/{{ repo_path }}"
-                GECKO_HEAD_REV: "{{ revision }}"
-                MOZHARNESS_SCRIPT: "mozharness/scripts/fx_desktop_build.py"
-                MOZHARNESS_CONFIG: "builds/releng_sub_linux_configs/64_source.py"
-                # MH_BRANCH is used for branch specific MH configs
-                MH_BRANCH: "{{ branch }}"
-                MH_BUILD_POOL: "taskcluster"
-                # Don't clone mozharness, use the in-tree version
-                MOZHARNESS_DISABLE: "true"
-                MOZ_PKG_VERSION: "{{ version }}"
-                MOZHARNESS_ACTIONS: "no-clone-tools no-checkout-sources no-setup-mock"
+                VERSION: "{{ version }}"
+                BUILD_NUMBER: "{{ buildNumber }}"
+                CANDIDATES_DIR: "https://{{ beetmover_candidates_bucket }}.s3.amazonaws.com/pub/firefox/candidates"
         metadata:
             owner: release@mozilla.com
             source: https://github.com/mozilla/releasetasks
-            name: "{{ branch }} source generation"
+            name: "{{ branch }} snap generation"
             description: |
-                Generates a source tarball
-
+                Generates snap image
         routes:
             - tc-treeherder-stage.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
             - tc-treeherder.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
-            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.source_tarball
-            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.source_tarball
+            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.snap
+            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.snap
         extra:
             {{ common_extras(taskname=buildername, locales=["null"], platform="null") | indent(12)}}
             treeherderEnv:
                 - staging
                 - production
             treeherder:
-                symbol: Src
-                groupSymbol: Release
+                symbol: B
+                groupSymbol: Snap
                 collection:
                     opt: true
                 machine:
                     platform: linux64
                 build:
                     platform: linux64
-            {{ task_notifications("{} source generation".format(branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
+            {{ task_notifications("{} snap generation".format(branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
 
 -
     taskId: "{{ stableSlugId(buildername_signing) }}"
@@ -103,15 +91,14 @@
         metadata:
             owner: release@mozilla.com
             source: https://github.com/mozillla/releasetasks
-            name: "{{ branch }} source signing"
+            name: "{{ branch }} snap checksums signing"
             description: |
-                Sign source tarball
-
+                Sign snap checksums file
         routes:
             - tc-treeherder-stage.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
             - tc-treeherder-production.{{ branch }}.{{ revision }}.{{ pushlog_id }}
-            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.source_tarball_signing
-            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.source_tarball_signing
+            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.snap_checksums_signing
+            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.snap_checksums_signing
 
         extra:
             {{ common_extras(taskname=buildername_signing, locales=["null"], platform="null") | indent(12)}}
@@ -119,15 +106,15 @@
                 - staging
                 - production
             treeherder:
-                symbol: Src-S
-                groupSymbol: Release
+                symbol: S
+                groupSymbol: Snap
                 collection:
                     opt: true
                 machine:
                     platform: linux64
                 build:
                     platform: linux64
-            {{ task_notifications("{} source signing".format(branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
+            {{ task_notifications("{} snap checksums signing".format(branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
 
 -
     taskId: "{{ stableSlugId(buildername_beet) }}"
@@ -146,8 +133,8 @@
         routes:
             - tc-treeherder-stage.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
             - tc-treeherder-production.{{ branch }}.{{ revision }}.{{ pushlog_id }}
-            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.source_tarball_beetmover
-            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.source_tarball_beetmover
+            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.snap_beetmover
+            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.snap_beetmover
 
         payload:
             maxRunTime: 7200
@@ -161,7 +148,7 @@
                 - >
                   wget -O mozharness.tar.bz2 https://hg.mozilla.org/{{ repo_path }}/archive/{{ mozharness_changeset }}.tar.bz2/testing/mozharness &&
                   mkdir mozharness && tar xvfj mozharness.tar.bz2 -C mozharness --strip-components 3 && cd mozharness &&
-                  python scripts/release/beet_mover.py --no-refresh-antivirus --template configs/beetmover/source.yml.tmpl --platform linux64 --version {{ version }} --locale en-US --taskid {{ stableSlugId(buildername) }} --build-num build{{ buildNumber }} --bucket {{ beetmover_candidates_bucket }}
+                  python scripts/release/beet_mover.py --no-refresh-antivirus --template configs/beetmover/snap.yml.tmpl --platform linux64 --version {{ version }} --locale en-US --taskid {{ stableSlugId(buildername) }} --build-num build{{ buildNumber }} --bucket {{ beetmover_candidates_bucket }}
             env:
                 DUMMY_ENV_FOR_ENCRYPT: "fake"
             encryptedEnv:
@@ -172,8 +159,8 @@
                                    now_ms + 24 * 4 * 3600 * 1000, 'AWS_SECRET_ACCESS_KEY',
                                    beetmover_aws_secret_access_key) }}
         metadata:
-            name: "[beetmover] {{ product }} {{ branch }} move source bundles"
-            description: "moves source artifacts to candidates dir"
+            name: "[beetmover] {{ product }} {{ branch }} move snap"
+            description: "moves snap artifacts to candidates dir"
             owner: "release@mozilla.com"
             source: https://github.com/mozilla/releasetasks
 
@@ -183,15 +170,15 @@
                 - staging
                 - production
             treeherder:
-                symbol: Src
-                groupSymbol: BM
+                symbol: BM
+                groupSymbol: Snap
                 collection:
                     opt: true
                 machine:
                     platform: linux64
                 build:
                     platform: linux64
-            {{ task_notifications("[beetmover] {} {} move source bundles".format(product, branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
+            {{ task_notifications("[beetmover] {} {} move snap".format(product, branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
 
 -
     taskId: "{{ stableSlugId(buildername_beet_signing) }}"
@@ -210,8 +197,8 @@
         routes:
             - tc-treeherder-stage.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
             - tc-treeherder.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
-            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.source_tarball_sigs_beetmover
-            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.source_tarball_sigs_beetmover
+            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.snap_sigs_beetmover
+            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.snap_sigs_beetmover
         payload:
             maxRunTime: 7200
             image:
@@ -224,7 +211,7 @@
                 - >
                   wget -O mozharness.tar.bz2 https://hg.mozilla.org/{{ repo_path }}/archive/{{ mozharness_changeset }}.tar.bz2/testing/mozharness &&
                   mkdir mozharness && tar xvfj mozharness.tar.bz2 -C mozharness --strip-components 3 && cd mozharness &&
-                  python scripts/release/beet_mover.py --no-refresh-antivirus --template configs/beetmover/source_checksums.yml.tmpl --platform linux64 --version {{ version }} --locale en-US  --artifact-subdir env --taskid "{{ stableSlugId(buildername_signing) }}" --build-num build{{ buildNumber }} --bucket {{ beetmover_candidates_bucket }}
+                  python scripts/release/beet_mover.py --no-refresh-antivirus --template configs/beetmover/snap_checksums.yml.tmpl --platform linux64 --version {{ version }} --locale en-US  --artifact-subdir env --taskid "{{ stableSlugId(buildername_signing) }}" --build-num build{{ buildNumber }} --bucket {{ beetmover_candidates_bucket }}
             env:
                 DUMMY_ENV_FOR_ENCRYPT: "fake"
             encryptedEnv:
@@ -235,8 +222,8 @@
                                    now_ms + 24 * 4 * 3600 * 1000, 'AWS_SECRET_ACCESS_KEY',
                                    beetmover_aws_secret_access_key) }}
         metadata:
-            name: "[beetmover] {{ product }} {{ branch }} move source bundle checksums"
-            description: "moves source artifact checksums to candidates dir"
+            name: "[beetmover] {{ product }} {{ branch }} move snap checksums"
+            description: "moves snap artifact checksums to candidates dir"
             owner: "release@mozilla.com"
             source: https://github.com/mozilla/releasetasks
 
@@ -245,12 +232,12 @@
             treeherderEnv:
                 - staging
             treeherder:
-                symbol: Src-CS
-                groupSymbol: BM
+                symbol: S-BM
+                groupSymbol: Snap
                 collection:
                     opt: true
                 machine:
                     platform: linux64
                 build:
                     platform: linux64
-            {{ task_notifications("[beetmover] {} {} move source bundle checksums".format(product, branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
+            {{ task_notifications("[beetmover] {} {} move snap checksums".format(product, branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}

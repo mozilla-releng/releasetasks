@@ -206,7 +206,8 @@ class TestPushToMirrorsAutomatic(unittest.TestCase):
         return '--version 42.0b2' in command and \
                '--build-number 3' in command and \
                "--exclude '.*-EME-free/.*'" in command and \
-               "--exclude '.*/win32-sha1/.*'" in command
+               "--exclude '.*/win32-sha1/.*'" in command and \
+               "--exclude '.*/snap/.*'" in command
 
     # Returns validator for task dependencies
     def generate_task_requires_validator(self):

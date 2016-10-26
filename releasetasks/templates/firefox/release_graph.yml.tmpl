@@ -1,6 +1,7 @@
 # store all en-US artifact generating tasks for upstream builder purposes
 {% set artifact_completes_builders = [] %}
 {% set artifact_partials_builders = [] %}
+{% set balrog_submission_builders = [] %}
 {% set push_to_releases_extra_upstream_builders = [] %}
 
 {% macro common_extras(taskname, locales, platform) %}
@@ -88,6 +89,13 @@ tasks:
             {% include "source.yml.tmpl" %}
         {% endmacro %}
         {{ source_tasks()|indent(4) }}
+    {% endif %}
+
+    {% if snap_enabled is defined and snap_enabled %}
+        {% macro snap_tasks() %}
+            {% include "snap.yml.tmpl" %}
+        {% endmacro %}
+        {{ snap_tasks()|indent(4) }}
     {% endif %}
 
     {% if partner_repacks_platforms is defined and push_to_candidates_enabled and l10n_config.get("platforms") %}
