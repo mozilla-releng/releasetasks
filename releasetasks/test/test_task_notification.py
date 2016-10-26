@@ -1,34 +1,32 @@
 import unittest
-from releasetasks.test import PVT_KEY_FILE
+from releasetasks.test import PVT_KEY_FILE, verify
 from releasetasks.test.firefox import make_task_graph, create_firefox_test_args
 from voluptuous import Any, Schema
-from voluptuous.humanize import validate_with_humanized_errors
 
 
 class TestFirefoxTaskNotifications(unittest.TestCase):
 
-    NOTIFICATIONS_SCHEMA = Schema({
-        'task': {
-            'extra': {
-                #  Notification section is either 'no notifications' or the below schema
-                'notifications': Any(
-                    Schema({
-                        Any(
-                            'task-completed',
-                            'task-exception',
-                            'task-failed',
-                        ): {
-                                'subject': str,
-                                'message': str,
-                        }
-                    }, extra=True, required=True),
-                    'no notifications'
-                )
-            }
-        }
-    }, required=True, extra=True)
-
     def setUp(self):
+        self.notifications_schema = Schema({
+            'task': {
+                'extra': {
+                    #  Notification section is either 'no notifications' or the below schema
+                    'notifications': Any(
+                        Schema({
+                            Any(
+                                'task-completed',
+                                'task-exception',
+                                'task-failed',
+                            ): {
+                                    'subject': str,
+                                    'message': str,
+                            }
+                        }, extra=True, required=True),
+                        'no notifications'
+                    )
+                }
+            }
+        }, required=True, extra=True)
         test_kwargs = create_firefox_test_args({
             'source_enabled': True,
             'updates_enabled': True,
@@ -57,4 +55,4 @@ class TestFirefoxTaskNotifications(unittest.TestCase):
 
     def test_notification_configuration(self):
         for task in self.graph['tasks']:
-            assert validate_with_humanized_errors(task, self.NOTIFICATIONS_SCHEMA)
+            verify(task, self.notifications_schema)

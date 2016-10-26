@@ -2,9 +2,9 @@ import unittest
 
 from releasetasks.test.firefox import make_task_graph, get_task_by_name, \
     do_common_assertions
-from releasetasks.test import PVT_KEY_FILE
+from releasetasks.test import PVT_KEY_FILE, verify
 from releasetasks.test.firefox import create_firefox_test_args
-from voluptuous import Schema
+from voluptuous import Schema, truth
 
 
 class TestL10NSingleChunk(unittest.TestCase):
@@ -14,23 +14,34 @@ class TestL10NSingleChunk(unittest.TestCase):
     payload = None
     properties = None
 
-    TASK_SCHEMA = Schema({
-        'task': {
-            'provisionerId': 'buildbot-bridge',
-            'workerType': 'buildbot-bridge',
-            'payload': {
-                'properties': {
-                    'repo_path': 'releases/mozilla-beta',
-                    'script_repo_revision': 'abcd',
-                    'builderName': 'release-mozilla-beta_firefox_win32_l10n_repack',
-                    'locales': 'de:default en-GB:default zh-TW:default',
-                    'en_us_binary_url': 'https://queue.taskcluster.net/something/firefox.exe',
+    def setUp(self):
+        self.chunk_0_schema = Schema(None)
+        self.chunk_1_schema = Schema({
+            'task': {
+                'provisionerId': 'buildbot-bridge',
+                'workerType': 'buildbot-bridge',
+                'payload': {
+                    'buildername': 'release-mozilla-beta_firefox_win32_l10n_repack',
+                    'properties': {
+                        'repo_path': 'releases/mozilla-beta',
+                        'script_repo_revision': 'abcd',
+                        'locales': 'de:default en-GB:default zh-TW:default',
+                        'en_us_binary_url': 'https://queue.taskcluster.net/something/firefox.exe',
+                    }
                 }
             }
-        }
-    })
+        }, extra=True, required=True)
+        self.chunk_2_schema = Schema(None)
 
-    def setUp(self):
+        self.artifact_0_schema = Schema(None)
+        self.artifact_1_schema = Schema({
+            'task': {
+                'provisionerId': 'null-provisioner',
+                'workerType': 'buildbot',
+            }
+        }, extra=True, required=True)
+        self.artifact_2_schema = Schema(None)
+
         test_arguments = create_firefox_test_args({
             'updates_enabled': True,
             'signing_pvt_key': PVT_KEY_FILE,
@@ -67,63 +78,70 @@ class TestL10NSingleChunk(unittest.TestCase):
                 }
             },
         })
+
         self.graph = make_task_graph(**test_arguments)
-        self.task = get_task_by_name(self.graph, "release-mozilla-beta_firefox_win32_l10n_repack_1")
-        self.payload = self.task["task"]["payload"]
-        self.properties = self.payload["properties"]
+
+        self.chunk_0 = get_task_by_name(self.graph, "release-mozilla-beta_firefox_win32_l10n_repack_0")
+        self.chunk_1 = get_task_by_name(self.graph, "release-mozilla-beta_firefox_win32_l10n_repack_1")
+        self.chunk_2 = get_task_by_name(self.graph, "release-mozilla-beta_firefox_win32_l10n_repack_2")
+
+        self.artifact_0 = get_task_by_name(self.graph, "release-mozilla-beta_firefox_win32_l10n_repack_artifacts_0")
+        self.artifact_1 = get_task_by_name(self.graph, "release-mozilla-beta_firefox_win32_l10n_repack_artifacts_1")
+        self.artifact_2 = get_task_by_name(self.graph, "release-mozilla-beta_firefox_win32_l10n_repack_artifacts_2")
 
     def test_common_assertions(self):
         do_common_assertions(self.graph)
 
-    def test_task_present(self):
-        self.assertIsNotNone(self.task)
+    def test_chunk_0(self):
+        verify(self.chunk_0, self.chunk_0_schema)
 
-    def test_only_one_chunk_1(self):
-        self.assertIsNone(get_task_by_name(self.graph, "release-mozilla-beta_firefox_win32_l10n_repack_0"))
+    def test_chunk_1(self):
+        verify(self.chunk_1, self.chunk_1_schema)
 
-    def test_only_one_chunk_2(self):
-        self.assertIsNone(get_task_by_name(self.graph, "release-mozilla-beta_firefox_win32_l10n_repack_2"))
+    def test_chunk_2(self):
+        verify(self.chunk_2, self.chunk_2_schema)
 
-    def test_artifacts_task_present(self):
-        self.assertIsNotNone(get_task_by_name(self.graph, "release-mozilla-beta_firefox_win32_l10n_repack_artifacts_1"))
+    def test_artifact_0(self):
+        verify(self.artifact_0, self.artifact_0_schema)
 
-    def test_artifacts_task_only_one_chunk_1(self):
-        self.assertIsNone(get_task_by_name(self.graph, "release-mozilla-beta_firefox_win32_l10n_repack_artifacts_0"))
+    def test_artifact_1(self):
+        verify(self.artifact_1, self.artifact_1_schema)
 
-    def test_artifacts_task_only_one_chunk_2(self):
-        self.assertIsNone(get_task_by_name(self.graph, "release-mozilla-beta_firefox_win32_l10n_repack_artifacts_2"))
-
-    def test_artifacts_task_provisioner(self):
-        art_task = get_task_by_name(self.graph, "release-mozilla-beta_firefox_win32_l10n_repack_artifacts_1")
-        self.assertEqual(art_task["task"]["provisionerId"], "null-provisioner")
-
-    def test_artifacts_task_worker_type(self):
-        art_task = get_task_by_name(self.graph, "release-mozilla-beta_firefox_win32_l10n_repack_artifacts_1")
-        self.assertEqual(art_task["task"]["workerType"], "buildbot")
+    def test_artifact_2(self):
+        verify(self.artifact_2, self.artifact_2_schema)
 
     def test_partials_present(self):
         for pl in ["win32", "linux64"]:
             for part in ["37.0", "38.0"]:
                 task_name = "release-mozilla-beta_firefox_{pl}_l10n_repack_1_{part}_update_generator".format(
                     pl=pl, part=part)
-                self.assertIsNotNone(get_task_by_name(
-                    self.graph, task_name))
+                partial_task = get_task_by_name(self.graph, task_name)
+
+                verify(partial_task, Schema(dict))  # The task must exist as a dict
 
     def test_funsize_name(self):
         for platform in ("win32", "linux64",):
             for version in ("37.0", "38.0",):
-                generator = get_task_by_name(self.graph,
-                                             "release-mozilla-beta_firefox_{pl}_l10n_repack_1_{part}_update_generator".format(pl=platform, part=version))
-                signing = get_task_by_name(self.graph,
-                                           "release-mozilla-beta_firefox_{pl}_l10n_repack_1_{part}_signing_task".format(pl=platform, part=version))
-                balrog = get_task_by_name(self.graph,
-                                          "release-mozilla-beta_firefox_{pl}_l10n_repack_1_{part}_balrog_task".format(pl=platform, part=version))
-                self.assertEqual(generator["task"]["metadata"]["name"],
-                                 "[funsize] Update generating task %s chunk %s for %s" % (platform, "1", version,))
-                self.assertEqual(signing["task"]["metadata"]["name"],
-                                 "[funsize] MAR signing task %s chunk %s for %s" % (platform, "1", version,))
-                self.assertEqual(balrog["task"]["metadata"]["name"],
-                                 "[funsize] Publish to Balrog %s chunk %s for %s" % (platform, "1", version,))
+                generator_schema = Schema({
+                    'task': {'metadata': {'name': "[funsize] Update generating task %s chunk %s for %s" % (platform, "1", version,)}}
+                }, extra=True, required=True)
+                signing_schema = Schema({
+                    'task': {'metadata': {'name': "[funsize] MAR signing task %s chunk %s for %s" % (platform, "1", version,)}}
+                }, extra=True, required=True)
+                balrog_schema = Schema({
+                    'task': {'metadata': {'name':  "[funsize] Publish to Balrog %s chunk %s for %s" % (platform, "1", version,)}}
+                }, extra=True, required=True)
+
+                generator_task = get_task_by_name(self.graph,
+                                                  "release-mozilla-beta_firefox_{pl}_l10n_repack_1_{part}_update_generator".format(pl=platform, part=version))
+                signing_task = get_task_by_name(self.graph,
+                                                "release-mozilla-beta_firefox_{pl}_l10n_repack_1_{part}_signing_task".format(pl=platform, part=version))
+                balrog_task = get_task_by_name(self.graph,
+                                               "release-mozilla-beta_firefox_{pl}_l10n_repack_1_{part}_balrog_task".format(pl=platform, part=version))
+
+                verify(generator_task, generator_schema)
+                verify(signing_task, signing_schema)
+                verify(balrog_task, balrog_schema)
 
 
 class TestL10NMultipleChunks(unittest.TestCase):
@@ -135,29 +153,39 @@ class TestL10NMultipleChunks(unittest.TestCase):
     chunk2_properties = None
 
     def setUp(self):
-        self.chunk1_schema = Schema({
+        self.chunk_1_schema = Schema({
             'task': {
                 'payload': {
-                    'builderName': 'release-mozilla-beta_firefox_win32_l10n_repack',
-                    'locales': 'de:default en-GB:default ru:default',
-                    'en_us_binary_url': 'https://queue.taskcluster.net/something/firefox.exe',
-                    'repo_path': 'releases/mozilla-beta',
-                    'script_repo_revision': 'abcd',
+                    'buildername': 'release-mozilla-beta_firefox_win32_l10n_repack',
+                    'properties': {
+                        'locales': 'de:default en-GB:default ru:default',
+                        'en_us_binary_url': 'https://queue.taskcluster.net/something/firefox.exe',
+                        'repo_path': 'releases/mozilla-beta',
+                        'script_repo_revision': 'abcd',
+                    }
                 }
             }
-        })
+        }, extra=True, required=True)
 
-        self.chunk2_schema = Schema({
+        self.chunk_2_schema = Schema({
             'task': {
                 'payload': {
-                    'builderName': 'release-mozilla-beta_firefox_win32_l10n_repack',
-                    'locales': 'uk:default zh-TW:default',
-                    'en_us_binary_url': 'https://queue.taskcluster.net/something/firefox.exe',
-                    'repo_path': 'releases/mozilla-beta',
-                    'script_repo_revision': 'abcd'
+                    'buildername': 'release-mozilla-beta_firefox_win32_l10n_repack',
+                    'properties': {
+                        'en_us_binary_url': 'https://queue.taskcluster.net/something/firefox.exe',
+                        'script_repo_revision': 'abcd',
+                        'repo_path': 'releases/mozilla-beta',
+                        'locales': 'uk:default zh-TW:default',
+                    }
                 }
             }
-        })
+        }, extra=True, required=True)
+
+        self.artifacts_1_schema = self.artifacts_2_schema = Schema(dict)  # Tasks must exist as a dict
+        self.chunk_3_schema = self.artifacts_3_schema = Schema(None)  # Tasks must be None
+
+        self.partials_schema = Schema(dict)
+
         test_kwargs = create_firefox_test_args({
             'updates_enabled': True,
             'repo_path': 'releases/mozilla-beta',
@@ -194,57 +222,68 @@ class TestL10NMultipleChunks(unittest.TestCase):
             },
         })
         self.graph = make_task_graph(**test_kwargs)
-        self.chunk1 = get_task_by_name(
-            self.graph, "release-mozilla-beta_firefox_win32_l10n_repack_1")
-        self.chunk2 = get_task_by_name(
-            self.graph, "release-mozilla-beta_firefox_win32_l10n_repack_2")
-        self.chunk1_properties = self.chunk1["task"]["payload"]["properties"]
-        self.chunk2_properties = self.chunk2["task"]["payload"]["properties"]
+
+        self.chunk_1 = get_task_by_name(self.graph, "release-mozilla-beta_firefox_win32_l10n_repack_1")
+        self.chunk_2 = get_task_by_name(self.graph, "release-mozilla-beta_firefox_win32_l10n_repack_2")
+        self.chunk_3 = get_task_by_name(self.graph, "release-mozilla-beta_firefox_win32_l10n_repack_3")
+
+        self.artifacts_1 = get_task_by_name(self.graph, "release-mozilla-beta_firefox_win32_l10n_repack_artifacts_1")
+        self.artifacts_2 = get_task_by_name(self.graph, "release-mozilla-beta_firefox_win32_l10n_repack_artifacts_2")
+        self.artifacts_3 = get_task_by_name(self.graph, "release-mozilla-beta_firefox_win32_l10n_repack_artifacts_3")
 
     def test_common_assertions(self):
         do_common_assertions(self.graph)
 
-    def test_chunk2_script_repo_revision(self):
-        self.assertEqual(self.chunk2_properties["script_repo_revision"],
-                         "abcd")
+    def test_chunk_1(self):
+        verify(self.chunk_1, self.chunk_1_schema)
 
-    def test_no_chunk3(self):
-        self.assertIsNone(get_task_by_name(
-            self.graph, "release-mozilla-beta_firefox_win32_l10n_repack_3"))
+    def test_chunk_2(self):
+        verify(self.chunk_2, self.chunk_2_schema)
 
-    def test_chunk1_artifacts_task_present(self):
-        # make sure artifacts tasks are present
-        self.assertIsNotNone(get_task_by_name(
-            self.graph,
-            "release-mozilla-beta_firefox_win32_l10n_repack_artifacts_1"))
+    def test_chunk_3(self):
+        verify(self.chunk_3, self.chunk_3_schema)
 
-    def test_chunk2_artifacts_task_present(self):
-        self.assertIsNotNone(get_task_by_name(
-            self.graph,
-            "release-mozilla-beta_firefox_win32_l10n_repack_artifacts_2"))
+    def test_artifacts_1(self):
+        verify(self.artifacts_1, self.artifacts_1_schema)
 
-    def test_no_chunk3_artifacts(self):
-        self.assertIsNone(get_task_by_name(
-            self.graph,
-            "release-mozilla-beta_firefox_win32_l10n_repack_artifacts_3"))
+    def test_artifacts_2(self):
+        verify(self.artifacts_2, self.artifacts_2_schema)
+
+    def test_artifacts_3(self):
+        verify(self.artifacts_3, self.artifacts_3_schema)
 
     def test_partials_present(self):
         for pl in ["win32", "linux64"]:
             for part in ["37.0", "38.0"]:
                 for chunk in [1, 2]:
-                    task_name1 = "release-mozilla-beta_firefox_{pl}_l10n_repack_{chunk}_{part}_update_generator".format(
+                    partials_name_1 = "release-mozilla-beta_firefox_{pl}_l10n_repack_{chunk}_{part}_update_generator".format(
                         pl=pl, part=part, chunk=chunk)
-                    task_name2 = "release-mozilla-beta_firefox_{pl}_l10n_repack_{chunk}_{part}_signing_task".format(
+                    partials_name_2 = "release-mozilla-beta_firefox_{pl}_l10n_repack_{chunk}_{part}_signing_task".format(
                         pl=pl, part=part, chunk=chunk)
-                    self.assertIsNotNone(get_task_by_name(
-                        self.graph, task_name1))
-                    self.assertIsNotNone(get_task_by_name(
-                        self.graph, task_name2))
+
+                    partials_1 = get_task_by_name(self.graph, partials_name_1)
+                    partials_2 = get_task_by_name(self.graph, partials_name_2)
+
+                    # Verify the partial tasks are not none
+                    verify(partials_1, self.partials_schema)
+                    verify(partials_2, self.partials_schema)
 
     def test_funsize_name(self):
         for platform in ("win32", "linux64",):
             for version in ("37.0", "38.0",):
                 for chunk in ('1', '2',):
+                    generator_schema = Schema({
+                        'task': {'metadata': {
+                            'name': "[funsize] Update generating task %s chunk %s for %s" % (platform, chunk, version,)}}
+                    }, extra=True, required=True)
+                    signing_schema = Schema({
+                        'task': {'metadata': {
+                            'name': "[funsize] MAR signing task %s chunk %s for %s" % (platform, chunk, version,)}}
+                    }, extra=True, required=True)
+                    balrog_schema = Schema({
+                        'task': {'metadata': {
+                            'name': "[funsize] Publish to Balrog %s chunk %s for %s" % (platform, chunk, version,)}}
+                    }, extra=True, required=True)
                     generator = get_task_by_name(self.graph,
                                                  "release-mozilla-beta_firefox_{pl}_l10n_repack_{c}_{part}_update_generator".format(
                                                      pl=platform, part=version, c=chunk))
@@ -254,12 +293,10 @@ class TestL10NMultipleChunks(unittest.TestCase):
                     balrog = get_task_by_name(self.graph,
                                               "release-mozilla-beta_firefox_{pl}_l10n_repack_{c}_{part}_balrog_task".format(
                                                   pl=platform, part=version, c=chunk))
-                    self.assertEqual(generator["task"]["metadata"]["name"],
-                                     "[funsize] Update generating task %s chunk %s for %s" % (platform, chunk, version,))
-                    self.assertEqual(signing["task"]["metadata"]["name"],
-                                     "[funsize] MAR signing task %s chunk %s for %s" % (platform, chunk, version,))
-                    self.assertEqual(balrog["task"]["metadata"]["name"],
-                                     "[funsize] Publish to Balrog %s chunk %s for %s" % (platform, chunk, version,))
+
+                    verify(generator, generator_schema)
+                    verify(signing, signing_schema)
+                    verify(balrog, balrog_schema)
 
 
 class TestL10NNewLocales(unittest.TestCase):
@@ -319,34 +356,46 @@ class TestL10NNewLocales(unittest.TestCase):
         })
         self.graph = make_task_graph(**test_kwargs)
 
+        self.update_generator_37 = get_task_by_name(self.graph, "release-mozilla-beta_firefox_win32_l10n_repack_1_37.0_update_generator")
+        self.update_generator_38 = get_task_by_name(self.graph, "release-mozilla-beta_firefox_win32_l10n_repack_1_38.0_update_generator")
+        self.beetmover_candidates_37 = get_task_by_name(self.graph, "release-mozilla-beta_firefox_win32_l10n_repack_partial_37.0build2_beetmover_candidates_1")
+        self.beetmover_candidates_38 = get_task_by_name(self.graph, "release-mozilla-beta_firefox_win32_l10n_repack_partial_38.0build1_beetmover_candidates_1")
+
     def test_common_assertions(self):
         do_common_assertions(self.graph)
 
-    def test_new_locale_not_in_update_generator(self):
-        t = get_task_by_name(
-            self.graph,
-            "release-mozilla-beta_firefox_win32_l10n_repack_1_37.0_update_generator")
-        self.assertEqual(
-            sorted(["de", "en-GB", "ru", "uk"]),
-            sorted([p["locale"] for p in t["task"]["extra"]["funsize"]["partials"]]))
+    @staticmethod
+    @truth
+    def verify_new_locale_not_in_update_generator(task):
+        partials = task["task"]["extra"]["funsize"]["partials"]
+        return sorted(["de", "en-GB", "ru", "uk"]) == sorted([p["locale"] for p in partials])
 
-    def test_new_locale_in_update_generator(self):
-        t = get_task_by_name(
-            self.graph,
-            "release-mozilla-beta_firefox_win32_l10n_repack_1_38.0_update_generator")
-        self.assertEqual(sorted(["de", "en-GB", "ru", "uk", "zh-TW"]),
-                         sorted([p["locale"] for p in t["task"]["extra"]["funsize"]["partials"]]))
+    @staticmethod
+    @truth
+    def verify_new_locale_in_update_generator(task):
+        partials = task["task"]["extra"]["funsize"]["partials"]
+        return sorted(["de", "en-GB", "ru", "uk", "zh-TW"]) == sorted([p["locale"] for p in partials])
 
-    def test_new_locale_not_in_beetmover(self):
-        t = get_task_by_name(
-            self.graph,
-            "release-mozilla-beta_firefox_win32_l10n_repack_partial_37.0build2_beetmover_candidates_1")
-        self.assertNotIn("--locale zh-TW",  " ".join(t["task"]["payload"]["command"]))
-        self.assertIn("--locale en-GB", " ".join(t["task"]["payload"]["command"]))
+    @staticmethod
+    @truth
+    def verify_new_locale_not_in_beetmover(task):
+        command = " ".join(task["task"]["payload"]["command"])
+        return "--locale zh-TW" not in command and "--locale en-GB" in command
 
-    def test_new_locale_in_beetmover(self):
-        t = get_task_by_name(
-            self.graph,
-            "release-mozilla-beta_firefox_win32_l10n_repack_partial_38.0build1_beetmover_candidates_1")
-        self.assertIn("--locale zh-TW", " ".join(t["task"]["payload"]["command"]))
-        self.assertIn("--locale en-GB", " ".join(t["task"]["payload"]["command"]))
+    @staticmethod
+    @truth
+    def verify_new_locale_in_beetmover(task):
+        command = " ".join(task["task"]["payload"]["command"])
+        return "--locale zh-TW" in command and "--locale en-GB" in command
+
+    def test_update_generator_37(self):
+        verify(self.update_generator_37, TestL10NNewLocales.verify_new_locale_not_in_update_generator)
+
+    def test_update_generator_38(self):
+        verify(self.update_generator_38, TestL10NNewLocales.verify_new_locale_in_update_generator)
+
+    def test_beetmover_37(self):
+        verify(self.beetmover_candidates_37, TestL10NNewLocales.verify_new_locale_not_in_beetmover)
+
+    def test_beetmover_38(self):
+        verify(self.beetmover_candidates_38, TestL10NNewLocales.verify_new_locale_in_beetmover)

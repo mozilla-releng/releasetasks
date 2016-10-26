@@ -2,9 +2,8 @@ import unittest
 
 from releasetasks.test.firefox import make_task_graph, do_common_assertions, \
     get_task_by_name, create_firefox_test_args
-from releasetasks.test import PVT_KEY_FILE
-from voluptuous import Schema
-from voluptuous.humanize import validate_with_humanized_errors
+from releasetasks.test import PVT_KEY_FILE, verify
+from voluptuous import Schema, truth
 
 
 class TestPublishBalrog(unittest.TestCase):
@@ -13,20 +12,20 @@ class TestPublishBalrog(unittest.TestCase):
     task = None
     payload = None
 
-    TASK_SCHEMA = Schema({
-        'task': {
-            'provisionerId': 'buildbot-bridge',
-            'workerType': 'buildbot-bridge',
-            'payload': {
-                'properties': {
-                    'balrog_api_root': 'https://balrog.real/api',
-                    'channels': 'alpha, release-dev',
+    def setUp(self):
+        self.task_schema = Schema({
+            'task': {
+                'provisionerId': 'buildbot-bridge',
+                'workerType': 'buildbot-bridge',
+                'payload': {
+                    'properties': {
+                        'balrog_api_root': 'https://balrog.real/api',
+                        'channels': 'alpha, release-dev',
+                    }
                 }
             }
-        }
-    }, extra=True, required=True)
+        }, extra=True, required=True)
 
-    def setUp(self):
         test_kwargs = create_firefox_test_args({
             'push_to_candidates_enabled': True,
             'push_to_releases_enabled': True,
@@ -47,12 +46,18 @@ class TestPublishBalrog(unittest.TestCase):
         self.graph = make_task_graph(**test_kwargs)
         self.task = get_task_by_name(self.graph, "release-foo-firefox_publish_balrog")
 
+    # Returns a validator for task dependencies
+    def generate_task_requires_validator(self):
+        requires_sorted = sorted([get_task_by_name(self.graph, "publish_release_human_decision")["taskId"]])
+
+        @truth
+        def validate_task_requires(task):
+            return sorted(task['requires']) == requires_sorted
+
+        return validate_task_requires
+
     def test_publish_balrog_task(self):
-        assert validate_with_humanized_errors(self.task, TestPublishBalrog.TASK_SCHEMA)
+        verify(self.task, self.task_schema, self.generate_task_requires_validator())
 
     def test_common_assertions(self):
         do_common_assertions(self.graph)
-
-    def test_requires(self):
-        requires = [get_task_by_name(self.graph, "publish_release_human_decision")["taskId"]]
-        self.assertEqual(sorted(self.task["requires"]), sorted(requires))

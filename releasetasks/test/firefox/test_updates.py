@@ -1,10 +1,9 @@
 import unittest
 
 from releasetasks.test.firefox import make_task_graph, do_common_assertions, \
-    get_task_by_name, create_firefox_test_args
-from releasetasks.test import PVT_KEY_FILE
-from voluptuous import Schema
-from voluptuous.humanize import validate_with_humanized_errors
+    get_task_by_name, create_firefox_test_args, scope_check_factory
+from releasetasks.test import PVT_KEY_FILE, verify
+from voluptuous import Schema, truth
 
 
 class TestUpdates(unittest.TestCase):
@@ -13,24 +12,30 @@ class TestUpdates(unittest.TestCase):
     task = None
     props = None
 
-    TASK_SCHEMA = Schema({
-        'task': {
-            'provisionerId': 'buildbot-bridge',
-            'workerType': 'buildbot-bridge',
-            'payload': {
-                'properties': {
-                    'repo_path': 'releases/foo',
-                    'script_repo_revision': 'abcd',
-                    'partial_versions': '37.0build2, 38.0build1',
-                    'balrog_api_root': 'https://balrog.real/api',
-                    'platforms': 'linux, linux64, macosx64, win32, win64',
-                    'channels': 'bar, foo',
+    def setUp(self):
+        self.graph_schema = Schema({
+            'scopes': scope_check_factory({
+                "queue:task-priority:high",
+            })
+        }, extra=True, required=True)
+
+        self.task_schema = Schema({
+            'task': {
+                'provisionerId': 'buildbot-bridge',
+                'workerType': 'buildbot-bridge',
+                'payload': {
+                    'properties': {
+                        'repo_path': 'releases/foo',
+                        'script_repo_revision': 'abcd',
+                        'partial_versions': '37.0build2, 38.0build1',
+                        'balrog_api_root': 'https://balrog.real/api',
+                        'platforms': 'linux, linux64, macosx64, win32, win64',
+                        'channels': 'bar, foo',
+                    }
                 }
             }
-        }
-    }, extra=True, required=True)
+        }, extra=True, required=True)
 
-    def setUp(self):
         test_kwargs = create_firefox_test_args({
             'updates_enabled': True,
             'bouncer_enabled': True,
@@ -51,25 +56,24 @@ class TestUpdates(unittest.TestCase):
             }
         })
         self.graph = make_task_graph(**test_kwargs)
-        self.task = get_task_by_name(
-            self.graph, "release-foo-firefox_updates")
+        self.task = get_task_by_name(self.graph, "release-foo-firefox_updates")
+
+    # Returns a task dependency validator
+    def generate_task_dependency_validator(self):
+        tmpl = "release-foo_firefox_{}_complete_en-US_beetmover_candidates"
+        requires = [get_task_by_name(self.graph, tmpl.format(p))["taskId"] for p in ("linux", "linux64", "macosx64", "win32", "win64",)]
+
+        @truth
+        def validate_task_dependencies(task):
+            return sorted(task['requires']) == sorted(requires)
+
+        return validate_task_dependencies
 
     def test_common_assertions(self):
         do_common_assertions(self.graph)
 
+    def test_graph(self):
+        verify(self.graph, self.graph_schema)
+
     def test_updates_task(self):
-        assert validate_with_humanized_errors(self.task, TestUpdates.TASK_SCHEMA)
-
-    def test_graph_scopes(self):
-        expected_graph_scopes = set([
-            "queue:task-priority:high",
-        ])
-        self.assertTrue(expected_graph_scopes.issubset(self.graph["scopes"]))
-
-    def test_requires(self):
-        tmpl = "release-foo_firefox_{}_complete_en-US_beetmover_candidates"
-        requires = [
-            get_task_by_name(self.graph, tmpl.format(p))["taskId"]
-            for p in ("linux", "linux64", "macosx64", "win32", "win64")
-        ]
-        self.assertEqual(sorted(self.task["requires"]), sorted(requires))
+        verify(self.task, self.task_schema, self.generate_task_dependency_validator())
