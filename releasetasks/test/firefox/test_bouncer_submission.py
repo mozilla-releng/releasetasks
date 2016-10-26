@@ -12,30 +12,25 @@ class TestBouncerSubmission(unittest.TestCase):
     task = None
     payload = None
 
-    TASK_SCHEMA = Schema({
-        'task': {
-            'provisionerId': 'buildbot-bridge',
-            'workerType': 'buildbot-bridge',
-            'payload': {
-                'properties': {
-                    'build_number': 3,
-                    'repo_path': 'releases/foo',
-                    'script_repo_revision': 'abcd',
-                    'partial_versions': ', '.join([
-                        '37.0build2',
-                        '38.0build1',
-                    ]),
+    def setUp(self):
+        self.task_schema = Schema({
+            'task': {
+                'provisionerId': 'buildbot-bridge',
+                'workerType': 'buildbot-bridge',
+                'payload': {
+                    'properties': {
+                        'build_number': 3,
+                        'repo_path': 'releases/foo',
+                        'script_repo_revision': 'abcd',
+                        'partial_versions': ', '.join([
+                            '37.0build2',
+                            '38.0build1',
+                        ]),
+                    }
                 }
             }
-        }
-    }, required=True, extra=True)
+        }, required=True, extra=True)
 
-    @staticmethod
-    @truth
-    def not_allowed(task):
-        return "scopes" not in task
-
-    def setUp(self):
         test_kwargs = create_firefox_test_args({
             'bouncer_enabled': True,
             'release_channels': ['foo'],
@@ -51,13 +46,17 @@ class TestBouncerSubmission(unittest.TestCase):
                 }
             },
         })
+
         self.graph = make_task_graph(**test_kwargs)
-        self.task = get_task_by_name(self.graph,
-                                     "release-foo_firefox_bncr_sub")
-        self.payload = self.task["task"]["payload"]
+        self.task = get_task_by_name(self.graph, "release-foo_firefox_bncr_sub")
+
+    @staticmethod
+    @truth
+    def not_allowed(task):
+        return "scopes" not in task
 
     def test_common_assertions(self):
         do_common_assertions(self.graph)
 
     def test_bouncer_submission_task(self):
-        verify(self.task, self.TASK_SCHEMA, TestBouncerSubmission.not_allowed)
+        verify(self.task, self.task_schema, TestBouncerSubmission.not_allowed)

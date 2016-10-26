@@ -1,8 +1,8 @@
 import unittest
 
 from releasetasks.test.firefox import make_task_graph, do_common_assertions, \
-    get_task_by_name, create_firefox_test_args, scope_check_factory
-from releasetasks.test import PVT_KEY_FILE, verify
+    get_task_by_name, create_firefox_test_args
+from releasetasks.test import generate_scope_validator, PVT_KEY_FILE, verify
 from voluptuous import Schema, truth
 
 
@@ -54,10 +54,10 @@ class TestBB_UpdateVerify(unittest.TestCase):
 
     def setUp(self):
         self.graph_schema = Schema({
-            'scopes': scope_check_factory(scopes={'queue:task-priority:high'}),
+            'scopes': generate_scope_validator(scopes={'queue:task-priority:high'}),
         }, extra=True, required=True)
 
-        self.schema = Schema({
+        self.task_schema = Schema({
             'task': {
                 'provisionerId': 'buildbot-bridge',
                 'workerType': 'buildbot-bridge',
@@ -73,7 +73,7 @@ class TestBB_UpdateVerify(unittest.TestCase):
         }, extra=True, required=True)
 
         # Ensure the task exists, and is a dict
-        self.builder_schema = Schema(dict)
+        self.builder_exists_schema = Schema(dict)
 
         test_args = create_firefox_test_args({
             'updates_enabled': True,
@@ -103,8 +103,7 @@ class TestBB_UpdateVerify(unittest.TestCase):
                 ])
         for partials in (en_US_partials_tmpl, l10n_partials_tmpl):
             requires.extend([
-                get_task_by_name(self.graph, partials.format(platform, p_version, p_build_num))[
-                    "taskId"]
+                get_task_by_name(self.graph, partials.format(platform, p_version, p_build_num))["taskId"]
                 for platform in ("macosx64", "win32", "win64")
                 for p_version, p_build_num in (('38.0', '1'), ('37.0', '2'))
                 ])
@@ -120,7 +119,7 @@ class TestBB_UpdateVerify(unittest.TestCase):
         do_common_assertions(self.graph)
 
     def test_bb_update_verify_task(self):
-        verify(self.task, self.schema, self.generate_task_dependency_validator())
+        verify(self.task, self.task_schema, self.generate_task_dependency_validator())
 
     def test_bb_update_verify_graph(self):
         verify(self.graph, self.graph_schema)
@@ -129,7 +128,7 @@ class TestBB_UpdateVerify(unittest.TestCase):
         for p in ['win32', 'win64', 'macosx64']:
             for i in xrange(1, 7):  # test full chunk size
                 builder_task = get_task_by_name(self.graph, "release-beta_firefox_%s_update_verify_beta_%s" % (p, i))
-                verify(builder_task, self.builder_schema)
+                verify(builder_task, self.builder_exists_schema)
 
 
 class TestBB_UpdateVerifyMultiChannel(unittest.TestCase):

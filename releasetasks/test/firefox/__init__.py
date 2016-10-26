@@ -36,7 +36,7 @@ def passes_index_route_requirement(task_routes):
     return True
 
 
-TASK_SCHEMA = Schema(All({
+COMMON_TASK_SCHEMA = Schema(All({
     Required('reruns'): int,
     Required('taskId'): str,
     Required('task'): All(
@@ -87,16 +87,9 @@ def do_common_assertions(graph):
     if graph['tasks']:
         for t in graph['tasks']:
             assert t['taskId'] not in _cached_taskIDs
-            assert validate_with_humanized_errors(t, TASK_SCHEMA)
+            assert validate_with_humanized_errors(t, COMMON_TASK_SCHEMA)
 
             _cached_taskIDs.add(t['taskId'])
-
-
-def scope_check_factory(scopes=None):
-    @truth
-    def check_scopes(schema_input):
-        return scopes.issubset(schema_input)
-    return check_scopes
 
 
 def get_task_by_name(graph, name):

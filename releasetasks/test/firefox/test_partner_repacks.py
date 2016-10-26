@@ -15,6 +15,7 @@ class TestPartnerRepacks(unittest.TestCase):
     sha1_tasks = None
 
     def setUp(self):
+        # Task attributes common to each partner repack
         common_task_schema = Schema({
             'task': {
                 'provisionerId': 'buildbot-bridge',
@@ -93,6 +94,7 @@ class TestPartnerRepacks(unittest.TestCase):
                 },
             },
         })
+
         self.graph = make_task_graph(**test_kwargs)
         self.partner_tasks = [
             get_task_by_name(self.graph, "release-foo-firefox-{}_partner_repacks".format(platform))

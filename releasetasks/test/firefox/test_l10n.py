@@ -15,7 +15,7 @@ class TestL10NSingleChunk(unittest.TestCase):
     properties = None
 
     def setUp(self):
-        self.chunk_0_schema = Schema(None)
+        self.chunk_0_schema = self.chunk_2_schema = Schema(None)
         self.chunk_1_schema = Schema({
             'task': {
                 'provisionerId': 'buildbot-bridge',
@@ -31,16 +31,14 @@ class TestL10NSingleChunk(unittest.TestCase):
                 }
             }
         }, extra=True, required=True)
-        self.chunk_2_schema = Schema(None)
 
-        self.artifact_0_schema = Schema(None)
+        self.artifact_0_schema = self.artifact_2_schema = Schema(None)
         self.artifact_1_schema = Schema({
             'task': {
                 'provisionerId': 'null-provisioner',
                 'workerType': 'buildbot',
             }
         }, extra=True, required=True)
-        self.artifact_2_schema = Schema(None)
 
         test_arguments = create_firefox_test_args({
             'updates_enabled': True,
@@ -113,11 +111,10 @@ class TestL10NSingleChunk(unittest.TestCase):
     def test_partials_present(self):
         for pl in ["win32", "linux64"]:
             for part in ["37.0", "38.0"]:
-                task_name = "release-mozilla-beta_firefox_{pl}_l10n_repack_1_{part}_update_generator".format(
-                    pl=pl, part=part)
+                task_name = "release-mozilla-beta_firefox_{pl}_l10n_repack_1_{part}_update_generator".format(pl=pl, part=part)
                 partial_task = get_task_by_name(self.graph, task_name)
 
-                verify(partial_task, Schema(dict))  # The task must exist as a dict
+                verify(partial_task, Schema(dict))  # The task must exist as a dict (ie not None)
 
     def test_funsize_name(self):
         for platform in ("win32", "linux64",):
@@ -358,6 +355,7 @@ class TestL10NNewLocales(unittest.TestCase):
 
         self.update_generator_37 = get_task_by_name(self.graph, "release-mozilla-beta_firefox_win32_l10n_repack_1_37.0_update_generator")
         self.update_generator_38 = get_task_by_name(self.graph, "release-mozilla-beta_firefox_win32_l10n_repack_1_38.0_update_generator")
+
         self.beetmover_candidates_37 = get_task_by_name(self.graph, "release-mozilla-beta_firefox_win32_l10n_repack_partial_37.0build2_beetmover_candidates_1")
         self.beetmover_candidates_38 = get_task_by_name(self.graph, "release-mozilla-beta_firefox_win32_l10n_repack_partial_38.0build1_beetmover_candidates_1")
 

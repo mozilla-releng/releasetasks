@@ -43,6 +43,7 @@ class TestPublishBalrog(unittest.TestCase):
                 }
             },
         })
+
         self.graph = make_task_graph(**test_kwargs)
         self.task = get_task_by_name(self.graph, "release-foo-firefox_publish_balrog")
 

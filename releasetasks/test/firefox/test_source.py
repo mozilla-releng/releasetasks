@@ -1,8 +1,8 @@
 import unittest
 
 from releasetasks.test.firefox import do_common_assertions, get_task_by_name, \
-    make_task_graph, create_firefox_test_args, scope_check_factory
-from releasetasks.test import PVT_KEY_FILE, verify
+    make_task_graph, create_firefox_test_args
+from releasetasks.test import generate_scope_validator, PVT_KEY_FILE, verify
 from voluptuous import All, Length, Match, Schema, truth
 
 EN_US_CONFIG = {
@@ -22,7 +22,7 @@ class TestSourceBuilder(unittest.TestCase):
 
     def setUp(self):
         self.graph_schema = Schema({
-            'scopes': scope_check_factory(scopes={
+            'scopes': generate_scope_validator(scopes={
                 "docker-worker:cache:tc-vcs",
                 "docker-worker:image:taskcluster/builder:*",
                 "queue:define-task:aws-provisioner-v1/opt-linux64",
@@ -39,7 +39,7 @@ class TestSourceBuilder(unittest.TestCase):
 
         self.task_schema = Schema({
             'task': {
-                'scopes': scope_check_factory(scopes={
+                'scopes': generate_scope_validator(scopes={
                     "docker-worker:cache:tc-vcs",
                     "docker-worker:image:taskcluster/builder:0.5.9",
                     "queue:define-task:aws-provisioner-v1/opt-linux64",
@@ -66,7 +66,7 @@ class TestSourceBuilder(unittest.TestCase):
 
         self.signing_task_schema = Schema({
             'task': {
-                'scopes': scope_check_factory(scopes={
+                'scopes': generate_scope_validator(scopes={
                     "project:releng:signing:format:gpg",
                     "project:releng:signing:cert:release-signing",
                 }),

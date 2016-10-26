@@ -1,8 +1,8 @@
 import unittest
 
 from releasetasks.test.firefox import make_task_graph, do_common_assertions, \
-    get_task_by_name, create_firefox_test_args, scope_check_factory
-from releasetasks.test import PVT_KEY_FILE, verify
+    get_task_by_name, create_firefox_test_args
+from releasetasks.test import generate_scope_validator, PVT_KEY_FILE, verify
 from voluptuous import Schema, truth
 
 
@@ -14,7 +14,7 @@ class TestChecksums(unittest.TestCase):
 
     def setUp(self):
         self.graph_schema = Schema({
-            'scopes': scope_check_factory(scopes={'queue:task-priority:high'}),
+            'scopes': generate_scope_validator(scopes={'queue:task-priority:high'}),
         }, extra=True, required=True)
 
         self.test_schema = Schema({
@@ -54,7 +54,7 @@ class TestChecksums(unittest.TestCase):
         return 'scopes' not in task
 
     # Returns validator for task dependencies
-    def dependency_test_factory(self):
+    def generate_task_dependency_validator(self):
         tmpl = "release-foo_firefox_{p}_complete_en-US_beetmover_candidates"
         tmpl_partials = "release-foo_firefox_{p}_partial_en-US_{v}build{b}_beetmover_candidates"
         requires = [
@@ -69,13 +69,14 @@ class TestChecksums(unittest.TestCase):
         @truth
         def validate_dependencies(task):
             return sorted(task['requires']) == sorted(requires)
+
         return validate_dependencies
 
     def test_common_assertions(self):
         do_common_assertions(self.graph)
 
     def test_task(self):
-        verify(self.task, self.test_schema, self.dependency_test_factory(), TestChecksums.not_allowed)
+        verify(self.task, self.test_schema, self.generate_task_dependency_validator(), TestChecksums.not_allowed)
 
     def test_graph(self):
         verify(self.graph, self.graph_schema)

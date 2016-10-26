@@ -1,8 +1,8 @@
 import unittest
 
 from releasetasks.test.firefox import make_task_graph, do_common_assertions, \
-    get_task_by_name, create_firefox_test_args, scope_check_factory
-from releasetasks.test import PVT_KEY_FILE, verify
+    get_task_by_name, create_firefox_test_args
+from releasetasks.test import generate_scope_validator, PVT_KEY_FILE, verify
 from voluptuous import Schema
 
 
@@ -15,7 +15,7 @@ class TestBouncerAliases(unittest.TestCase):
 
     def setUp(self):
         self.graph_schema = Schema({
-            'scopes': scope_check_factory({'queue:task-priority:high'}),
+            'scopes': generate_scope_validator(scopes={'queue:task-priority:high'}),
         }, required=True, extra=True)
 
         self.human_task_schema = Schema({
@@ -58,10 +58,9 @@ class TestBouncerAliases(unittest.TestCase):
             },
         })
         self.graph = make_task_graph(**test_kwargs)
-        self.task = get_task_by_name(
-            self.graph, "release-foo-firefox_bouncer_aliases")
-        self.human_task = get_task_by_name(
-            self.graph, "publish_release_human_decision")
+
+        self.task = get_task_by_name(self.graph, "release-foo-firefox_bouncer_aliases")
+        self.human_task = get_task_by_name(self.graph, "publish_release_human_decision")
 
     def test_human_task(self):
         verify(self.human_task, self.human_task_schema)

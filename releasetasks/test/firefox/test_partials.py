@@ -1,8 +1,8 @@
 import unittest
 
 from releasetasks.test.firefox import make_task_graph, do_common_assertions, \
-    get_task_by_name, create_firefox_test_args, scope_check_factory
-from releasetasks.test import PVT_KEY_FILE, verify
+    get_task_by_name, create_firefox_test_args
+from releasetasks.test import generate_scope_validator, PVT_KEY_FILE, verify
 from voluptuous import Schema, truth
 
 
@@ -11,7 +11,7 @@ class TestEnUSPartials(unittest.TestCase):
 
     def setUp(self):
         self.graph_schema = Schema({
-            'scopes': scope_check_factory({
+            'scopes': generate_scope_validator(scopes={
                 "queue:*",
                 "docker-worker:*",
                 "scheduler:*",

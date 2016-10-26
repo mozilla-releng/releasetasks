@@ -2,8 +2,8 @@ import unittest
 
 from releasetasks.test.firefox import make_task_graph, do_common_assertions, \
     get_task_by_name
-from releasetasks.test import PVT_KEY_FILE, verify
-from releasetasks.test.firefox import create_firefox_test_args, scope_check_factory
+from releasetasks.test import generate_scope_validator, PVT_KEY_FILE, verify
+from releasetasks.test.firefox import create_firefox_test_args
 from voluptuous import Match, Schema, truth
 
 
@@ -28,7 +28,7 @@ class TestFinalVerification(unittest.TestCase):
         }, extra=True, required=True)
 
         self.graph_schema = Schema({
-            'scopes': scope_check_factory(scopes={'queue:task-priority:high'}),
+            'scopes': generate_scope_validator(scopes={'queue:task-priority:high'}),
         }, extra=True, required=True)
 
         test_args = create_firefox_test_args({
@@ -62,7 +62,7 @@ class TestFinalVerification(unittest.TestCase):
             return True
 
     # Returns validator for task dependencies
-    def dependency_test_factory(self):
+    def generate_task_dependency_validator(self):
         requires = [get_task_by_name(self.graph, "release-foo-firefox_uptake_monitoring")["taskId"]]
 
         @truth
@@ -75,7 +75,7 @@ class TestFinalVerification(unittest.TestCase):
         do_common_assertions(self.graph)
 
     def test_task(self):
-        verify(self.task, self.task_schema, self.dependency_test_factory(), TestFinalVerification.not_allowed)
+        verify(self.task, self.task_schema, self.generate_task_dependency_validator(), TestFinalVerification.not_allowed)
 
 
 class TestFinalVerificationMultiChannel(unittest.TestCase):
@@ -84,7 +84,7 @@ class TestFinalVerificationMultiChannel(unittest.TestCase):
 
     def setUp(self):
         self.graph_schema = Schema({
-            'scopes': scope_check_factory(scopes={'queue:task-priority:high'})
+            'scopes': generate_scope_validator(scopes={'queue:task-priority:high'})
         }, extra=True, required=True)
 
         self.task_schema = Schema({
@@ -98,6 +98,7 @@ class TestFinalVerificationMultiChannel(unittest.TestCase):
                 }
             }
         }, extra=True, required=True)
+
         test_kwargs = create_firefox_test_args({
             'push_to_releases_enabled': True,
             'release_channels': ['beta', 'release'],
@@ -114,6 +115,7 @@ class TestFinalVerificationMultiChannel(unittest.TestCase):
                 }
             },
         })
+
         self.graph = make_task_graph(**test_kwargs)
         self.tasks = [get_task_by_name(self.graph, "{chan}_final_verify".format(chan=chan)) for chan in ('beta', 'release',)]
 
@@ -189,7 +191,7 @@ class TestFinalVerifyNoMirrors(unittest.TestCase):
         self.task = get_task_by_name(self.graph, "beta_final_verify")
 
     # Returns validator for task dependencies
-    def dependency_test_factory(self):
+    def generate_task_dependency_validator(self):
         en_US_tmpl = "release-mozilla-beta_firefox_{}_complete_en-US_beetmover_candidates"
         en_US_partials_tmpl = "release-mozilla-beta_firefox_{}_partial_en-US_{}build{}_beetmover_candidates"
         l10n_tmpl = "release-mozilla-beta_firefox_{}_l10n_repack_beetmover_candidates_1"
@@ -215,4 +217,4 @@ class TestFinalVerifyNoMirrors(unittest.TestCase):
         return validate_dependencies
 
     def test_task(self):
-        verify(self.task, self.dependency_test_factory())
+        verify(self.task, self.generate_task_dependency_validator())
