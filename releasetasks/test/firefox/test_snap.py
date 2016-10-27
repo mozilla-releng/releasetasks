@@ -91,7 +91,7 @@ class TestSnapBuilder(unittest.TestCase):
 
         @truth
         def validate_signing_task_dependencies(signing_task):
-            return requires in self.signing_task['requires']
+            return requires in signing_task['requires']
 
         return validate_signing_task_dependencies
 
