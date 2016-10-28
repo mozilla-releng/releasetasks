@@ -25,6 +25,7 @@ test_requirements = [
     "pytest-cov",
     "flake8",
     "mock",
+    "voluptuous",
 ]
 
 setup(

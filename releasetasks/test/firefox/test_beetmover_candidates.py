@@ -2,8 +2,9 @@ import unittest
 
 from releasetasks.test.firefox import make_task_graph, do_common_assertions, \
     get_task_by_name, create_firefox_test_args
-from releasetasks.test import PVT_KEY_FILE
+from releasetasks.test import generate_scope_validator, PVT_KEY_FILE, verify
 from releasetasks.util import buildbot2ftp
+from voluptuous import Schema, truth
 
 
 EN_US_CONFIG = {
@@ -16,38 +17,21 @@ EN_US_CONFIG = {
 
 class BaseTestBeetmoverCandidates(object):
 
+    GRAPH_SCHEMA = Schema({
+        'scopes': generate_scope_validator(scopes={
+            'queue:task-priority:high',
+            'queue:define-task:aws-provisioner-v1/opt-linux64',
+            'queue:create-task:aws-provisioner-v1/opt-linux64',
+        })
+    }, extra=True, required=True)
+
     def test_common_assertions(self):
         do_common_assertions(self.graph)
 
-    def test_provisioner(self):
-        for platform, task in self.tasks.iteritems():
-            self.assertEqual(task["task"]["provisionerId"], "aws-provisioner-v1")
-
-    def test_worker_type(self):
-        for platform, task in self.tasks.iteritems():
-            self.assertEqual(task["task"]["workerType"], "opt-linux64")
-
-    def test_scopes_present(self):
-        for platform, task in self.tasks.iteritems():
-            self.assertFalse("scopes" in task)
-
-    def test_graph_scopes(self):
-        expected_graph_scopes = set([
-            "queue:task-priority:high",
-            "queue:define-task:aws-provisioner-v1/opt-linux64",
-            "queue:create-task:aws-provisioner-v1/opt-linux64"
-        ])
-        self.assertTrue(expected_graph_scopes.issubset(self.graph["scopes"]))
-
-    def test_platform_in_command(self):
-        for platform, task in self.tasks.iteritems():
-            command = task['task']['payload']['command']
-            self.assertTrue("--platform {}".format(buildbot2ftp(platform)) in "".join(command))
-
-    def test_version_in_command(self):
-        for platform, task in self.tasks.iteritems():
-            command = task['task']['payload']['command']
-            self.assertTrue("--version 42.0b2" in "".join(command))
+    @staticmethod
+    @truth
+    def not_allowed(task):
+        return 'scopes' not in task
 
 
 class TestBeetmoverEnUSCandidates(unittest.TestCase, BaseTestBeetmoverCandidates):
@@ -57,6 +41,23 @@ class TestBeetmoverEnUSCandidates(unittest.TestCase, BaseTestBeetmoverCandidates
     tasks = None
 
     def setUp(self):
+        self.task_schema = Schema({
+            'task': {
+                'provisionerId': 'aws-provisioner-v1',
+                'workerType': 'opt-linux64',
+                'extra': {
+                    'build_props': {
+                        'product': 'firefox',
+                        'locales': ['en-US'],
+                        'branch': 'mozilla-beta',
+                        'version': '42.0b2',
+                        'revision': 'abcdef123456',
+                        'platform': str,
+                    }
+                }
+            }
+        }, extra=True, required=True)
+
         test_kwargs = create_firefox_test_args({
             'push_to_candidates_enabled': True,
             'en_US_config': EN_US_CONFIG,
@@ -80,36 +81,30 @@ class TestBeetmoverEnUSCandidates(unittest.TestCase, BaseTestBeetmoverCandidates
             ),
         }
 
-    def test_app_version_in_command(self):
-        for platform, task in self.tasks.iteritems():
-            command = task['task']['payload']['command']
-            self.assertTrue("--app-version 42.0" in "".join(command))
+    # This function returns a validator function to check the command requirements for each platform
+    def generate_command_requirements_validator(self, platform):
+        @truth
+        def validate_command_requirements(task):
+            command = ''.join(task['task']['payload']['command'])
+            required_elements = (
+                "--app-version 42.0",
+                "--locale en-US",
+                "--bucket fake_bucket",
+                "--taskid {}".format(EN_US_CONFIG['platforms'][platform]['task_id']),
+                "--platform {}".format(buildbot2ftp(platform)),
+                "--version 42.0b2",
+            )
+            for element in required_elements:
+                if element not in command:
+                    return False
+            else:
+                return True
 
-    def test_locale_in_command(self):
-        for platform, task in self.tasks.iteritems():
-            command = task['task']['payload']['command']
-            self.assertTrue("--locale en-US" in "".join(command))
+        return validate_command_requirements
 
-    def test_taskid_in_command(self):
+    def test_tasks(self):
         for platform, task in self.tasks.iteritems():
-            en_US_taskid = EN_US_CONFIG['platforms'][platform]['task_id']
-            command = task['task']['payload']['command']
-            self.assertTrue("--taskid {}".format(en_US_taskid) in "".join(command))
-
-    def test_bucket_in_command(self):
-        for platform, task in self.tasks.iteritems():
-            command = task['task']['payload']['command']
-            self.assertTrue("--bucket {}".format("fake_bucket") in "".join(command))
-
-    def test_extra_build_props(self):
-        for platform, task in self.tasks.iteritems():
-            build_props = task['task']['extra']['build_props']
-            self.assertEqual(build_props["product"], "firefox")
-            self.assertEqual(build_props["locales"], ["en-US"])
-            self.assertEqual(build_props["branch"], "mozilla-beta")
-            self.assertTrue("platform" in build_props)
-            self.assertEqual(build_props["version"], "42.0b2")
-            self.assertEqual(build_props["revision"], "abcdef123456")
+            verify(task, self.task_schema, self.generate_command_requirements_validator(platform), TestBeetmoverEnUSCandidates.not_allowed)
 
 
 class TestBeetmover110nCandidates(unittest.TestCase, BaseTestBeetmoverCandidates):
@@ -129,7 +124,6 @@ class TestBeetmover110nCandidates(unittest.TestCase, BaseTestBeetmoverCandidates
                 "locales": ["de", "en-GB", "zh-TW"],
                 "chunks": 1,
             },
-
         },
         "changesets": {
             "de": "default",
@@ -139,6 +133,23 @@ class TestBeetmover110nCandidates(unittest.TestCase, BaseTestBeetmoverCandidates
     }
 
     def setUp(self):
+        self.task_schema = Schema({
+            'task': {
+                'provisionerId': 'aws-provisioner-v1',
+                'workerType': 'opt-linux64',
+                'extra': {
+                    'build_props': {
+                        'product': 'firefox',
+                        'locales': ["de", "en-GB", "zh-TW"],
+                        'branch': 'mozilla-beta',
+                        'version': '42.0b2',
+                        'revision': 'abcdef123456',
+                        'platform': str,
+                    }
+                }
+            }
+        }, extra=True, required=True)
+
         test_kwargs = create_firefox_test_args({
             'push_to_candidates_enabled': True,
             'branch': 'mozilla-beta',
@@ -149,6 +160,7 @@ class TestBeetmover110nCandidates(unittest.TestCase, BaseTestBeetmoverCandidates
             'en_US_config': EN_US_CONFIG,
             'l10n_config': self.l10n_config,
         })
+
         self.graph = make_task_graph(**test_kwargs)
         self.tasks = {
             'win32': get_task_by_name(
@@ -163,39 +175,38 @@ class TestBeetmover110nCandidates(unittest.TestCase, BaseTestBeetmoverCandidates
             ),
         }
 
-    def test_app_version_in_command(self):
-        for platform, task in self.tasks.iteritems():
-            command = task['task']['payload']['command']
-            self.assertTrue("--app-version 42.0" in "".join(command))
+    # This function returns a validator function to check the command requirements for each platform
+    def generate_command_requirements_validator(self, platform):
+        l10n_artifact_task = get_task_by_name(
+            self.graph,
+            "release-mozilla-beta_firefox_{}_l10n_repack_artifacts_1".format(platform)
+        )
 
-    def test_locale_in_command(self):
-        for platform, task in self.tasks.iteritems():
-            command = task['task']['payload']['command']
-            self.assertTrue("--locale de --locale en-GB --locale zh-TW" in "".join(command))
+        task_id = l10n_artifact_task['taskId']
 
-    def test_bucket_in_command(self):
-        for platform, task in self.tasks.iteritems():
-            command = task['task']['payload']['command']
-            self.assertTrue("--bucket {}".format("fake_bucket") in "".join(command))
-
-    def test_taskid_in_command(self):
-        for platform, task in self.tasks.iteritems():
-            l10n_artifact_task = get_task_by_name(
-                self.graph,
-                "release-mozilla-beta_firefox_{}_l10n_repack_artifacts_1".format(platform)
+        @truth
+        def verify_command_requirements(task):
+            command = ''.join(task['task']['payload']['command'])
+            required_elements = (
+                "--app-version 42.0",
+                "--locale de --locale en-GB --locale zh-TW",
+                "--bucket fake_bucket",
+                "--taskid {}".format(task_id),
+                "--platform {}".format(buildbot2ftp(platform)),
+                "--version 42.0b2",
             )
-            command = task['task']['payload']['command']
-            self.assertTrue("--taskid {}".format(l10n_artifact_task['taskId']) in "".join(command))
 
-    def test_extra_build_props(self):
+            for element in required_elements:
+                if element not in command:
+                    return False
+            else:
+                return True
+
+        return verify_command_requirements
+
+    def test_tasks(self):
         for platform, task in self.tasks.iteritems():
-            build_props = task['task']['extra']['build_props']
-            self.assertEqual(build_props["product"], "firefox")
-            self.assertEqual(build_props["locales"], ["de", "en-GB", "zh-TW"])
-            self.assertEqual(build_props["branch"], "mozilla-beta")
-            self.assertTrue("platform" in build_props)
-            self.assertEqual(build_props["version"], "42.0b2")
-            self.assertEqual(build_props["revision"], "abcdef123456")
+            verify(task, self.task_schema, self.generate_command_requirements_validator(platform), TestBeetmover110nCandidates.not_allowed)
 
 
 class TestBeetmoverEnUSPartialsCandidates(unittest.TestCase, BaseTestBeetmoverCandidates):
@@ -205,6 +216,13 @@ class TestBeetmoverEnUSPartialsCandidates(unittest.TestCase, BaseTestBeetmoverCa
     tasks = None
 
     def setUp(self):
+        self.task_schema = Schema({
+            'task': {
+                'provisionerId': 'aws-provisioner-v1',
+                'workerType': 'opt-linux64',
+            }
+        }, extra=True, required=True)
+
         test_kwargs = create_firefox_test_args({
             'updates_enabled': True,
             'push_to_candidates_enabled': True,
@@ -214,6 +232,7 @@ class TestBeetmoverEnUSPartialsCandidates(unittest.TestCase, BaseTestBeetmoverCa
             'en_US_config': EN_US_CONFIG,
         })
         self.graph = make_task_graph(**test_kwargs)
+
         self.tasks = {
             'win32': get_task_by_name(
                 self.graph, "release-{}_{}_{}_partial_en-US_{}build{}_beetmover_candidates".format(
@@ -227,28 +246,48 @@ class TestBeetmoverEnUSPartialsCandidates(unittest.TestCase, BaseTestBeetmoverCa
             ),
         }
 
-    def test_partial_version_in_command(self):
-        for platform, task in self.tasks.iteritems():
-            command = task['task']['payload']['command']
-            if platform == "win32":
-                self.assertTrue("--partial-version 38.0" in "".join(command))
-            else:  # macosx64
-                self.assertTrue("--partial-version 37.0" in "".join(command))
-
-    def test_locale_in_command(self):
-        for platform, task in self.tasks.iteritems():
-            command = task['task']['payload']['command']
-            self.assertTrue("--locale en-US" in "".join(command))
-
-    def test_taskid_in_command(self):
-        for platform, task in self.tasks.iteritems():
-            if platform == "win32":
-                buildername = "win32_en-US_38.0build1_funsize_signing_task"
-            else:  # macosx64
-                buildername = "macosx64_en-US_37.0build2_funsize_signing_task"
+    # This function returns a validator function to check the command requirements for each platform
+    def generate_command_requirements_validator(self, platform):
+        # Command requirements for win32
+        if platform == 'win32':
+            buildername = "win32_en-US_38.0build1_funsize_signing_task"
             funsize_artifact = get_task_by_name(self.graph, buildername)
-            command = task['task']['payload']['command']
-            self.assertTrue("--taskid {}".format(funsize_artifact['taskId']) in "".join(command))
+
+            required_elements = (
+                "--partial-version 38.0",
+                "--locale en-US",
+                "--taskid {}".format(funsize_artifact['taskId']),
+                "--platform {}".format(buildbot2ftp(platform)),
+                "--version 42.0b2",
+            )
+
+        # Command requirements for macosx64
+        elif platform == 'macosx64':
+            buildername = "macosx64_en-US_37.0build2_funsize_signing_task"
+            funsize_artifact = get_task_by_name(self.graph, buildername)
+
+            required_elements = (
+                "--partial-version 37.0",
+                "--locale en-US",
+                "--taskid {}".format(funsize_artifact['taskId']),
+                "--platform {}".format(buildbot2ftp(platform)),
+                "--version 42.0b2",
+            )
+
+        @truth
+        def verify_command_requirements(task):
+            command = ''.join(task['task']['payload']['command'])
+            for element in required_elements:
+                if element not in command:
+                    return False
+            else:
+                return True
+
+        return verify_command_requirements
+
+    def test_tasks(self):
+        for platform, task in self.tasks.iteritems():
+            verify(task, self.task_schema, self.generate_command_requirements_validator(platform), TestBeetmoverEnUSPartialsCandidates.not_allowed)
 
 
 class TestBeetmoverl10nPartialsCandidates(unittest.TestCase, BaseTestBeetmoverCandidates):
@@ -278,6 +317,13 @@ class TestBeetmoverl10nPartialsCandidates(unittest.TestCase, BaseTestBeetmoverCa
     }
 
     def setUp(self):
+        self.task_schema = Schema({
+            'task': {
+                'provisionerId': 'aws-provisioner-v1',
+                'workerType': 'opt-linux64',
+            }
+        }, extra=True, required=True)
+
         test_kwargs = create_firefox_test_args({
             'updates_enabled': True,
             'push_to_candidates_enabled': True,
@@ -289,6 +335,7 @@ class TestBeetmoverl10nPartialsCandidates(unittest.TestCase, BaseTestBeetmoverCa
             'final_verify_channels': ['beta'],
             'release_channels': ['beta']
         })
+
         self.graph = make_task_graph(**test_kwargs)
         self.tasks = {
             'win32': get_task_by_name(
@@ -303,25 +350,42 @@ class TestBeetmoverl10nPartialsCandidates(unittest.TestCase, BaseTestBeetmoverCa
             ),
         }
 
-    def test_partial_version_in_command(self):
-        for platform, task in self.tasks.iteritems():
-            command = task['task']['payload']['command']
-            if platform == "win32":
-                self.assertTrue("--partial-version 38.0" in "".join(command))
-            else:  # macosx64
-                self.assertTrue("--partial-version 37.0" in "".join(command))
-
-    def test_locale_in_command(self):
-        for platform, task in self.tasks.iteritems():
-            command = task['task']['payload']['command']
-            self.assertTrue("--locale de --locale en-GB --locale zh-TW" in "".join(command))
-
-    def test_taskid_in_command(self):
-        for platform, task in self.tasks.iteritems():
-            if platform == "win32":
-                buildername = "release-mozilla-beta_firefox_win32_l10n_repack_1_38.0_signing_task"
-            else:  # macosx64
-                buildername = "release-mozilla-beta_firefox_macosx64_l10n_repack_1_37.0_signing_task"
+    def generate_command_requirements_validator(self, platform):
+        if platform == 'win32':
+            buildername = "release-mozilla-beta_firefox_win32_l10n_repack_1_38.0_signing_task"
             funsize_artifact = get_task_by_name(self.graph, buildername)
-            command = task['task']['payload']['command']
-            self.assertTrue("--taskid {}".format(funsize_artifact['taskId']) in "".join(command))
+
+            required_elements = (
+                "--partial-version 38.0",
+                "--locale de --locale en-GB --locale zh-TW",
+                "--taskid {}".format(funsize_artifact['taskId']),
+                "--platform {}".format(buildbot2ftp(platform)),
+                "--version 42.0b2",
+            )
+
+        elif platform == 'macosx64':
+            buildername = "release-mozilla-beta_firefox_macosx64_l10n_repack_1_37.0_signing_task"
+            funsize_artifact = get_task_by_name(self.graph, buildername)
+
+            required_elements = (
+                "--partial-version 37.0",
+                "--locale de --locale en-GB --locale zh-TW",
+                "--taskid {}".format(funsize_artifact['taskId']),
+                "--platform {}".format(buildbot2ftp(platform)),
+                "--version 42.0b2",
+            )
+
+        @truth
+        def validate_command_requirements(task):
+            command = ''.join(task['task']['payload']['command'])
+            for element in required_elements:
+                if element not in command:
+                    return False
+            else:
+                return True
+
+        return validate_command_requirements
+
+    def test_tasks(self):
+        for platform, task in self.tasks.iteritems():
+            verify(task, self.task_schema, self.generate_command_requirements_validator(platform), TestBeetmoverl10nPartialsCandidates.not_allowed)

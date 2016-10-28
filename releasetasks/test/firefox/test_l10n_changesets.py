@@ -2,17 +2,27 @@ import unittest
 
 from releasetasks.test.firefox import do_common_assertions, get_task_by_name, \
     make_task_graph
-from releasetasks.test import PVT_KEY_FILE
+from releasetasks.test import PVT_KEY_FILE, verify
 from releasetasks.test.firefox import create_firefox_test_args
+from voluptuous import Schema
 
 
 class TestL10NChangesets(unittest.TestCase):
     maxDiff = 30000
     graph = None
     task = None
-    task_beet = None
 
     def setUp(self):
+        self.task_schema = Schema({
+            'task': {
+                'workerType': 'opt-linux64',
+                'provisionerId': 'aws-provisioner-v1',
+                'extra': {
+                    'l10n_changesets': 'ab cd\nef gh\nij kl\n',
+                },
+            },
+        }, extra=True, required=True)
+
         test_kwargs = create_firefox_test_args({
             'source_enabled': True,
             'push_to_candidates_enabled': True,
@@ -51,17 +61,9 @@ class TestL10NChangesets(unittest.TestCase):
         })
         self.graph = make_task_graph(**test_kwargs)
         self.task = get_task_by_name(self.graph, "foo_l10n_changeset")
-        self.task_beet = get_task_by_name(self.graph, "foo_l10n_changeset_beet")
 
     def test_common_assertions(self):
         do_common_assertions(self.graph)
 
-    def test_provisioner(self):
-        self.assertEqual(self.task["task"]["provisionerId"], "aws-provisioner-v1")
-
-    def test_worker_type(self):
-        self.assertEqual(self.task["task"]["workerType"], "opt-linux64")
-
-    def test_l10n_changesets_text(self):
-        self.assertEqual(self.task["task"]["extra"]["l10n_changesets"],
-                         "ab cd\nef gh\nij kl\n")
+    def test_task_schema(self):
+        verify(self.task, self.task_schema)

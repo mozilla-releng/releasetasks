@@ -2,7 +2,8 @@ import unittest
 
 from releasetasks.test.firefox import make_task_graph, do_common_assertions, \
     get_task_by_name, create_firefox_test_args
-from releasetasks.test import PVT_KEY_FILE
+from releasetasks.test import generate_scope_validator, PVT_KEY_FILE, verify
+from voluptuous import Schema, truth
 
 
 L10N_CONFIG = {
@@ -52,6 +53,28 @@ class TestBB_UpdateVerify(unittest.TestCase):
     payload = None
 
     def setUp(self):
+        self.graph_schema = Schema({
+            'scopes': generate_scope_validator(scopes={'queue:task-priority:high'}),
+        }, extra=True, required=True)
+
+        self.task_schema = Schema({
+            'task': {
+                'provisionerId': 'buildbot-bridge',
+                'workerType': 'buildbot-bridge',
+                'payload': {
+                    'properties': {
+                        'NO_BBCONFIG': '1',
+                        'VERIFY_CONFIG': 'beta-firefox-win32.cfg',
+                        'TOTAL_CHUNKS': '12',
+                        'THIS_CHUNK': '3'
+                    }
+                }
+            }
+        }, extra=True, required=True)
+
+        # Ensure the task exists, and is a dict
+        self.builder_exists_schema = Schema(dict)
+
         test_args = create_firefox_test_args({
             'updates_enabled': True,
             'push_to_candidates_enabled': True,
@@ -66,47 +89,8 @@ class TestBB_UpdateVerify(unittest.TestCase):
         })
         self.graph = make_task_graph(**test_args)
         self.task = get_task_by_name(self.graph, "release-beta_firefox_win32_update_verify_beta_3")
-        self.payload = self.task["task"]["payload"]
-        self.properties = self.payload["properties"]
 
-    def test_common_assertions(self):
-        do_common_assertions(self.graph)
-
-    def test_provisioner(self):
-        self.assertEqual(self.task["task"]["provisionerId"], "buildbot-bridge")
-
-    def test_worker_type(self):
-        self.assertEqual(self.task["task"]["workerType"], "buildbot-bridge")
-
-    def test_scopes_present(self):
-        self.assertFalse("scopes" in self.task)
-
-    def test_graph_scopes(self):
-        expected_graph_scopes = set([
-            "queue:task-priority:high",
-        ])
-        self.assertTrue(expected_graph_scopes.issubset(self.graph["scopes"]))
-
-    def test_required_property(self):
-        self.assertEqual(self.payload['properties']['NO_BBCONFIG'], "1")
-        self.assertEqual(self.payload['properties']['VERIFY_CONFIG'],
-                         "beta-firefox-win32.cfg")
-
-    def test_chunking_info(self):
-        self.assertEqual(self.payload['properties']['TOTAL_CHUNKS'], "12")
-        self.assertEqual(self.payload['properties']['THIS_CHUNK'], "3")
-
-    def test_all_builders_exist(self):
-        for p in ['win32', 'win64', 'macosx64']:
-            for i in range(1, 7):  # test full chunk size
-                self.assertIsNotNone(
-                    get_task_by_name(
-                        self.graph,
-                        "release-beta_firefox_%s_update_verify_beta_%s" % (p, i)
-                    )
-                )
-
-    def test_requires(self):
+    def generate_task_dependency_validator(self):
         en_US_tmpl = "release-beta_firefox_{}_complete_en-US_beetmover_candidates"
         en_US_partials_tmpl = "release-beta_firefox_{p}_partial_en-US_{v}build{n}_beetmover_candidates"
         l10n_tmpl = "release-beta_firefox_{}_l10n_repack_beetmover_candidates_1"
@@ -125,9 +109,29 @@ class TestBB_UpdateVerify(unittest.TestCase):
                 get_task_by_name(self.graph, partials.format(p=platform, v=p_version, n=p_build_num))["taskId"]
                 for platform in ("macosx64", "win32", "win64")
                 for p_version, p_build_num in (('38.0', '1'), ('37.0', '2'))
-            ])
+                ])
         requires.append(get_task_by_name(self.graph, "release-beta-firefox_updates")["taskId"])
-        self.assertEqual(sorted(self.task["requires"]), sorted(requires))
+
+        @truth
+        def validate_task_dependencies(task):
+            return sorted(requires) == sorted(task['requires'])
+
+        return validate_task_dependencies
+
+    def test_common_assertions(self):
+        do_common_assertions(self.graph)
+
+    def test_bb_update_verify_task(self):
+        verify(self.task, self.task_schema, self.generate_task_dependency_validator())
+
+    def test_bb_update_verify_graph(self):
+        verify(self.graph, self.graph_schema)
+
+    def test_all_builders_exist(self):
+        for p in ['win32', 'win64', 'macosx64']:
+            for i in xrange(1, 7):  # test full chunk size
+                builder_task = get_task_by_name(self.graph, "release-beta_firefox_%s_update_verify_beta_%s" % (p, i))
+                verify(builder_task, self.builder_exists_schema)
 
 
 class TestBB_UpdateVerifyMultiChannel(unittest.TestCase):
@@ -150,16 +154,27 @@ class TestBB_UpdateVerifyMultiChannel(unittest.TestCase):
         })
         self.graph = make_task_graph(**test_kwargs)
 
+    @staticmethod
+    @truth
+    def not_allowed(task):
+        return "scopes" not in task
+
     def test_common_assertions(self):
         do_common_assertions(self.graph)
 
     def test_multichannel(self):
         for chan in ["beta", "release"]:
-            task = get_task_by_name(
-                self.graph, "release-beta_firefox_win32_update_verify_{chan}_3".format(chan=chan)
-            )
-            self.assertEqual(task["task"]["provisionerId"], "buildbot-bridge")
-            self.assertEqual(task["task"]["workerType"], "buildbot-bridge")
-            self.assertFalse("scopes" in task)
-            self.assertEqual(task["task"]["payload"]['properties']['VERIFY_CONFIG'],
-                             "{chan}-firefox-win32.cfg".format(chan=chan))
+            multichan_schema = Schema({
+                'task': {
+                    'provisionerId': 'buildbot-bridge',
+                    'workerType': 'buildbot-bridge',
+                    'payload': {
+                        'properties': {
+                            'VERIFY_CONFIG': "{chan}-firefox-win32.cfg".format(chan=chan),
+                        }
+                    }
+                }
+            }, extra=True, required=True)
+
+            multichan_task = get_task_by_name(self.graph, "release-beta_firefox_win32_update_verify_{chan}_3".format(chan=chan))
+            verify(multichan_task, multichan_schema, TestBB_UpdateVerifyMultiChannel.not_allowed)

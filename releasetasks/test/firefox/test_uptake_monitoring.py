@@ -2,7 +2,8 @@ import unittest
 
 from releasetasks.test.firefox import make_task_graph, do_common_assertions, \
     get_task_by_name, create_firefox_test_args
-from releasetasks.test import PVT_KEY_FILE
+from releasetasks.test import PVT_KEY_FILE, verify
+from voluptuous import Schema, truth
 
 
 class TestUptakeMonitoring(unittest.TestCase):
@@ -12,6 +13,25 @@ class TestUptakeMonitoring(unittest.TestCase):
     payload = None
 
     def setUp(self):
+        self.task_schema = Schema({
+            'task': {
+                'scopes': list,
+                'provisionerId': 'buildbot-bridge',
+                'workerType': 'buildbot-bridge',
+                'payload': {
+                    'properties': {
+                        'product': 'firefox',
+                        'version': '42.0b2',
+                        'build_number': 3,
+                        'repo_path': 'releases/foo',
+                        'script_repo_revision': 'abcd',
+                        'revision': 'abcdef123456',
+                        'tuxedo_server_url': 'https://bouncer.real.allizom.org/api',
+                    }
+                }
+            }
+        }, extra=True, required=True)
+
         test_kwargs = create_firefox_test_args({
             'push_to_candidates_enabled': True,
             'push_to_releases_enabled': True,
@@ -34,49 +54,20 @@ class TestUptakeMonitoring(unittest.TestCase):
         self.task = get_task_by_name(self.graph, "release-foo-firefox_uptake_monitoring")
         self.payload = self.task["task"]["payload"]
 
+    def generate_task_dependency_validator(self):
+        requires = sorted([get_task_by_name(self.graph, "release-foo_firefox_push_to_releases")["taskId"]])
+
+        @truth
+        def validate_task_dependencies(task):
+            return sorted(requires) == sorted(task['requires'])
+
+        return validate_task_dependencies
+
     def test_common_assertions(self):
         do_common_assertions(self.graph)
 
-    def test_provisioner(self):
-        self.assertEqual(self.task["task"]["provisionerId"],
-                         "buildbot-bridge")
-
-    def test_worker_type(self):
-        self.assertEqual(self.task["task"]["workerType"], "buildbot-bridge")
-
-    def test_scopes_present(self):
-        self.assertTrue("scopes" in self.task['task'])
-
-    def test_requires(self):
-        requires = [get_task_by_name(self.graph, "release-foo_firefox_push_to_releases")["taskId"]]
-        self.assertEqual(sorted(self.task["requires"]), sorted(requires))
-
-    def test_product(self):
-        self.assertEqual(self.payload["properties"]["product"],
-                         "firefox")
-
-    def test_version(self):
-        self.assertEqual(self.payload["properties"]["version"],
-                         "42.0b2")
-
-    def test_build_number(self):
-        self.assertEqual(self.payload["properties"]["build_number"], 3)
-
-    def test_repo_path(self):
-        self.assertEqual(self.payload["properties"]["repo_path"],
-                         "releases/foo")
-
-    def test_script_repo_revision(self):
-        self.assertEqual(self.payload["properties"]["script_repo_revision"],
-                         "abcd")
-
-    def test_revision(self):
-        self.assertEqual(self.payload["properties"]["revision"],
-                         "abcdef123456")
-
-    def test_tuxedo_server_url(self):
-        self.assertEqual(self.payload["properties"]["tuxedo_server_url"],
-                         "https://bouncer.real.allizom.org/api")
+    def test_uptake_monitoring_task(self):
+        verify(self.task, self.task_schema, self.generate_task_dependency_validator())
 
 
 class TestUptakeMonitoringSHA1(unittest.TestCase):
@@ -125,13 +116,22 @@ class TestUptakeMonitoringSHA1(unittest.TestCase):
                 },
             },
         })
+
         self.graph = make_task_graph(**test_kwargs)
         self.task = get_task_by_name(self.graph, "release-foo-firefox_uptake_monitoring")
-        self.payload = self.task["task"]["payload"]
 
-    def test_requires_sha1(self):
+    # Returns a validator for task dependencies
+    def generate_task_requires_validator(self):
         requires = [
             get_task_by_name(self.graph, "release-foo_firefox_push_to_releases")["taskId"],
             get_task_by_name(self.graph, "release-foo-firefox_partner_repacks_copy_to_releases")["taskId"],
         ]
-        self.assertEqual(sorted(self.task["requires"]), sorted(requires))
+
+        @truth
+        def validate_task_requires(task):
+            return sorted(requires) == sorted(task['requires'])
+
+        return validate_task_requires
+
+    def test_task(self):
+        verify(self.task, self.generate_task_requires_validator())
