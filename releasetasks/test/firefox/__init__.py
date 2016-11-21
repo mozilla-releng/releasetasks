@@ -7,45 +7,57 @@ import yaml
 
 from releasetasks import make_task_graph as make_task_graph_orig
 from releasetasks.test import PUB_KEY, DUMMY_PUBLIC_KEY, verify
-from voluptuous import All, Any, Optional, Schema, truth
+from voluptuous import All, Any, Email, Extra, Length, Match, Optional, Range, Required, Schema, truth, Unique, Url
+
+TASKCLUSTER_ID_REGEX = r'^[A-Za-z0-9_-]{8}[Q-T][A-Za-z0-9_-][CGKOSWaeimquy26-][A-Za-z0-9_-]{10}[AQgw]$'
 
 
 @truth
-def passes_task_provisionerId_test(task):
+def unique_task_ids(graph):
+    """Test the graph generates all unique task IDs"""
+    set_of_task_ids = set()
+    if graph['tasks']:
+        for task in graph['tasks']:
+            if task['taskId'] in set_of_task_ids:
+                return False
+            else:
+                set_of_task_ids.add(task['taskId'])
+
+    return True
+
+
+@truth
+def task_provisionerId_test(task):
+    """Test the provisionerId requirements are met"""
     if task['provisionerId'] == "buildbot-bridge":
-        assert not {"treeherderEnv", "treeherderEnv"}.intersection(task["extra"])
-        assert not any([r.startswith("tc-treeherder") for r in task["routes"]])
+        return not {"treeherderEnv", "treeherderEnv"}.intersection(task["extra"]) and not any([r.startswith("tc-treeherder") for r in task["routes"]])
 
     if task['provisionerId'] == "aws-provisioner-v1":
-        assert {"treeherder", "treeherderEnv"}.intersection(task["extra"])
-        assert len([r for r in task["routes"] if r.startswith("tc-treeherder")]) == 2
-    return True  # if this line is reached the test passes
+        return {"treeherder", "treeherderEnv"}.intersection(task["extra"]) and len([r for r in task["routes"] if r.startswith("tc-treeherder")]) == 2
 
-
-@truth
-def passes_task_signature_test(task):
-    assert task['taskId'] == jwt.decode(task['task']["extra"]["signing"]["signature"], PUB_KEY, algorithms=[ALGORITHMS.RS512])['taskId']
     return True
 
 
 @truth
-def passes_index_route_requirement(task_routes):
+def task_signature_test(task):
+    """Test the task signatures are generated as expected."""
+    return task['taskId'] == jwt.decode(task['task']["extra"]["signing"]["signature"], PUB_KEY, algorithms=[ALGORITHMS.RS512])['taskId']
+
+
+@truth
+def index_route_requirement(task_routes):
     rel_routes = [r.startswith("index.releases.") for r in task_routes]
-    assert len(rel_routes) >= 2, "At least 2 release index routes required"
-    return True
+    return len(rel_routes) >= 2
 
 
-COMMON_TASK_SCHEMA = Schema(All(passes_task_signature_test, {  # Must pass task signature test, and the below Schema
-    'reruns': int,
-    'taskId': str,
-    'task': All(passes_task_provisionerId_test,  # Must pass provisionerId test, and the below Schema
-                Schema({
-                    'routes': passes_index_route_requirement,
-                    'priority': 'high',
-                    'metadata': {
-                        'name': str,
-                    },
-                    'extra': {
+COMMON_TASK_SCHEMA = Schema(All(task_signature_test, {  # Must pass task signature test, and the below Schema
+    'requires': Any([Match(TASKCLUSTER_ID_REGEX)], None),
+    Required('reruns', msg="Required for releasetasks schema."): Range(min=0, max=100),
+    Required('taskId', msg="Required for TaskCluster schema."): Match(TASKCLUSTER_ID_REGEX),
+    Required('task', msg="Required for TaskCluster schema."): All(task_provisionerId_test, Schema({
+                    Required('created', msg="Required for TaskCluster schema."): str,
+                    Required('deadline', msg="Required for TaskCluster schema."): str,
+                    Required('extra', msg="Required for releasetasks schema."): {
                         'task_name': str,
                         'build_props': {
                             'product': str,
@@ -55,22 +67,72 @@ COMMON_TASK_SCHEMA = Schema(All(passes_task_signature_test, {  # Must pass task 
                             'version': str,
                             'revision': str,
                             'build_number': int,
+                            Extra: object,
                         },
                         'signing': {
                             'signature': str,
-                        }
+                        },
+                        Extra: object,
                     },
-                    'payload': {
+                    Required('metadata', msg="Required for TaskCluster schema."): {
+                        'name': All(str, Length(max=255)),
+                        'description': All(str, Length(max=32768)),
+                        'owner': All(Email(), Length(max=255)),
+                        'source': All(Url(), Length(max=4096)),
+                    },
+                    Required('payload', msg="Required for TaskCluster schema."): {
+                        Extra: object,
                         Optional('properties'): {
                             'version': str,
                             'build_number': int,
                             'release_promotion': bool,
                             'revision': str,
                             'product': str,
+                            Extra: object,
                         }
                     },
-                }, extra=True, required=True))
-}, extra=True, required=True))
+                    Required('provisionerId', msg="Required for TaskCluster schema."): All(Match(r'^([a-zA-Z0-9-_]*)$'), Length(min=1, max=22)),
+                    Required('priority', msg="Required for releasetasks schema."): 'high',
+                    Required('routes', msg="Required for releasetasks schema."): All(
+                        [All(str, Length(min=1, max=249))],
+                        index_route_requirement,
+                        Length(max=10),
+                        Unique(),
+                        msg="Maximum 10 unique routes per task."),
+                    Required('workerType', msg="Required for TaskCluster schema."): All(Match(r'^([a-zA-Z0-9-_]*)$'), Length(min=1, max=22)),
+                    'dependencies': All([Match(TASKCLUSTER_ID_REGEX)],
+                                        Length(max=100),
+                                        Unique()),
+                    'expires': str,
+                    'requires': Any('all-completed', 'all-resolved'),
+                    'retries': Range(min=0, max=49),
+                    'schedulerId': All(Match(r'^([a-zA-Z0-9-_]*)$'), Length(min=1, max=22)),
+                    'scopes': [Match(r'^[\x20-\x7e]*$')],
+                    'tags': {
+                        All(str, Length(max=4096)): str,
+                    },
+                    'taskGroupId': Match(TASKCLUSTER_ID_REGEX),
+                }, extra=False, required=False))
+}, extra=False, required=False))
+
+TC_GRAPH_SCHEMA = Schema({
+    Required('tasks', msg="Required for TaskCluster schema."): Any([COMMON_TASK_SCHEMA], None),
+    Required('metadata', msg="Required for TaskCluster schema."): Schema({
+        'name': All(str, Length(max=255)),
+        'description': All(str, Length(max=32768)),
+        'owner': All(Email(), Length(max=255)),
+        'source': All(Url(), Length(max=4096))
+    }, extra=False, required=True),
+    'scopes': [str],
+    'routes': All(
+        [All(str, Length(min=1, max=249))],
+        Unique(),
+        Length(max=10)
+    ),
+    'tags': {
+        All(str, Length(max=4096)): str,
+    },
+}, extra=False, required=False)
 
 
 def create_firefox_test_args(non_standard_arguments):
@@ -81,13 +143,7 @@ def create_firefox_test_args(non_standard_arguments):
 
 
 def do_common_assertions(graph):
-    _cached_taskIDs = set()
-    if graph['tasks']:
-        for t in graph['tasks']:
-            assert t['taskId'] not in _cached_taskIDs
-            verify(t, COMMON_TASK_SCHEMA)
-
-            _cached_taskIDs.add(t['taskId'])
+    verify(graph, TC_GRAPH_SCHEMA, unique_task_ids)
 
 
 def get_task_by_name(graph, name):

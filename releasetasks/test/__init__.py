@@ -22,6 +22,7 @@ def generate_scope_validator(scopes=None):
 
     return validate_scopes
 
+
 PVT_KEY_FILE = os.path.join(os.path.dirname(__file__), "id_rsa")
 PVT_KEY = read_file(PVT_KEY_FILE)
 PUB_KEY = read_file(os.path.join(os.path.dirname(__file__), "id_rsa.pub"))
