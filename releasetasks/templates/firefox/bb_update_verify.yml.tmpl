@@ -10,6 +10,9 @@
         - {{ stableSlugId(upstream_builder) }}
         {% endfor %}
         - {{ stableSlugId("release-{}-{}_updates".format(branch, product)) }}
+        {% if update_verify_requires_cdn_push is defined and update_verify_requires_cdn_push %}
+        - {{  stableSlugId("release-{}-{}_uptake_monitoring".format(branch, product)) }}
+        {% endif %}
     reruns: 5
     task:
         provisionerId: buildbot-bridge
@@ -43,6 +46,9 @@
                 VERIFY_CONFIG: "{{ channel }}-{{ product }}-{{ platform }}.cfg"
                 TOTAL_CHUNKS: "{{ uv_totalchunks }}"
                 THIS_CHUNK: "{{ chunk }}"
+                {% if update_verify_channel is defined and update_verify_channel %}
+                CHANNEL: "{{ update_verify_channel }}"
+                {% endif %}
 
         metadata:
             owner: release@mozilla.com

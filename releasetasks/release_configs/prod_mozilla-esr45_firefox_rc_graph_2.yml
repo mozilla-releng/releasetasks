@@ -46,3 +46,5 @@ tuxedo_server_url: "https://bounceradmin.mozilla.com/api"
 push_to_releases_automatic: true
 beetmover_candidates_bucket: "net-mozaws-prod-delivery-firefox"
 snap_enabled: false
+update_verify_channel: null
+update_verify_requires_cdn_push: false

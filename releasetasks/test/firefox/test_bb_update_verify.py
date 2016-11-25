@@ -178,3 +178,64 @@ class TestBB_UpdateVerifyMultiChannel(unittest.TestCase):
 
             multichan_task = get_task_by_name(self.graph, "release-beta_firefox_win32_update_verify_{chan}_3".format(chan=chan))
             verify(multichan_task, multichan_schema, TestBB_UpdateVerifyMultiChannel.not_allowed)
+
+
+class TestBB_UpdateVerifyChannel(unittest.TestCase):
+    maxDiff = 30000
+    graph = None
+    task = None
+    payload = None
+
+    def setUp(self):
+        self.task_schema = Schema({
+            'task': {
+                'provisionerId': 'buildbot-bridge',
+                'workerType': 'buildbot-bridge',
+                'payload': {
+                    'properties': {
+                        'CHANNEL': 'beta-cdntest'
+                    }
+                }
+            }
+        }, extra=True, required=True)
+        test_args = create_firefox_test_args({
+            'updates_enabled': True,
+            'push_to_candidates_enabled': True,
+            'push_to_releases_enabled': True,
+            'update_verify_enabled': True,
+            'updates_builder_enabled': True,
+            'signing_pvt_key': PVT_KEY_FILE,
+            'branch': 'beta',
+            'release_channels': ['beta'],
+            'final_verify_channels': ['beta'],
+            'l10n_config': L10N_CONFIG,
+            'en_US_config': EN_US_CONFIG,
+            'uptake_monitoring_enabled': True,
+            'update_verify_channel': 'beta-cdntest',
+            'update_verify_requires_cdn_push': True,
+        })
+        self.graph = make_task_graph(**test_args)
+        self.task = get_task_by_name(self.graph, "release-beta_firefox_win32_update_verify_beta_3")
+
+    def test_common_assertions(self):
+        do_common_assertions(self.graph)
+
+    @staticmethod
+    @truth
+    def not_allowed(task):
+        return "scopes" not in task
+
+    def test_channel(self):
+        verify(self.task, self.task_schema, self.__class__.not_allowed)
+
+    def generate_task_dependency_validator(self):
+
+        @truth
+        def validate_dependencies(task):
+            uptake = get_task_by_name(self.graph, "release-beta-firefox_uptake_monitoring")["taskId"]
+            return uptake in task['requires']
+
+        return validate_dependencies
+
+    def test_cdns(self):
+        verify(self.task, self.task_schema, self.generate_task_dependency_validator())
