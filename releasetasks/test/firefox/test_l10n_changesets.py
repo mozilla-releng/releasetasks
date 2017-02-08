@@ -31,6 +31,8 @@ class TestL10NChangesets(unittest.TestCase):
             'signing_pvt_key': PVT_KEY_FILE,
             'release_channels': ['foo', 'bar'],
             'partner_repacks_platforms': ['win32', 'linux'],
+            'eme_free_repacks_platforms': ['win32', 'macosx64'],
+            'sha1_repacks_platforms': ['win32'],
             'l10n_changesets': {"ab": "cd", "ef": "gh", "ij": "kl"},
             'en_US_config': {
                 "platforms": {

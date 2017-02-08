@@ -1,7 +1,5 @@
 {% for platform in partner_repacks_platforms %}
 {% set buildername = "release-{}-{}-{}_partner_repacks".format(branch, product, platform) %}
-{% set buildername_eme_free = "release-{}-{}-{}_eme_free_repacks".format(branch, product, platform) %}
-{% set buildername_sha1 = "release-{}-{}-{}_sha1_repacks".format(branch, product, platform) %}
 -
     taskId: "{{ stableSlugId(buildername) }}"
     reruns: 5
@@ -45,8 +43,12 @@
         extra:
             {{ common_extras(taskname=buildername, locales=["null"], platform="null") | indent(12)}}
             {{ task_notifications("{} {} {} partner repacks".format(product, branch, platform), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
+{% endfor %}
 
-
+{% for platform in eme_free_repacks_platforms %}
+{# buildername is passed to buildbot #}
+{% set buildername = "release-{}-{}-{}_partner_repacks".format(branch, product, platform) %}
+{% set buildername_eme_free = "release-{}-{}-{}_eme_free_repacks".format(branch, product, platform) %}
 -
     taskId: "{{ stableSlugId(buildername_eme_free) }}"
     reruns: 5
@@ -91,7 +93,12 @@
             {{ common_extras(taskname=buildername_eme_free, locales=["null"], platform="null") | indent(12)}}
             {{ task_notifications("{} {} {} EME-free repacks".format(product, branch, platform), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
 
+{% endfor %}
 
+{% for platform in sha1_repacks_platforms %}
+{# buildername is passed to buildbot #}
+{% set buildername = "release-{}-{}-{}_partner_repacks".format(branch, product, platform) %}
+{% set buildername_sha1 = "release-{}-{}-{}_sha1_repacks".format(branch, product, platform) %}
 -
     taskId: "{{ stableSlugId(buildername_sha1) }}"
     reruns: 5
@@ -135,9 +142,6 @@
         extra:
             {{ common_extras(taskname=buildername_sha1, locales=["null"], platform="null") | indent(12)}}
             {{ task_notifications("{} {} {} SHA1 repacks".format(product, branch, platform), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
-
-
-
 {% endfor %}
 
 {% if push_to_releases_enabled is defined and push_to_releases_enabled %}
@@ -148,7 +152,11 @@
     requires:
         {% for platform in partner_repacks_platforms %}
         - "{{ stableSlugId("release-{}-{}-{}_partner_repacks".format(branch, product, platform)) }}"
+        {% endfor %}
+        {% for platform in eme_free_repacks_platforms %}
         - "{{ stableSlugId("release-{}-{}-{}_eme_free_repacks".format(branch, product, platform)) }}"
+        {% endfor %}
+        {% for platform in sha1_repacks_platforms %}
         - "{{ stableSlugId("release-{}-{}-{}_sha1_repacks".format(branch, product, platform)) }}"
         {% endfor %}
         - "{{ stableSlugId("release-{}_{}_push_to_releases".format(branch, product)) }}"

@@ -77,6 +77,8 @@ class TestPushToMirrorsHuman(unittest.TestCase):
             'release_channels': ['beta', 'release'],
             'final_verify_channels': ['beta', 'release'],
             'partner_repacks_platforms': ['win32', 'macosx64'],
+            'eme_free_repacks_platforms': ['win32', 'macosx64'],
+            'sha1_repacks_platforms': ['win32'],
             'en_US_config': EN_US_CONFIG,
             'l10n_config': L10N_CONFIG,
         })
@@ -186,6 +188,8 @@ class TestPushToMirrorsAutomatic(unittest.TestCase):
             'release_channels': ['beta', 'release'],
             'final_verify_channels': ['beta', 'release'],
             'partner_repacks_platforms': ['win32', 'macosx64'],
+            'eme_free_repacks_platforms': ['win32', 'macosx64'],
+            'sha1_repacks_platforms': ['win32'],
             'en_US_config': EN_US_CONFIG,
             'l10n_config': L10N_CONFIG,
         })
@@ -270,6 +274,8 @@ class TestPushToMirrorsGraph2(unittest.TestCase):
             'release_channels': ['beta', 'release'],
             'final_verify_channels': ['beta', 'release'],
             'partner_repacks_platforms': [],
+            'eme_free_repacks_platforms': [],
+            'sha1_repacks_platforms': [],
             'en_US_config': EN_US_CONFIG,
             'l10n_config': L10N_CONFIG,
         })

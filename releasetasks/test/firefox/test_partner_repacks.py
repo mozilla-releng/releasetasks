@@ -66,10 +66,13 @@ class TestPartnerRepacks(unittest.TestCase):
             'source_enabled': True,
             'signing_pvt_key': PVT_KEY_FILE,
             'partner_repacks_platforms': ['win32', 'linux'],
+            'eme_free_repacks_platforms': ['win32', 'macosx64'],
+            'sha1_repacks_platforms': ['win32'],
             'release_channels': ['foo', 'bar'],
             'en_US_config': {
                 "platforms": {
                     "linux": {"task_id": "xyz"},
+                    "macosx64": {"task_id": "xyz"},
                     "win32": {"task_id": "xyy"}
                 }
             },
@@ -85,7 +88,11 @@ class TestPartnerRepacks(unittest.TestCase):
                         "locales": ["de", "en-GB", "zh-TW"],
                         "chunks": 1,
                     },
-
+                    "macosx64": {
+                        "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.dmg",
+                        "locales": ["de", "en-GB", "zh-TW"],
+                        "chunks": 1,
+                    },
                 },
                 "changesets": {
                     "de": "default",
@@ -102,11 +109,11 @@ class TestPartnerRepacks(unittest.TestCase):
         ]
         self.eme_free_tasks = [
             get_task_by_name(self.graph, "release-foo-firefox-{}_eme_free_repacks".format(platform))
-            for platform in ["win32", "linux"]
+            for platform in ["win32", "macosx64"]
         ]
         self.sha1_tasks = [
             get_task_by_name(self.graph, "release-foo-firefox-{}_sha1_repacks".format(platform))
-            for platform in ["win32", "linux"]
+            for platform in ["win32"]
         ]
 
         self.partner_push_to_mirrors_task = get_task_by_name(self.graph, "release-foo-firefox_partner_repacks_copy_to_releases")
@@ -114,10 +121,10 @@ class TestPartnerRepacks(unittest.TestCase):
 
         self.upstream_dependencies = [
             "release-foo_firefox_{}_complete_en-US_beetmover_candidates".format(platform)
-            for platform in ["win32", "linux"]
+            for platform in ["win32", "linux", "macosx64"]
         ] + [
             "release-foo_firefox_{}_l10n_repack_beetmover_candidates_1".format(platform)
-            for platform in ["win32", "linux"]
+            for platform in ["win32", "linux", "macosx64"]
         ]
 
     # Returns a validator for task dependencies

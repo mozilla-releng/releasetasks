@@ -83,7 +83,9 @@ class TestUptakeMonitoringSHA1(unittest.TestCase):
             'uptake_monitoring_enabled': True,
             'signing_pvt_key': PVT_KEY_FILE,
             'uptake_monitoring_platforms': ["macosx64", "win32", "win64", "linux", "linux64"],
-            'partner_repacks_platforms': ["macosx64", "win32", "win64", "linux", "linux64"],
+            'partner_repacks_platforms': [],
+            'eme_free_repacks_platforms': [],
+            'sha1_repacks_platforms': ['win32'],
             'release_channels': ['foo'],
             'final_verify_channels': ['foo'],
             'en_US_config': {

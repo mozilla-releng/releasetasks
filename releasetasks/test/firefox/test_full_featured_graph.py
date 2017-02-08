@@ -27,6 +27,13 @@ class TestFullGraph(unittest.TestCase):
                 'win32',
                 'macosx64',
             ],
+            'eme_free_repacks_platforms': [
+                'win32',
+                'macosx64',
+            ],
+            'sha1_repacks_platforms': [
+                'win32',
+            ],
             'en_US_config': {
                 "platforms": {
                     "macosx64": {"task_id": "abc"},
