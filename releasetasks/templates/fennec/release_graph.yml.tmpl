@@ -1,0 +1,67 @@
+# store all en-US artifact generating tasks for upstream builder purposes
+{% set artifact_completes_builders = [] %}
+{% set artifact_partials_builders = [] %}
+{% set balrog_submission_builders = [] %}
+{% set push_to_releases_extra_upstream_builders = [] %}
+
+{% macro common_extras(taskname, locales, platform) %}
+{% include "common_extras.yml.tmpl" %}
+{% endmacro %}
+
+{% macro task_notifications(taskname, failed=None, exception=None, artifact=None, completed=None) %}
+{% include "notifications.yml.tmpl" %}
+{% endmacro %}
+---
+metadata:
+    name: "Release Promotion"
+    description: "Release Promotion"
+    owner: "release@mozilla.com"
+    source: "https://github.com/rail/releasetasks"
+
+scopes:
+  - project:releng:signing:format:gpg
+  - queue:define-task:buildbot-bridge/buildbot-bridge
+  - queue:create-task:buildbot-bridge/buildbot-bridge
+  - queue:task-priority:high
+  # TODO: need a better way to specify dev/prod scopes
+  - project:releng:buildbot-bridge:builder-name:release-*
+  - queue:define-task:aws-provisioner-v1/opt-linux64
+  - queue:create-task:aws-provisioner-v1/opt-linux64
+  - docker-worker:cache:tc-vcs
+  - docker-worker:image:taskcluster/builder:*
+  - queue:define-task:aws-provisioner-v1/build-c4-2xlarge
+  - queue:create-task:aws-provisioner-v1/build-c4-2xlarge
+  - docker-worker:cache:build-{{ branch }}-release-workspace
+  - docker-worker:cache:tooltool-cache
+  - project:releng:signing:cert:{{ signing_class }}
+  - docker-worker:relengapi-proxy:tooltool.download.public
+  - queue:*
+  - docker-worker:*
+  - scheduler:*
+  - project:releng:signing:cert:{{ signing_class }}
+{# dep signing uses Balrog dev environment, which is publicly available and
+   this doesn't need to use the proxy
+#}
+{% if signing_class != "dep-signing" %}
+  - docker-worker:feature:balrogVPNProxy
+{% endif %}
+
+tasks:
+    {% if source_enabled %}
+        {% macro source_tasks() %}
+            {% include "source.yml.tmpl" %}
+        {% endmacro %}
+        {{ source_tasks()|indent(4) }}
+    {% endif %}
+    {% if push_to_candidates_enabled is defined and push_to_candidates_enabled %}
+        {% macro beetmove_image_task() %}
+            {% include "beetmove_image.yml.tmpl" %}
+        {% endmacro %}
+        {{ beetmove_image_task()|indent(4) }}
+    {% endif %}
+    {% if checksums_enabled %}
+        {% macro checksums_tasks() %}
+            {% include "checksums.yml.tmpl" %}
+        {% endmacro %}
+        {{ checksums_tasks()|indent(4) }}
+    {% endif %}

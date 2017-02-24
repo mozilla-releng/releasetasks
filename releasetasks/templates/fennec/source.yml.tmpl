@@ -1,0 +1,256 @@
+{% set buildername = "{}_source".format(branch) %}
+{% set buildername_signing = "{}_signing".format(buildername) %}
+{% set buildername_beet = "{}_beet".format(buildername) %}
+{% set buildername_beet_signing = "{}_beet".format(buildername_signing) %}
+{% do push_to_releases_extra_upstream_builders.append(buildername_beet) %}
+{% do push_to_releases_extra_upstream_builders.append(buildername_beet_signing) %}
+-
+    taskId: "{{ stableSlugId(buildername) }}"
+    reruns: 5
+    task:
+        provisionerId: aws-provisioner-v1
+        workerType: opt-linux64
+        created: "{{ now }}"
+        deadline: "{{ now.replace(days=4) }}"
+        expires: "{{ never }}"
+        priority: "high"
+        retries: 5
+        scopes:
+            - docker-worker:cache:tc-vcs
+            - docker-worker:image:taskcluster/builder:0.5.9
+            - queue:define-task:aws-provisioner-v1/opt-linux64
+            - queue:create-task:aws-provisioner-v1/opt-linux64
+            - queue:define-task:aws-provisioner-v1/build-c4-2xlarge
+            - queue:create-task:aws-provisioner-v1/build-c4-2xlarge
+            - docker-worker:cache:build-{{ branch }}-release-workspace
+            - docker-worker:cache:tooltool-cache
+            - docker-worker:relengapi-proxy:tooltool.download.public
+
+        payload:
+            maxRunTime: 7200
+            image: rail/source-builder@sha256:20ea2d9aff06740d6a35ff2f42af98c8d8b65efec9d0dea48692fbb3025d5d8c
+            cache:
+                build-{{ branch }}-release-workspace: /home/worker/workspace
+                tooltool-cache: /home/worker/tooltool-cache
+                tc-vcs: /home/worker/.tc-vcs
+            artifacts:
+                public/build:
+                    path: /home/worker/artifacts/
+                    expires: {{ now.replace(days=365) }}
+                    type: directory
+            command:
+                - /bin/bash
+                - -c
+                - bin/build.sh || JOB_SCRIPT=testing/taskcluster/scripts/builder/build-linux.sh bin/build.sh
+            env:
+                GECKO_REPOSITORY: "https://hg.mozilla.org/{{ repo_path }}"
+                GECKO_HEAD_REV: "{{ revision }}"
+                MOZHARNESS_SCRIPT: "mozharness/scripts/fx_desktop_build.py"
+                MOZHARNESS_CONFIG: "builds/releng_sub_linux_configs/64_source.py"
+                # MH_BRANCH is used for branch specific MH configs
+                MH_BRANCH: "{{ branch }}"
+                MH_BUILD_POOL: "taskcluster"
+                # Don't clone mozharness, use the in-tree version
+                MOZHARNESS_DISABLE: "true"
+                MOZ_PKG_VERSION: "{{ version }}"
+                MOZHARNESS_ACTIONS: "no-clone-tools no-checkout-sources no-setup-mock"
+        metadata:
+            owner: release@mozilla.com
+            source: https://github.com/mozilla/releasetasks
+            name: "{{ branch }} source generation"
+            description: |
+                Generates a source tarball
+
+        routes:
+            - tc-treeherder-stage.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
+            - tc-treeherder.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
+            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.source_tarball
+            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.source_tarball
+        extra:
+            {{ common_extras(taskname=buildername, locales=["null"], platform="null") | indent(12)}}
+            treeherderEnv:
+                - staging
+                - production
+            treeherder:
+                symbol: Src
+                groupSymbol: Release
+                collection:
+                    opt: true
+                machine:
+                    platform: android-4-0-armv7-api15
+                build:
+                    platform: android-4-0-armv7-api15
+            {{ task_notifications("{} source generation".format(branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
+
+-
+    taskId: "{{ stableSlugId(buildername_signing) }}"
+    requires:
+        - "{{ stableSlugId(buildername) }}"
+    reruns: 5
+    task:
+        provisionerId: signing-provisioner-v1
+        workerType: signing-worker-v1
+        created: "{{ now }}"
+        deadline: "{{ now.replace(days=4) }}"
+        expires: "{{ never }}"
+        priority: "high"
+        retries: 5
+        scopes:
+            - project:releng:signing:format:gpg
+            - project:releng:signing:cert:{{ signing_class }}
+        payload:
+            signingManifest: https://queue.taskcluster.net/v1/task/{{ stableSlugId(buildername) }}/artifacts/public/build/signing_manifest.json
+        metadata:
+            owner: release@mozilla.com
+            source: https://github.com/mozillla/releasetasks
+            name: "{{ branch }} source signing"
+            description: |
+                Sign source tarball
+
+        routes:
+            - tc-treeherder-stage.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
+            - tc-treeherder-production.{{ branch }}.{{ revision }}.{{ pushlog_id }}
+            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.source_tarball_signing
+            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.source_tarball_signing
+
+        extra:
+            {{ common_extras(taskname=buildername_signing, locales=["null"], platform="null") | indent(12)}}
+            treeherderEnv:
+                - staging
+                - production
+            treeherder:
+                symbol: Src-S
+                groupSymbol: Release
+                collection:
+                    opt: true
+                machine:
+                    platform: android-4-0-armv7-api15
+                build:
+                    platform: android-4-0-armv7-api15
+            {{ task_notifications("{} source signing".format(branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
+
+-
+    taskId: "{{ stableSlugId(buildername_beet) }}"
+    requires:
+        - "{{ stableSlugId(buildername) }}"
+        - "{{ stableSlugId("beetmove_image") }}"
+    reruns: 5
+    task:
+        provisionerId: aws-provisioner-v1
+        workerType: opt-linux64
+        created: "{{ now }}"
+        deadline: "{{ now.replace(days=4) }}"
+        expires: "{{ never }}"
+        priority: "high"
+        retries: 5
+        routes:
+            - tc-treeherder-stage.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
+            - tc-treeherder-production.{{ branch }}.{{ revision }}.{{ pushlog_id }}
+            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.source_tarball_beetmover
+            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.source_tarball_beetmover
+
+        payload:
+            maxRunTime: 7200
+            image:
+                type: task-image
+                path: public/image.tar
+                taskId: {{ stableSlugId("beetmove_image") }}
+            command:
+                - /bin/bash
+                - -c
+                - >
+                  wget -O mozharness.tar.bz2 https://hg.mozilla.org/{{ repo_path }}/archive/{{ mozharness_changeset }}.tar.bz2/testing/mozharness &&
+                  mkdir mozharness && tar xvfj mozharness.tar.bz2 -C mozharness --strip-components 3 && cd mozharness &&
+                  python scripts/release/beet_mover.py --no-refresh-antivirus --template configs/beetmover/source.yml.tmpl --platform linux64 --version {{ version }} --locale en-US --taskid {{ stableSlugId(buildername) }} --build-num build{{ buildNumber }} --bucket {{ beetmover_candidates_bucket }}
+            env:
+                DUMMY_ENV_FOR_ENCRYPT: "fake"
+            encryptedEnv:
+                - {{ encrypt_env_var(stableSlugId(buildername_beet), now_ms,
+                                   now_ms + 24 * 4 * 3600 * 1000, 'AWS_ACCESS_KEY_ID',
+                                   beetmover_aws_access_key_id) }}
+                - {{ encrypt_env_var(stableSlugId(buildername_beet), now_ms,
+                                   now_ms + 24 * 4 * 3600 * 1000, 'AWS_SECRET_ACCESS_KEY',
+                                   beetmover_aws_secret_access_key) }}
+        metadata:
+            name: "[beetmover] {{ product }} {{ branch }} move source bundles"
+            description: "moves source artifacts to candidates dir"
+            owner: "release@mozilla.com"
+            source: https://github.com/mozilla/releasetasks
+
+        extra:
+            {{ common_extras(taskname=buildername_beet, locales=["null"], platform="null") | indent(12)}}
+            treeherderEnv:
+                - staging
+                - production
+            treeherder:
+                symbol: Src
+                groupSymbol: BM
+                collection:
+                    opt: true
+                machine:
+                    platform: android-4-0-armv7-api15
+                build:
+                    platform: android-4-0-armv7-api15
+            {{ task_notifications("[beetmover] {} {} move source bundles".format(product, branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
+
+-
+    taskId: "{{ stableSlugId(buildername_beet_signing) }}"
+    requires:
+        - "{{ stableSlugId(buildername_signing) }}"
+        - "{{ stableSlugId("beetmove_image") }}"
+    reruns: 5
+    task:
+        provisionerId: aws-provisioner-v1
+        workerType: opt-linux64
+        created: "{{ now }}"
+        deadline: "{{ now.replace(days=4) }}"
+        expires: "{{ never }}"
+        priority: "high"
+        retries: 5
+        routes:
+            - tc-treeherder-stage.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
+            - tc-treeherder.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
+            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.source_tarball_sigs_beetmover
+            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.source_tarball_sigs_beetmover
+        payload:
+            maxRunTime: 7200
+            image:
+                type: task-image
+                path: public/image.tar
+                taskId: {{ stableSlugId("beetmove_image") }}
+            command:
+                - /bin/bash
+                - -c
+                - >
+                  wget -O mozharness.tar.bz2 https://hg.mozilla.org/{{ repo_path }}/archive/{{ mozharness_changeset }}.tar.bz2/testing/mozharness &&
+                  mkdir mozharness && tar xvfj mozharness.tar.bz2 -C mozharness --strip-components 3 && cd mozharness &&
+                  python scripts/release/beet_mover.py --no-refresh-antivirus --template configs/beetmover/source_checksums.yml.tmpl --platform linux64 --version {{ version }} --locale en-US  --artifact-subdir env --taskid "{{ stableSlugId(buildername_signing) }}" --build-num build{{ buildNumber }} --bucket {{ beetmover_candidates_bucket }}
+            env:
+                DUMMY_ENV_FOR_ENCRYPT: "fake"
+            encryptedEnv:
+                - {{ encrypt_env_var(stableSlugId(buildername_beet_signing), now_ms,
+                                   now_ms + 24 * 4 * 3600 * 1000, 'AWS_ACCESS_KEY_ID',
+                                   beetmover_aws_access_key_id) }}
+                - {{ encrypt_env_var(stableSlugId(buildername_beet_signing), now_ms,
+                                   now_ms + 24 * 4 * 3600 * 1000, 'AWS_SECRET_ACCESS_KEY',
+                                   beetmover_aws_secret_access_key) }}
+        metadata:
+            name: "[beetmover] {{ product }} {{ branch }} move source bundle checksums"
+            description: "moves source artifact checksums to candidates dir"
+            owner: "release@mozilla.com"
+            source: https://github.com/mozilla/releasetasks
+
+        extra:
+            {{ common_extras(taskname=buildername_beet_signing, locales=["null"], platform="null") | indent(12)}}
+            treeherderEnv:
+                - staging
+            treeherder:
+                symbol: Src-CS
+                groupSymbol: BM
+                collection:
+                    opt: true
+                machine:
+                    platform: android-4-0-armv7-api15
+                build:
+                    platform: android-4-0-armv7-api15
+            {{ task_notifications("[beetmover] {} {} move source bundle checksums".format(product, branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}

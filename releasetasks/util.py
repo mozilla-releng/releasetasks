@@ -30,6 +30,8 @@ def treeherder_platform(platform):
         "macosx64": "osx-10-10",
         "win32": "windowsxp",
         "win64": "windows8-64",
+        "android-4-2-x86": "android-x86",
+        "android-4-0-armv7-api15": "android"
     }
     return m[platform]
 
