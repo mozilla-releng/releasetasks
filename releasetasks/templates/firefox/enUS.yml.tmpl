@@ -25,7 +25,7 @@
             maxRunTime: 7200
             image:
                 type: task-image
-                path: public/image.tar
+                path: public/image.tar.zst
                 taskId: {{ stableSlugId("beetmove_image") }}
             command:
                 - /bin/bash
@@ -141,7 +141,7 @@
         payload:
             image:
                 type: task-image
-                path: public/image.tar
+                path: public/image.tar.zst
                 taskId: "{{ stableSlugId("funsize_update_generator_image") }}"
             maxRunTime: 3600
             command:
@@ -269,7 +269,7 @@
         payload:
             image:
                 type: task-image
-                path: public/image.tar
+                path: public/image.tar.zst
                 taskId: "{{ stableSlugId("funsize_balrog_image") }}"
             maxRunTime: 1800
             command:
@@ -332,7 +332,7 @@
             # TODO - create specific image for this
             image:
                 type: task-image
-                path: public/image.tar
+                path: public/image.tar.zst
                 taskId: {{ stableSlugId("beetmove_image") }}
             command:
                 - /bin/bash

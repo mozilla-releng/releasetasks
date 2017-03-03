@@ -4,7 +4,7 @@
     reruns: 5
     task:
         provisionerId: aws-provisioner-v1
-        workerType: taskcluster-images
+        workerType: gecko-images
         created: "{{ now }}"
         deadline: "{{ now.replace(days=4) }}"
         expires: "{{ never }}"
@@ -17,26 +17,23 @@
             - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.beetmove_image
         payload:
             artifacts:
-                public/image.tar:
+                public/image.tar.zst:
                       expires: {{ now.replace(days=365) }}
-                      path: /artifacts/image.tar
+                      path: /home/worker/workspace/artifacts/image.tar.zst
                       type: file
             features:
                 dind: true
             maxRunTime: 1800
-            image: "taskcluster/image_builder:0.1.3"
-            command:
-                - /bin/bash
-                - "-c"
-                - /home/worker/bin/build_image.sh
+            image: "taskcluster/image_builder:1.2.0"
             env:
-                BASE_REPOSITORY: "https://hg.mozilla.org/{{ repo_path }}"
-                CONTEXT_PATH: release/docker/beet-mover
-                HEAD_REF: "{{ revision }}"
-                HEAD_REPOSITORY: "https://hg.mozilla.org/{{ repo_path }}"
-                HEAD_REV: "{{ revision }}"
                 HASH: "{{ revision }}"
                 PROJECT: "{{ branch }}"
+                IMAGE_NAME: beet-mover
+                HG_STORE_PATH: /home/worker/checkouts/hg-store
+                CONTEXT_URL: ""
+                GECKO_HEAD_REV: "{{ revision }}"
+                GECKO_BASE_REPOSITORY: "https://hg.mozilla.org/{{ repo_path }}"
+                GECKO_HEAD_REPOSITORY: "https://hg.mozilla.org/{{ repo_path }}"
         metadata:
             name: "Generate beetmover docker image"
             description: "Refresh AV DB of beetmover docker image"
