@@ -71,25 +71,28 @@ class TestPartnerRepacks(unittest.TestCase):
             'release_channels': ['foo', 'bar'],
             'en_US_config': {
                 "platforms": {
-                    "linux": {"task_id": "xyz"},
-                    "macosx64": {"task_id": "xyz"},
-                    "win32": {"task_id": "xyy"}
+                    "linux": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
+                    "macosx64": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
+                    "win32": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
                 }
             },
             'l10n_config': {
                 "platforms": {
                     "win32": {
                         "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.exe",
+                        "mar_tools_url": "https://queue.taskcluster.net/something/",
                         "locales": ["de", "en-GB", "zh-TW"],
                         "chunks": 1,
                     },
                     "linux": {
                         "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.tar.xz",
+                        "mar_tools_url": "https://queue.taskcluster.net/something/",
                         "locales": ["de", "en-GB", "zh-TW"],
                         "chunks": 1,
                     },
                     "macosx64": {
                         "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.dmg",
+                        "mar_tools_url": "https://queue.taskcluster.net/something/",
                         "locales": ["de", "en-GB", "zh-TW"],
                         "chunks": 1,
                     },

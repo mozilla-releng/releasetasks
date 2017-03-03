@@ -1,0 +1,19 @@
+# Common task extras
+{% if running_tests is defined %}
+task_name: "{{ taskname }}"
+{% endif %}
+build_props:
+    product: {{ product }}
+    locales:
+    {% for locale in locales %}
+    - {{ locale }}
+    {% endfor %}
+    branch: {{ branch }}
+    platform: {{ platform }}
+    version: "{{ version }}"
+    revision: {{ revision }}
+    mozharness_changeset: "{{ mozharness_changeset }}"
+    build_number: {{ buildNumber }}
+
+signing:
+   signature: {{ sign_task(stableSlugId(taskname), valid_for=4 * 24 * 3600) }}

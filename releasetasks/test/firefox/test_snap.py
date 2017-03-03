@@ -7,8 +7,8 @@ from voluptuous import All, Length, Schema, truth
 
 EN_US_CONFIG = {
     "platforms": {
-        "macosx64": {"task_id": "xyz"},
-        "win32": {"task_id": "xyy"}
+        "macosx64": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
+        "win32": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
     }
 }
 

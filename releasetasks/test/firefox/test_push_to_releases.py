@@ -7,8 +7,8 @@ from voluptuous import Schema, truth
 
 EN_US_CONFIG = {
     "platforms": {
-        "macosx64": {"task_id": "xyz"},
-        "win32": {"task_id": "xyy"}
+        "macosx64": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
+        "win32": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
     }
 }
 
@@ -17,11 +17,13 @@ L10N_CONFIG = {
     "platforms": {
         "win32": {
             "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.exe",
+            "mar_tools_url": "https://queue.taskcluster.net/something/",
             "locales": ["de", "en-GB", "zh-TW"],
             "chunks": 1,
         },
         "macosx64": {
             "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.tar.xz",
+            "mar_tools_url": "https://queue.taskcluster.net/something/",
             "locales": ["de", "en-GB", "zh-TW"],
             "chunks": 1,
         },

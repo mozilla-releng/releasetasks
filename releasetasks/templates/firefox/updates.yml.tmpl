@@ -2,7 +2,7 @@
 -
     taskId: "{{ stableSlugId(buildername) }}"
     requires:
-        {% for platform, platform_info in en_US_config["platforms"].iteritems() %}
+        {% for platform in en_US_config["platforms"] %}
         - {{ stableSlugId("release-{}_{}_{}_complete_en-US_beetmover_candidates".format(branch, product, platform)) }}
         {% endfor %}
     reruns: 5

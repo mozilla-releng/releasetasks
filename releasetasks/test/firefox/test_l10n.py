@@ -27,6 +27,7 @@ class TestL10NSingleChunk(unittest.TestCase):
                         'script_repo_revision': 'abcd',
                         'locales': 'de:default en-GB:default zh-TW:default',
                         'en_us_binary_url': 'https://queue.taskcluster.net/something/firefox.exe',
+                        "mar_tools_url": "https://queue.taskcluster.net/something/",
                     }
                 }
             }
@@ -50,20 +51,20 @@ class TestL10NSingleChunk(unittest.TestCase):
 
             'en_US_config': {
                 "platforms": {
-                    "win32": {
-                        "task_id": "xyy"
-                    }
+                    "win32": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'}
                 }
             },
             'l10n_config': {
                 "platforms": {
                     "win32": {
                         "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.exe",
+                        "mar_tools_url": "https://queue.taskcluster.net/something/",
                         "locales": ["de", "en-GB", "zh-TW"],
                         "chunks": 1,
                     },
                     "linux64": {
                         "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.tar.xz",
+                        "mar_tools_url": "https://queue.taskcluster.net/something/",
                         "locales": ["de", "en-GB", "zh-TW"],
                         "chunks": 1,
                     },
@@ -157,6 +158,7 @@ class TestL10NMultipleChunks(unittest.TestCase):
                     'properties': {
                         'locales': 'de:default en-GB:default ru:default',
                         'en_us_binary_url': 'https://queue.taskcluster.net/something/firefox.exe',
+                        "mar_tools_url": "https://queue.taskcluster.net/something/",
                         'repo_path': 'releases/mozilla-beta',
                         'script_repo_revision': 'abcd',
                     }
@@ -170,6 +172,7 @@ class TestL10NMultipleChunks(unittest.TestCase):
                     'buildername': 'release-mozilla-beta_firefox_win32_l10n_repack',
                     'properties': {
                         'en_us_binary_url': 'https://queue.taskcluster.net/something/firefox.exe',
+                        "mar_tools_url": "https://queue.taskcluster.net/something/",
                         'script_repo_revision': 'abcd',
                         'repo_path': 'releases/mozilla-beta',
                         'locales': 'uk:default zh-TW:default',
@@ -193,18 +196,20 @@ class TestL10NMultipleChunks(unittest.TestCase):
             'en_US_platforms': ['win32'],
             'en_US_config': {
                 "platforms": {
-                    "win32": {"task_id": "xyy"}
+                    "win32": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'}
                 }
             },
             'l10n_config': {
                 "platforms": {
                     "win32": {
                         "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.exe",
+                        "mar_tools_url": "https://queue.taskcluster.net/something/",
                         "locales": ["de", "en-GB", "ru", "uk", "zh-TW"],
                         "chunks": 2,
                     },
                     "linux64": {
                         "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.tar.xz",
+                        "mar_tools_url": "https://queue.taskcluster.net/something/",
                         "locales": ["de", "en-GB", "ru", "uk", "zh-TW"],
                         "chunks": 2,
                     },
@@ -312,18 +317,20 @@ class TestL10NNewLocales(unittest.TestCase):
             'enUS_platforms': ['win32'],
             'en_US_config': {
                 "platforms": {
-                    "win32": {"task_id": "xyy"}
+                    "win32": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'}
                 }
             },
             'l10n_config': {
                 "platforms": {
                     "win32": {
                         "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.exe",
+                        "mar_tools_url": "https://queue.taskcluster.net/something/",
                         "locales": ["de", "en-GB", "ru", "uk", "zh-TW"],
                         "chunks": 1,
                     },
                     "linux64": {
                         "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.tar.xz",
+                        "mar_tools_url": "https://queue.taskcluster.net/something/",
                         "locales": ["de", "en-GB", "ru", "uk", "zh-TW"],
                         "chunks": 1,
                     },

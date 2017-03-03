@@ -135,7 +135,7 @@ TC_GRAPH_SCHEMA = Schema({
 }, extra=False, required=False)
 
 
-def create_firefox_test_args(non_standard_arguments):
+def create_fennec_test_args(non_standard_arguments):
     with open(os.path.join(os.path.dirname(__file__), 'default_graph_parameters.yml')) as f:
         default_arguments = yaml.safe_load(f)
     default_arguments.update(non_standard_arguments)

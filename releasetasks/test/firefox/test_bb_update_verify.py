@@ -10,16 +10,19 @@ L10N_CONFIG = {
     'platforms': {
         'win32': {
             'en_us_binary_url': 'https://queue.taskcluster.net/something/firefox.exe',
+            "mar_tools_url": "https://queue.taskcluster.net/something/",
             'locales': ['de', 'en-GB', 'zh-TW'],
             'chunks': 1
         },
         'win64': {
             'en_us_binary_url': 'https://queue.taskcluster.net/something/firefox.exe',
+            "mar_tools_url": "https://queue.taskcluster.net/something/",
             'locales': ['de', 'en-GB', 'zh-TW'],
             'chunks': 1
         },
         'macosx64': {
             'en_us_binary_url': 'https://queue.taskcluster.net/something/firefox.exe',
+            "mar_tools_url": "https://queue.taskcluster.net/something/",
             'locales': ['de', 'en-GB', 'zh-TW'],
             'chunks': 1
         },
@@ -33,15 +36,9 @@ L10N_CONFIG = {
 
 EN_US_CONFIG = {
     'platforms': {
-        'macosx64': {
-            'task_id': 'xyz'
-        },
-        'win32': {
-            'task_id': 'xyz'
-        },
-        'win64': {
-            'task_id': 'xyz'
-        }
+        'macosx64': {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
+        'win32': {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
+        'win64': {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
     }
 }
 

@@ -162,19 +162,21 @@ class TestFinalVerifyNoMirrors(unittest.TestCase):
             'final_verify_channels': ['beta'],
             'en_US_config': {
                 "platforms": {
-                    "macosx64": {"task_id": "xyz"},
-                    "win32": {"task_id": "xyy"}
+                    "macosx64": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
+                    "win32": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
                 }
             },
             'l10n_config': {
                 "platforms": {
                     "win32": {
                         "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.exe",
+                        "mar_tools_url": "https://queue.taskcluster.net/something/",
                         "locales": ["de", "en-GB", "zh-TW"],
                         "chunks": 1,
                     },
                     "macosx64": {
                         "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.tar.xz",
+                        "mar_tools_url": "https://queue.taskcluster.net/something/",
                         "locales": ["de", "en-GB", "zh-TW"],
                         "chunks": 1,
                     },

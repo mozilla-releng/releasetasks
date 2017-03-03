@@ -47,11 +47,11 @@ class TestUpdates(unittest.TestCase):
             'signing_pvt_key': PVT_KEY_FILE,
             'en_US_config': {
                 'platforms': {
-                    'macosx64': {'task_id': 'abc'},
-                    'win32': {'task_id': 'def'},
-                    'win64': {'task_id': 'ghi'},
-                    'linux': {'task_id': 'jkl'},
-                    'linux64': {'task_id': 'mno'},
+                    'macosx64': {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
+                    'win32': {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
+                    'win64': {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
+                    'linux': {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
+                    'linux64': {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
                 }
             }
         })

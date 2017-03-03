@@ -39,9 +39,9 @@ class TestChecksums(unittest.TestCase):
             'final_verify_channels': ['foo'],
             'en_US_config': {
                 "platforms": {
-                    "macosx64": {"task_id": "abc"},
-                    "win64": {"task_id": "jgh"},
-                    "linux64": {"task_id": "lmn"},
+                    "macosx64": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
+                    "win64": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
+                    "linux64": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
                 }
             },
         })

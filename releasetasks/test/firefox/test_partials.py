@@ -31,8 +31,8 @@ class TestEnUSPartials(unittest.TestCase):
             'final_verify_channels': ['beta'],
             'en_US_config': {
                 "platforms": {
-                    "macosx64": {"task_id": "xyz"},
-                    "win32": {"task_id": "xyy"}
+                    "macosx64": {"unsigned_task_id": "xyz", "signed_task_id": "xyz"},
+                    "win32": {"unsigned_task_id": "xyy", "signed_task_id": "xyy"},
                 }
             },
         })

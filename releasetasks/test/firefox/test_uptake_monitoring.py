@@ -42,11 +42,11 @@ class TestUptakeMonitoring(unittest.TestCase):
             'final_verify_channels': ['foo'],
             'en_US_config': {
                 "platforms": {
-                    "macosx64": {"task_id": "abc"},
-                    "win32": {"task_id": "def"},
-                    "win64": {"task_id": "jgh"},
-                    "linux": {"task_id": "ijk"},
-                    "linux64": {"task_id": "lmn"},
+                    "macosx64": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
+                    "win32": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
+                    "win64": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
+                    "linux": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
+                    "linux64": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
                 }
             },
         })
@@ -90,22 +90,24 @@ class TestUptakeMonitoringSHA1(unittest.TestCase):
             'final_verify_channels': ['foo'],
             'en_US_config': {
                 "platforms": {
-                    "macosx64": {"task_id": "abc"},
-                    "win32": {"task_id": "def"},
-                    "win64": {"task_id": "jgh"},
-                    "linux": {"task_id": "ijk"},
-                    "linux64": {"task_id": "lmn"},
+                    "macosx64": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
+                    "win32": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
+                    "win64": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
+                    "linux": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
+                    "linux64": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
                 }
             },
             'l10n_config': {
                 "platforms": {
                     "win32": {
                         "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.exe",
+                        "mar_tools_url": "https://queue.taskcluster.net/something/",
                         "locales": ["de", "en-GB", "zh-TW"],
                         "chunks": 1,
                     },
                     "linux64": {
                         "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.tar.xz",
+                        "mar_tools_url": "https://queue.taskcluster.net/something/",
                         "locales": ["de", "en-GB", "zh-TW"],
                         "chunks": 1,
                     },

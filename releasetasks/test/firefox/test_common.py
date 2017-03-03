@@ -56,8 +56,8 @@ class TestEncryption(unittest.TestCase):
             'signing_pvt_key': PVT_KEY_FILE,
             'en_US_config': {
                 "platforms": {
-                    "macosx64": {"task_id": "xyz"},
-                    "win32": {"task_id": "xyy"}
+                    "macosx64": {"unsigned_task_id": "xyz", "signed_task_id": "xyz"},
+                    "win32": {"unsigned_task_id": "xyz", "signed_task_id": "xyz"},
                 }
             },
         })
@@ -89,8 +89,8 @@ class TestGraphScopes(unittest.TestCase):
             'signing_pvt_key': PVT_KEY_FILE,
             'en_US_config': {
                 "platforms": {
-                    "linux": {"task_id": "xyz"},
-                    "win32": {"task_id": "xyy"}
+                    "linux": {"unsigned_task_id": "xyz", "signed_task_id": "xyx"},
+                    "win32": {"unsigned_task_id": "xyz", "signed_task_id": "xyz"},
                 }
             },
         })

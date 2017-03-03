@@ -9,8 +9,8 @@ from voluptuous import Schema, truth
 
 EN_US_CONFIG = {
     "platforms": {
-        "macosx64": {"task_id": "xyz"},
-        "win32": {"task_id": "xyy"}
+        "macosx64": {"unsigned_task_id": "xyz", "signed_task_id": "xyx"},
+        "win32": {"unsigned_task_id": "xyz", "signed_task_id": "xyx"},
     }
 }
 
@@ -90,7 +90,7 @@ class TestBeetmoverEnUSCandidates(unittest.TestCase, BaseTestBeetmoverCandidates
                 "--app-version 42.0",
                 "--locale en-US",
                 "--bucket fake_bucket",
-                "--taskid {}".format(EN_US_CONFIG['platforms'][platform]['task_id']),
+                "--taskid {}".format(EN_US_CONFIG['platforms'][platform]['signed_task_id']),
                 "--platform {}".format(buildbot2ftp(platform)),
                 "--version 42.0b2",
             )
@@ -116,11 +116,13 @@ class TestBeetmover110nCandidates(unittest.TestCase, BaseTestBeetmoverCandidates
         "platforms": {
             "win32": {
                 "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.exe",
+                "mar_tools_url": "https://queue.taskcluster.net/something/",
                 "locales": ["de", "en-GB", "zh-TW"],
                 "chunks": 1,
             },
             "macosx64": {
                 "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.tar.xz",
+                "mar_tools_url": "https://queue.taskcluster.net/something/",
                 "locales": ["de", "en-GB", "zh-TW"],
                 "chunks": 1,
             },
@@ -299,11 +301,13 @@ class TestBeetmoverl10nPartialsCandidates(unittest.TestCase, BaseTestBeetmoverCa
         "platforms": {
             "win32": {
                 "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.exe",
+                "mar_tools_url": "https://queue.taskcluster.net/something/",
                 "locales": ["de", "en-GB", "zh-TW"],
                 "chunks": 1,
             },
             "macosx64": {
                 "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.tar.xz",
+                "mar_tools_url": "https://queue.taskcluster.net/something/",
                 "locales": ["de", "en-GB", "zh-TW"],
                 "chunks": 1,
             },

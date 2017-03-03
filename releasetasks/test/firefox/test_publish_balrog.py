@@ -35,11 +35,11 @@ class TestPublishBalrog(unittest.TestCase):
             'publish_to_balrog_channels': ["release-dev", "alpha"],
             'en_US_config': {
                 "platforms": {
-                    "macosx64": {"task_id": "abc"},
-                    "win32": {"task_id": "def"},
-                    "win64": {"task_id": "jgh"},
-                    "linux": {"task_id": "ijk"},
-                    "linux64": {"task_id": "lmn"},
+                    "macosx64": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
+                    "win32": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
+                    "win64": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
+                    "linux": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
+                    "linux64": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
                 }
             },
         })
