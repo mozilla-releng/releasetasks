@@ -1,0 +1,44 @@
+{% set buildername = "release-{}-{}_mark_as_shipped".format(branch, product) %}
+
+-
+    taskId: "{{ stableSlugId(buildername) }}"
+    requires:
+        - "{{ stableSlugId('release-{}-{}_push_to_releases'.format(branch, product)) }}"
+    reruns: 5
+    task:
+        provisionerId: "buildbot-bridge"
+        workerType: "buildbot-bridge"
+        created: "{{ now }}"
+        deadline: "{{ now.replace(days=4) }}"
+        expires: "{{ never }}"
+        priority: "high"
+        retries: 5
+        scopes:
+            - project:releng:buildbot-bridge:builder-name:{{ buildername }}
+        routes:
+            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.mark_as_shipped
+            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.mark_as_shipped
+
+        payload:
+            buildername: "{{ buildername }}"
+            sourcestamp:
+                branch: "{{ repo_path }}"
+                revision: "{{ mozharness_changeset }}"
+            properties:
+                product: "{{ product }}"
+                version: "{{ version }}"
+                build_number: {{ buildNumber }}
+                repo_path: "{{ repo_path }}"
+                script_repo_revision: "{{ mozharness_changeset }}"
+                release_promotion: true
+                revision: "{{ revision }}"
+
+        metadata:
+            name: "{{ product }} {{ branch }} mark release as shipped"
+            description: "mark release as shipped in Ship-It"
+            owner: "release@mozilla.com"
+            source: https://github.com/mozilla/releasetasks
+
+        extra:
+            {{ common_extras(taskname=buildername, locales=["null"], platform="null") | indent(12)}}
+            {{ task_notifications("{} {} mark release as shipped".format(product, branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}

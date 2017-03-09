@@ -1,0 +1,45 @@
+{% set buildername = "release-{}-{}_version_bump".format(branch, product) %}
+
+-
+    taskId: "{{ stableSlugId(buildername) }}"
+    requires:
+        - "{{ stableSlugId('release-{}-{}_push_to_releases'.format(branch, product)) }}"
+    reruns: 5
+    task:
+        provisionerId: "buildbot-bridge"
+        workerType: "buildbot-bridge"
+        created: "{{ now }}"
+        deadline: "{{ now.replace(days=4) }}"
+        expires: "{{ never }}"
+        priority: "high"
+        retries: 5
+        scopes:
+            - project:releng:buildbot-bridge:builder-name:{{ buildername }}
+        routes:
+            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.version_bump
+            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.version_bump
+
+        payload:
+            buildername: "{{ buildername }}"
+            sourcestamp:
+                branch: "{{ repo_path }}"
+                revision: "{{ mozharness_changeset }}"
+            properties:
+                product: "{{ product }}"
+                version: "{{ version }}"
+                next_version: "{{ next_version }}"
+                build_number: {{ buildNumber }}
+                repo_path: "{{ repo_path }}"
+                script_repo_revision: "{{ mozharness_changeset }}"
+                release_promotion: true
+                revision: "{{ revision }}"
+
+        metadata:
+            name: "{{ product }} {{ branch }} version bump"
+            description: "version bump"
+            owner: "release@mozilla.com"
+            source: https://github.com/mozilla/releasetasks
+
+        extra:
+            {{ common_extras(taskname=buildername, locales=["null"], platform="null") | indent(12)}}
+            {{ task_notifications("{} {} version bump".format(product, branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}

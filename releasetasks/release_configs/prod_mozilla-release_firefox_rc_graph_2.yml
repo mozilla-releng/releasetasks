@@ -39,6 +39,7 @@ postrelease_version_bump_enabled: true
 postrelease_mark_as_shipped_enabled: true
 
 product: "firefox"
+stage_product: "firefox"
 repo_path: "releases/mozilla-release"
 branch: "mozilla-release"
 funsize_balrog_api_root: "http://balrog/api"

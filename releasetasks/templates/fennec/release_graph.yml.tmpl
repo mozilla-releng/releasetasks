@@ -65,3 +65,46 @@ tasks:
         {% endmacro %}
         {{ checksums_tasks()|indent(4) }}
     {% endif %}
+
+    {% if push_to_releases_enabled %}
+        {% macro push_to_releases_tasks() %}
+            {% include "push_to_releases.yml.tmpl" %}
+        {% endmacro %}
+        {{ push_to_releases_tasks()|indent(4) }}
+
+        {% if uptake_monitoring_enabled %}
+          {% macro uptake_monitoring_tasks() %}
+              {% include "uptake_monitoring.yml.tmpl" %}
+          {% endmacro %}
+          {{ uptake_monitoring_tasks()|indent(4) }}
+        {% endif %}
+
+    {% endif %}
+
+    {% if publish_to_balrog_channels %}
+        {% macro publish_balrog_tasks() %}
+            {% include "publish_balrog.yml.tmpl" %}
+        {% endmacro %}
+        {{ publish_balrog_tasks()|indent(4) }}
+    {% endif %}
+
+    {% if postrelease_bouncer_aliases_enabled %}
+        {% macro bouncer_aliases_tasks() %}
+            {% include "bouncer_aliases.yml.tmpl" %}
+        {% endmacro %}
+        {{ bouncer_aliases_tasks()|indent(4) }}
+    {% endif %}
+
+    {% if postrelease_version_bump_enabled %}
+        {% macro version_bump_tasks() %}
+            {% include "version_bump.yml.tmpl" %}
+        {% endmacro %}
+        {{ version_bump_tasks()|indent(4) }}
+    {% endif %}
+
+    {% if postrelease_mark_as_shipped_enabled %}
+        {% macro mark_as_shipped_tasks() %}
+            {% include "mark_as_shipped.yml.tmpl" %}
+        {% endmacro %}
+        {{ mark_as_shipped_tasks()|indent(4) }}
+    {% endif %}

@@ -1,0 +1,44 @@
+{% set buildername = "release-{}-{}_bouncer_aliases".format(branch, product) %}
+
+-
+    taskId: "{{ stableSlugId(buildername) }}"
+    requires:
+        - "{{ stableSlugId('release-{}-{}_push_to_releases'.format(branch, product)) }}"
+    reruns: 5
+    task:
+        provisionerId: "buildbot-bridge"
+        workerType: "buildbot-bridge"
+        created: "{{ now }}"
+        deadline: "{{ now.replace(days=4) }}"
+        expires: "{{ never }}"
+        priority: "high"
+        retries: 5
+        scopes:
+            - project:releng:buildbot-bridge:builder-name:{{ buildername }}
+        routes:
+            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.bouncer_aliases
+            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.bouncer_aliases
+        payload:
+            buildername: "{{ buildername }}"
+            sourcestamp:
+                branch: "{{ repo_path }}"
+                revision: "{{ mozharness_changeset }}"
+            properties:
+                product: "{{ product }}"
+                version: "{{ version }}"
+                build_number: {{ buildNumber }}
+                repo_path: "{{ repo_path }}"
+                script_repo_revision: "{{ mozharness_changeset }}"
+                release_promotion: true
+                revision: "{{ revision }}"
+                tuxedo_server_url: "{{ tuxedo_server_url }}"
+
+        metadata:
+            name: "{{ product }} {{ branch }} bouncer aliases"
+            description: "bouncer aliases"
+            owner: "release@mozilla.com"
+            source: https://github.com/mozilla/releasetasks
+
+        extra:
+            {{ task_notifications("{} {} bouncer aliases".format(product, branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
+            {{ common_extras(taskname=buildername, locales=["null"], platform="null") | indent(12)}}

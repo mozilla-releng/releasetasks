@@ -1,4 +1,5 @@
 product: fennec
+stage_product: mobile
 version: '42.0b2'
 next_version: '42.0b3'
 appVersion: '42.0'

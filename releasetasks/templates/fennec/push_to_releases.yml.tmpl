@@ -1,0 +1,113 @@
+{% set push_to_releases_basename = "release-{}-{}_push_to_releases".format(branch, product) %}
+
+{% if not push_to_releases_automatic %}
+  {% set push_to_releases_human_upstream_builders = artifact_completes_builders + artifact_partials_builders + push_to_releases_extra_upstream_builders %}
+  {% if checksums_enabled %}
+    {% do push_to_releases_human_upstream_builders.append("release-{}-{}_chcksms".format(branch, product)) %}
+  {% endif %}
+  {% set push_to_releases_upstream_builders = ['{}_human_decision'.format(push_to_releases_basename)] %}
+{% else %}
+  {% set push_to_releases_upstream_builders = artifact_completes_builders + artifact_partials_builders + push_to_releases_extra_upstream_builders %}
+  {% if checksums_enabled %}
+    {% do push_to_releases_upstream_builders.append("release-{}-{}_chcksms".format(branch, product)) %}
+  {% endif %}
+{% endif %}
+
+{% if not push_to_releases_automatic %}
+-
+    taskId: "{{ stableSlugId('{}_human_decision'.format(push_to_releases_basename)) }}"
+    {% if push_to_releases_human_upstream_builders %}
+    requires:
+        {% for upstream_builder in push_to_releases_human_upstream_builders %}
+        - {{ stableSlugId(upstream_builder) }}
+        {% endfor %}
+    {% endif %}
+    reruns: 5
+    task:
+        provisionerId: "null-provisioner"
+        workerType: "human-decision"
+        created: "{{ now }}"
+        deadline: "{{ now.replace(days=4) }}"
+        expires: "{{ never }}"
+        priority: "high"
+        retries: 5
+        routes:
+            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.push_to_cdn_human
+            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.push_to_cdn_human
+
+        payload:
+            description: "required"
+        metadata:
+            name: "{{ product }} {{ branch }} push to releases human decision task"
+            description: "push to releases human decision task"
+            owner: "release@mozilla.com"
+            source: https://github.com/mozilla/releasetasks
+
+        extra:
+            {{ common_extras(taskname='{}_human_decision'.format(push_to_releases_basename), locales=["null"], platform="null") | indent(12)}}
+            {{ task_notifications("{} {} push to releases human decision task".format(product, branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
+
+{% endif %}
+
+-
+    taskId: "{{ stableSlugId(push_to_releases_basename) }}"
+    {% if push_to_releases_upstream_builders %}
+    requires:
+        {% for upstream_builder in push_to_releases_upstream_builders %}
+        - {{ stableSlugId(upstream_builder) }}
+        {% endfor %}
+    {% endif %}
+    reruns: 5
+    task:
+        provisionerId: aws-provisioner-v1
+        workerType: opt-linux64
+        created: "{{ now }}"
+        deadline: "{{ now.replace(days=4) }}"
+        expires: "{{ never }}"
+        priority: "high"
+        retries: 5
+        routes:
+            - tc-treeherder-stage.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
+            - tc-treeherder.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
+            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.push_to_cdn
+            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.push_to_cdn
+        payload:
+            maxRunTime: 7200
+            image: "kmoir/python-beet-runner@sha256:4f6dc84c4386406090a9c72b976be03dea647f01fe45a023d63ce0e479eb3497"
+            command:
+                - /bin/bash
+                - -c
+                - >
+                  wget -O mozharness.tar.bz2 https://hg.mozilla.org/{{ repo_path }}/archive/{{ mozharness_changeset }}.tar.bz2/testing/mozharness &&
+                  mkdir mozharness && tar xvfj mozharness.tar.bz2 -C mozharness --strip-components 3 && cd mozharness &&
+                  python scripts/release/push-candidate-to-releases.py --product {{ stage_product }} --version {{ version }} --build-number {{ buildNumber }} --bucket {{ beetmover_candidates_bucket }}
+            env:
+                DUMMY_ENV_FOR_ENCRYPT: "fake"
+            encryptedEnv:
+                - {{ encrypt_env_var(stableSlugId(push_to_releases_basename), now_ms,
+                                   now_ms + 24 * 4 * 3600 * 1000, 'AWS_ACCESS_KEY_ID',
+                                   beetmover_aws_access_key_id) }}
+                - {{ encrypt_env_var(stableSlugId(push_to_releases_basename), now_ms,
+                                   now_ms + 24 * 4 * 3600 * 1000, 'AWS_SECRET_ACCESS_KEY',
+                                   beetmover_aws_secret_access_key) }}
+        metadata:
+            name: "[beetmover] {{ product }} {{ branch }} push to releases"
+            description: "moves candidates artifacts to releases dir. also known as push to mirrors"
+            owner: "release@mozilla.com"
+            source: https://github.com/mozilla/releasetasks
+
+        extra:
+            {{ common_extras(taskname=push_to_releases_basename, locales=["null"], platform="null") | indent(12)}}
+            treeherderEnv:
+                - staging
+                - production
+            treeherder:
+                symbol: p2m
+                groupSymbol: BM
+                collection:
+                    opt: true
+                machine:
+                    platform: linux64
+                build:
+                    platform: linux64
+            {{ task_notifications("[beetmover] {} {} push to releases".format(product, branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
