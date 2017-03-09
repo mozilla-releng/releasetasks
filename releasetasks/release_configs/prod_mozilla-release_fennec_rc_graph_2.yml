@@ -5,7 +5,7 @@ final_verify_platforms:
   - "android-4-0-armv7-api15"
   - "android-x86"
 uptake_monitoring_platforms:
-  - "android-4-0-armv7-api15"
+  - "android-api-15"
   - "android-x86"
 l10n_release_platforms: []
 partner_repacks_platforms: []
@@ -27,7 +27,7 @@ publish_to_balrog_channels: []
 final_verify_channels:
     - "release"
 postrelease_bouncer_aliases_enabled: false
-uptake_monitoring_enabled: false
+uptake_monitoring_enabled: true
 postrelease_version_bump_enabled: false
 postrelease_mark_as_shipped_enabled: false
 
