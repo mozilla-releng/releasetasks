@@ -26,7 +26,7 @@ channels:
 publish_to_balrog_channels: []
 final_verify_channels:
     - "release-dev"
-postrelease_bouncer_aliases_enabled: false
+postrelease_bouncer_aliases_enabled: true
 uptake_monitoring_enabled: true
 postrelease_version_bump_enabled: false
 postrelease_mark_as_shipped_enabled: false
