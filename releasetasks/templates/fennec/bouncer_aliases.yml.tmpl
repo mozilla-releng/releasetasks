@@ -4,6 +4,7 @@
     taskId: "{{ stableSlugId(buildername) }}"
     requires:
         - "{{ stableSlugId('release-{}-{}_push_to_releases'.format(branch, product)) }}"
+        - "{{ stableSlugId('release-{}-{}_uptake_monitoring'.format(branch, product)) }}"
     reruns: 5
     task:
         provisionerId: "buildbot-bridge"

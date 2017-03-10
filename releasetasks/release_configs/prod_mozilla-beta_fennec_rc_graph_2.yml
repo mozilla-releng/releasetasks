@@ -28,8 +28,8 @@ final_verify_channels:
     - "beta"
 postrelease_bouncer_aliases_enabled: true
 uptake_monitoring_enabled: true
-postrelease_version_bump_enabled: false
-postrelease_mark_as_shipped_enabled: false
+postrelease_version_bump_enabled: true
+postrelease_mark_as_shipped_enabled: true
 
 product: "fennec"
 stage_product: "mobile"

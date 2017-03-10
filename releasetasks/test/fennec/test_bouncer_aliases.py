@@ -25,6 +25,13 @@ class TestBouncerAliases(unittest.TestCase):
             }
         }, extra=True, required=True)
 
+        self.uptake_monitoring_schema = Schema({
+            'task': {
+                'provisionerId': 'buildbot-bridge',
+                'workerType': 'buildbot-bridge'
+            }
+        }, extra=True, required=True)
+
         self.task_schema = Schema({
             'task': {
                 'provisionerId': 'buildbot-bridge',
@@ -59,13 +66,16 @@ class TestBouncerAliases(unittest.TestCase):
         self.graph = make_task_graph(**test_kwargs)
         self.task = get_task_by_name(self.graph, "release-foo-fennec_bouncer_aliases")
         self.push_to_mirrors = get_task_by_name(self.graph, "release-foo-fennec_push_to_releases")
+        self.uptake_monitoring = get_task_by_name(self.graph, "release-foo-fennec_uptake_monitoring")
 
     def generate_task_dependency_validator(self):
         push_to_mirrors_task_id = self.push_to_mirrors['taskId']
+        uptake_monitoring_task_id = self.uptake_monitoring['taskId']
 
         @truth
         def validate_task_dependencies(task):
-            return push_to_mirrors_task_id in task['requires']
+            deps = [push_to_mirrors_task_id, uptake_monitoring_task_id]
+            return all([dep in task['requires'] for dep in deps])
 
         return validate_task_dependencies
 
@@ -80,3 +90,6 @@ class TestBouncerAliases(unittest.TestCase):
 
     def test_push_to_mirrors(self):
         verify(self.push_to_mirrors, self.push_to_mirrors_schema)
+
+    def test_uptake_monitoring(self):
+        verify(self.uptake_monitoring, self.uptake_monitoring)
