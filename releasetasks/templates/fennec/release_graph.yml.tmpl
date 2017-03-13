@@ -39,6 +39,7 @@ scopes:
   - docker-worker:*
   - scheduler:*
   - project:releng:signing:cert:{{ signing_class }}
+  - assume:hook-id:project-releng/candidates-fennec-dev
 {# dep signing uses Balrog dev environment, which is publicly available and
    this doesn't need to use the proxy
 #}
@@ -53,17 +54,26 @@ tasks:
         {% endmacro %}
         {{ source_tasks()|indent(4) }}
     {% endif %}
+
     {% if push_to_candidates_enabled is defined and push_to_candidates_enabled %}
         {% macro beetmove_image_task() %}
             {% include "beetmove_image.yml.tmpl" %}
         {% endmacro %}
         {{ beetmove_image_task()|indent(4) }}
     {% endif %}
+
     {% if checksums_enabled %}
         {% macro checksums_tasks() %}
             {% include "checksums.yml.tmpl" %}
         {% endmacro %}
         {{ checksums_tasks()|indent(4) }}
+    {% endif %}
+
+    {% if candidates_fennec_enabled %}
+      {% macro candidate_fennec_tasks() %}
+          {% include "candidates_fennec.yml.tmpl" %}
+      {% endmacro %}
+      {{ candidate_fennec_tasks()|indent(4) }}
     {% endif %}
 
     {% if push_to_releases_enabled %}
@@ -78,7 +88,6 @@ tasks:
           {% endmacro %}
           {{ uptake_monitoring_tasks()|indent(4) }}
         {% endif %}
-
     {% endif %}
 
     {% if publish_to_balrog_channels %}

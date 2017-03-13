@@ -19,6 +19,7 @@ repo_path: releases/foo
 source_enabled: False
 checksums_enabled: False
 bouncer_enabled: False
+candidates_fennec_enabled: False
 push_to_candidates_enabled: False
 push_to_releases_enabled: False
 push_to_releases_automatic: False
