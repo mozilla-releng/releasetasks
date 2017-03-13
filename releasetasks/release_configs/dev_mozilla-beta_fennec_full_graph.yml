@@ -12,11 +12,11 @@ sha1_repacks_platforms: []
 
 candidates_fennec_enabled: true
 updates_builder_enabled: false
-source_enabled: true
+source_enabled: false
 bouncer_enabled: false
 # funsize
 updates_enabled: false
-checksums_enabled: true
+checksums_enabled: false
 push_to_candidates_enabled: true
 update_verify_enabled: false
 push_to_releases_enabled: true
