@@ -1,0 +1,41 @@
+{% set buildername = "release-{}-{}_bncr_sub".format(branch, product) %}
+-
+    taskId: "{{ stableSlugId(buildername) }}"
+    reruns: 5
+    task:
+        provisionerId: "buildbot-bridge"
+        workerType: "buildbot-bridge"
+        created: "{{ now }}"
+        deadline: "{{ now.replace(days=4) }}"
+        expires: "{{ never }}"
+        priority: "high"
+        retries: 5
+        scopes:
+            - project:releng:buildbot-bridge:builder-name:{{ buildername }}
+
+        routes:
+            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.bouncer_submitter
+            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.bouncer_submitter
+
+        payload:
+            buildername: "{{ buildername }}"
+            sourcestamp:
+                branch: "{{ repo_path }}"
+                revision: "{{ mozharness_changeset }}"
+            properties:
+                product: "{{ product }}"
+                version: "{{ version }}"
+                build_number: {{ buildNumber }}
+                repo_path: "{{ repo_path }}"
+                script_repo_revision: "{{ mozharness_changeset }}"
+                release_promotion: true
+                revision: "{{ mozharness_changeset }}"
+        metadata:
+            name: "{{ product }} {{ branch }} bncr sub"
+            description: "bouncer submission job"
+            owner: "release@mozilla.com"
+            source: https://github.com/mozilla/releasetasks
+
+        extra:
+            {{ task_notifications("{} {} bncr sub".format(product, branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
+            {{ common_extras(taskname=buildername, locales=["null"], platform="null") | indent(12)}}

@@ -13,7 +13,7 @@ sha1_repacks_platforms: []
 candidates_fennec_enabled: true
 updates_builder_enabled: false
 source_enabled: false
-bouncer_enabled: false
+bouncer_enabled: true
 # funsize
 updates_enabled: false
 checksums_enabled: false
