@@ -20,8 +20,8 @@ class BaseTestBeetmoverCandidates(object):
     GRAPH_SCHEMA = Schema({
         'scopes': generate_scope_validator(scopes={
             'queue:task-priority:high',
-            'queue:define-task:aws-provisioner-v1/opt-linux64',
-            'queue:create-task:aws-provisioner-v1/opt-linux64',
+            'queue:define-task:aws-provisioner-v1/gecko-3-b-linux',
+            'queue:create-task:aws-provisioner-v1/gecko-3-b-linux',
         })
     }, extra=True, required=True)
 
@@ -44,7 +44,7 @@ class TestBeetmoverEnUSCandidates(unittest.TestCase, BaseTestBeetmoverCandidates
         self.task_schema = Schema({
             'task': {
                 'provisionerId': 'aws-provisioner-v1',
-                'workerType': 'opt-linux64',
+                'workerType': 'gecko-3-b-linux',
                 'extra': {
                     'build_props': {
                         'product': 'firefox',
@@ -138,7 +138,7 @@ class TestBeetmover110nCandidates(unittest.TestCase, BaseTestBeetmoverCandidates
         self.task_schema = Schema({
             'task': {
                 'provisionerId': 'aws-provisioner-v1',
-                'workerType': 'opt-linux64',
+                'workerType': 'gecko-3-b-linux',
                 'extra': {
                     'build_props': {
                         'product': 'firefox',
@@ -221,7 +221,7 @@ class TestBeetmoverEnUSPartialsCandidates(unittest.TestCase, BaseTestBeetmoverCa
         self.task_schema = Schema({
             'task': {
                 'provisionerId': 'aws-provisioner-v1',
-                'workerType': 'opt-linux64',
+                'workerType': 'gecko-3-b-linux',
             }
         }, extra=True, required=True)
 
@@ -324,7 +324,7 @@ class TestBeetmoverl10nPartialsCandidates(unittest.TestCase, BaseTestBeetmoverCa
         self.task_schema = Schema({
             'task': {
                 'provisionerId': 'aws-provisioner-v1',
-                'workerType': 'opt-linux64',
+                'workerType': 'gecko-3-b-linux',
             }
         }, extra=True, required=True)
 

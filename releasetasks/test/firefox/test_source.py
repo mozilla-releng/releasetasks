@@ -25,8 +25,8 @@ class TestSourceBuilder(unittest.TestCase):
             'scopes': generate_scope_validator(scopes={
                 "docker-worker:cache:tc-vcs",
                 "docker-worker:image:taskcluster/builder:*",
-                "queue:define-task:aws-provisioner-v1/opt-linux64",
-                "queue:create-task:aws-provisioner-v1/opt-linux64",
+                "queue:define-task:aws-provisioner-v1/gecko-3-b-linux",
+                "queue:create-task:aws-provisioner-v1/gecko-3-b-linux",
                 "queue:define-task:aws-provisioner-v1/build-c4-2xlarge",
                 "queue:create-task:aws-provisioner-v1/build-c4-2xlarge",
                 "docker-worker:cache:build-foo-release-workspace",
@@ -42,8 +42,8 @@ class TestSourceBuilder(unittest.TestCase):
                 'scopes': generate_scope_validator(scopes={
                     "docker-worker:cache:tc-vcs",
                     "docker-worker:image:taskcluster/builder:0.5.9",
-                    "queue:define-task:aws-provisioner-v1/opt-linux64",
-                    "queue:create-task:aws-provisioner-v1/opt-linux64",
+                    "queue:define-task:aws-provisioner-v1/gecko-3-b-linux",
+                    "queue:create-task:aws-provisioner-v1/gecko-3-b-linux",
                     "queue:define-task:aws-provisioner-v1/build-c4-2xlarge",
                     "queue:create-task:aws-provisioner-v1/build-c4-2xlarge",
                     "docker-worker:cache:build-foo-release-workspace",
@@ -51,7 +51,7 @@ class TestSourceBuilder(unittest.TestCase):
                     "docker-worker:relengapi-proxy:tooltool.download.public",
                 }),
                 'provisionerId': 'aws-provisioner-v1',
-                'workerType': 'opt-linux64',
+                'workerType': 'gecko-3-b-linux',
                 'payload': {
                     'artifacts': dict,
                     'command': list,

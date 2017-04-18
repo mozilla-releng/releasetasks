@@ -9,7 +9,7 @@
     reruns: 5
     task:
         provisionerId: aws-provisioner-v1
-        workerType: opt-linux64
+        workerType: gecko-3-b-linux
         created: "{{ now }}"
         deadline: "{{ now.replace(days=4) }}"
         expires: "{{ never }}"
@@ -18,8 +18,8 @@
         scopes:
             - docker-worker:cache:tc-vcs
             - docker-worker:image:taskcluster/builder:0.5.9
-            - queue:define-task:aws-provisioner-v1/opt-linux64
-            - queue:create-task:aws-provisioner-v1/opt-linux64
+            - queue:define-task:aws-provisioner-v1/gecko-3-b-linux
+            - queue:create-task:aws-provisioner-v1/gecko-3-b-linux
             - queue:define-task:aws-provisioner-v1/build-c4-2xlarge
             - queue:create-task:aws-provisioner-v1/build-c4-2xlarge
             - docker-worker:cache:build-{{ branch }}-release-workspace
@@ -137,7 +137,7 @@
     reruns: 5
     task:
         provisionerId: aws-provisioner-v1
-        workerType: opt-linux64
+        workerType: gecko-3-b-linux
         created: "{{ now }}"
         deadline: "{{ now.replace(days=4) }}"
         expires: "{{ never }}"
@@ -201,7 +201,7 @@
     reruns: 5
     task:
         provisionerId: aws-provisioner-v1
-        workerType: opt-linux64
+        workerType: gecko-3-b-linux
         created: "{{ now }}"
         deadline: "{{ now.replace(days=4) }}"
         expires: "{{ never }}"

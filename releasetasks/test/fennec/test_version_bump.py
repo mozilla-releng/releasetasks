@@ -37,7 +37,7 @@ class TestVersionBump(unittest.TestCase):
         self.push_to_mirrors_schema = Schema({
             'task': {
                 'provisionerId': 'aws-provisioner-v1',
-                'workerType': 'opt-linux64',
+                'workerType': 'gecko-3-b-linux',
             }
         }, extra=True, required=True)
 

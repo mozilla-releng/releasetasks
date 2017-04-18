@@ -47,15 +47,15 @@ class TestPushToMirrorsHuman(unittest.TestCase):
         self.graph_schema = Schema({
             'scopes': generate_scope_validator(scopes={
                 "queue:task-priority:high",
-                "queue:define-task:aws-provisioner-v1/opt-linux64",
-                "queue:create-task:aws-provisioner-v1/opt-linux64",
+                "queue:define-task:aws-provisioner-v1/gecko-3-b-linux",
+                "queue:create-task:aws-provisioner-v1/gecko-3-b-linux",
             })
         }, required=True, extra=True)
 
         self.task_schema = Schema({
             'task': {
                 'provisionerId': 'aws-provisioner-v1',
-                'workerType': 'opt-linux64',
+                'workerType': 'gecko-3-b-linux',
             }
         }, extra=True, required=True)
 
@@ -146,15 +146,15 @@ class TestPushToMirrorsAutomatic(unittest.TestCase):
         self.graph_schema = Schema({
             'scopes': generate_scope_validator(scopes={
                 "queue:task-priority:high",
-                "queue:define-task:aws-provisioner-v1/opt-linux64",
-                "queue:create-task:aws-provisioner-v1/opt-linux64",
+                "queue:define-task:aws-provisioner-v1/gecko-3-b-linux",
+                "queue:create-task:aws-provisioner-v1/gecko-3-b-linux",
             })
         }, extra=True, required=True)
 
         self.task_schema = Schema({
             'task': {
                 'provisionerId': 'aws-provisioner-v1',
-                'workerType': 'opt-linux64',
+                'workerType': 'gecko-3-b-linux',
             }
         }, extra=True, required=True)
 

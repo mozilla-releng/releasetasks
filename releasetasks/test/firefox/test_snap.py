@@ -24,8 +24,8 @@ class TestSnapBuilder(unittest.TestCase):
         self.graph_schema = Schema({
             'scopes': generate_scope_validator(scopes={
                 "docker-worker:image:taskcluster/builder:*",
-                "queue:define-task:aws-provisioner-v1/opt-linux64",
-                "queue:create-task:aws-provisioner-v1/opt-linux64",
+                "queue:define-task:aws-provisioner-v1/gecko-3-b-linux",
+                "queue:create-task:aws-provisioner-v1/gecko-3-b-linux",
                 "queue:define-task:aws-provisioner-v1/build-c4-2xlarge",
                 "queue:create-task:aws-provisioner-v1/build-c4-2xlarge",
                 "project:releng:signing:format:gpg",
@@ -36,13 +36,13 @@ class TestSnapBuilder(unittest.TestCase):
         self.task_schema = Schema({
             'task': {
                 'scopes': generate_scope_validator(scopes={
-                    "queue:define-task:aws-provisioner-v1/opt-linux64",
-                    "queue:create-task:aws-provisioner-v1/opt-linux64",
+                    "queue:define-task:aws-provisioner-v1/gecko-3-b-linux",
+                    "queue:create-task:aws-provisioner-v1/gecko-3-b-linux",
                     "queue:define-task:aws-provisioner-v1/build-c4-2xlarge",
                     "queue:create-task:aws-provisioner-v1/build-c4-2xlarge",
                 }),
                 'provisionerId': 'aws-provisioner-v1',
-                'workerType': 'opt-linux64',
+                'workerType': 'gecko-3-b-linux',
                 'payload': {
                     'image': str,
                     'command': list,

@@ -15,7 +15,7 @@ class TestL10NChangesets(unittest.TestCase):
     def setUp(self):
         self.task_schema = Schema({
             'task': {
-                'workerType': 'opt-linux64',
+                'workerType': 'gecko-3-b-linux',
                 'provisionerId': 'aws-provisioner-v1',
                 'extra': {
                     'l10n_changesets': 'ab cd\nef gh\nij kl\n',
