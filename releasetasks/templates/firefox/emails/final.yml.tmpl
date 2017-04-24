@@ -1,0 +1,5 @@
+{% set publish_balrog_buildername = "release-{}-{}_publish_balrog".format(branch, product) %}
+
+{% for channel in release_channels %}
+{{ email_release_drivers_task(product=product, version=version, channel=channel, requires=[publish_balrog_buildername]) }}
+{% endfor %}

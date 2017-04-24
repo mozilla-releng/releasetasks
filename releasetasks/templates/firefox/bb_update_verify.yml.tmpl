@@ -3,6 +3,7 @@
 {% for chunk in range(1, uv_totalchunks + 1) %}
 {% set uv_buildername = "release-{}_{}_{}_update_verify".format(branch, product, platform) %}
 {% set task_name = "{}_{}_{}".format(uv_buildername, channel, chunk) %}
+{% do all_update_verify_builders.append(task_name) %}
 -
     taskId: "{{ stableSlugId(task_name) }}"
     requires:

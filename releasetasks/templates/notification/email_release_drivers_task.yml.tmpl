@@ -1,0 +1,51 @@
+{#
+Emails release-drivers via Pulse-Notify service
+The macro call should look like
+    email_release_drivers_task(product, version, channel, requires, update_channel=None)
+As defined at the top of release_graph.yml.tmpl
+#}
+
+{% if (product is defined) and (version is defined) and (channel is defined) and (requires is defined) %}
+
+    {% set full_channel_name = "{}-{}".format(channel, update_channel) if update_channel else channel %}
+    {% set buildername = "release-{}-{}_email_{}".format(branch, product, full_channel_name) %}
+
+-
+    taskId: "{{ stableSlugId(buildername) }}"
+    requires:
+        {% for dependency_name in requires %}
+        - {{ stableSlugId(dependency_name) }}
+        {% endfor %}
+    reruns: 0
+    task:
+        provisionerId: aws-provisioner-v1
+        workerType: gecko-decision   # Fastest worker we have https://bugzilla.mozilla.org/show_bug.cgi?id=1318253#c3
+        created: "{{ now }}"
+        deadline: "{{ now.replace(days=4) }}"
+        expires: "{{ never }}"
+        priority: high
+        retries: 0
+        routes:
+            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.email-{{ full_channel_name }}
+            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.email-{{ full_channel_name }}
+        payload:
+            maxRunTime: 600
+            image: ubuntu:16.10
+            command:
+                - /bin/echo
+                - Dummy task to tell pulse-notify to send an email
+        metadata:
+            owner: release@mozilla.com
+            source: https://github.com/mozilla/releasetasks
+            name: "{{ product }} email release-drivers {{ full_channel_name }}"
+            description: |
+                Sends email to release-drivers telling updates are ready on {{ full_channel_name }}
+        extra:
+            {{ common_extras(taskname=buildername, locales=["null"], platform="null") | indent(12)}}
+            notifications:
+                task-completed:
+                    subject: "{{ product }} {{ channel }} {{ version }} updates are available on the {{ full_channel_name }} channel now <EOM>"
+                    message: "{{ product }} {{ channel }} {{ version }} updates are available on the {{ full_channel_name }} channel now <EOM>"
+                    ids:
+                        - releasetasks  # TODO Change to release-drivers when we know notifications work as expected
+{% endif %}

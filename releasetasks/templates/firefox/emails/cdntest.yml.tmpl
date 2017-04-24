@@ -1,0 +1,5 @@
+{% set uptake_buildername = "release-{}-{}_uptake_monitoring".format(branch, product) %}
+
+{% for channel in release_channels %}
+{{ email_release_drivers_task(product=product, version=version, channel=channel, requires=[uptake_buildername], update_channel='cdntest') }}
+{% endfor %}

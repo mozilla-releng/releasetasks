@@ -1,0 +1,5 @@
+{% for channel in release_channels %}
+{% if channel != "beta" %}
+{{ email_release_drivers_task(product=product, version=version, channel=channel, requires=all_update_verify_builders, update_channel='localtest') }}
+{% endif %}
+{% endfor %}

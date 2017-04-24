@@ -32,7 +32,8 @@ def task_provisionerId_test(task):
     if task['provisionerId'] == "buildbot-bridge":
         return not {"treeherderEnv", "treeherderEnv"}.intersection(task["extra"]) and not any([r.startswith("tc-treeherder") for r in task["routes"]])
 
-    if task['provisionerId'] == "aws-provisioner-v1":
+    # filters out dummy tasks used to send emails. No need for them to report on treeherder
+    if task['provisionerId'] == "aws-provisioner-v1" and 'email' not in task['metadata']['name']:
         return {"treeherder", "treeherderEnv"}.intersection(task["extra"]) and len([r for r in task["routes"] if r.startswith("tc-treeherder")]) == 2
 
     return True

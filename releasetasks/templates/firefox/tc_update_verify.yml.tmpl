@@ -2,6 +2,7 @@
 {% set uv_totalchunks = 12 %}
 {% for chunk in range(1, uv_totalchunks + 1) %}
 {% set uv_buildername = "{}_{}_update_verify_{}".format(platform, channel, chunk) %}
+{% do all_update_verify_builders.append(uv_buildername) %}
 -
     taskId: "{{ stableSlugId(uv_buildername) }}"
     requires:

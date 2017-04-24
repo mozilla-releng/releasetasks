@@ -3,6 +3,7 @@
 {% set artifact_partials_builders = [] %}
 {% set balrog_submission_builders = [] %}
 {% set push_to_releases_extra_upstream_builders = [] %}
+{% set all_update_verify_builders = [] %}
 
 {% macro common_extras(taskname, locales, platform) %}
 {% include "common_extras.yml.tmpl" %}
@@ -11,12 +12,17 @@
 {% macro task_notifications(taskname, failed=None, exception=None, artifact=None, completed=None) %}
 {% include "notifications.yml.tmpl" %}
 {% endmacro %}
+
+{% macro email_release_drivers_task(product, version, channel, requires, update_channel=None) %}
+{% include "email_release_drivers_task.yml.tmpl" %}
+{% endmacro %}
+
 ---
 metadata:
     name: "Release Promotion"
     description: "Release Promotion"
     owner: "release@mozilla.com"
-    source: "https://github.com/rail/releasetasks"
+    source: "https://github.com/mozilla/releasetasks"
 
 scopes:
   - project:releng:signing:format:gpg
@@ -141,6 +147,11 @@ tasks:
         {% for plat in en_US_config["platforms"].keys() %}
             {{ updateVerify_task(plat)|indent(4) }}
         {% endfor %}
+
+        {% macro email_localtest() %}
+            {% include "emails/localtest.yml.tmpl" %}
+        {% endmacro %}
+        {{ email_localtest()|indent(4) }}
     {% endif %}
 
     # push to mirrors
@@ -155,6 +166,11 @@ tasks:
               {% include "uptake_monitoring.yml.tmpl" %}
           {% endmacro %}
           {{ uptake_monitoring_tasks()|indent(4) }}
+
+          {% macro email_cdntest() %}
+              {% include "emails/cdntest.yml.tmpl" %}
+          {% endmacro %}
+          {{ email_cdntest()|indent(4) }}
         {% endif %}
 
     {% endif %}
@@ -179,6 +195,11 @@ tasks:
             {% include "publish_balrog.yml.tmpl" %}
         {% endmacro %}
         {{ publish_balrog_tasks()|indent(4) }}
+
+        {% macro email_final() %}
+            {% include "emails/final.yml.tmpl" %}
+        {% endmacro %}
+        {{ email_final()|indent(4) }}
     {% endif %}
 
     {% if postrelease_bouncer_aliases_enabled %}

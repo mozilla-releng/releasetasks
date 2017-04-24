@@ -42,7 +42,8 @@ class TestFullGraph(unittest.TestCase):
                     "linux": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
                     "linux64": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
                 }
-            }
+            },
+            'release_channels': ['foo']
         })
         self.graph = make_task_graph(**test_args)
 
