@@ -65,7 +65,7 @@ class TestEmailLocaltest(unittest.TestCase):
                         'task-completed': {
                             'subject': 'firefox foo 42.0b2 updates are available on the foo-localtest channel now <EOM>',
                             'message': 'firefox foo 42.0b2 updates are available on the foo-localtest channel now <EOM>',
-                            'ids': ['releasetasks'],
+                            'ids': ['release-drivers'],
                         },
                     },
                 },

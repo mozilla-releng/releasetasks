@@ -28,7 +28,7 @@ class TestEmailFinal(unittest.TestCase):
                         'task-completed': {
                             'subject': 'firefox foo 42.0b2 updates are available on the foo-cdntest channel now <EOM>',
                             'message': 'firefox foo 42.0b2 updates are available on the foo-cdntest channel now <EOM>',
-                            'ids': ['releasetasks'],
+                            'ids': ['release-drivers'],
                         },
                     },
                 },
