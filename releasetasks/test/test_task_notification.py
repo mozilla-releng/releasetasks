@@ -1,6 +1,6 @@
 import unittest
 from releasetasks.test import PVT_KEY_FILE, verify
-from releasetasks.test.firefox import make_task_graph, create_firefox_test_args
+from releasetasks.test.desktop import make_task_graph, create_firefox_test_args
 from voluptuous import Any, Schema
 
 
@@ -41,6 +41,9 @@ class TestFirefoxTaskNotifications(unittest.TestCase):
             'release_channels': ['foo'],
             'final_verify_channels': ['foo'],
             'signing_pvt_key': PVT_KEY_FILE,
+            'accepted_mar_channel_id': 'firefox-mozilla-beta',
+            'signing_cert': 'dep',
+            'moz_disable_mar_cert_verification': True,
             'en_US_config': {
                 "platforms": {
                     "macosx64": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},

@@ -14,6 +14,9 @@ candidates_fennec_enabled: true
 updates_builder_enabled: false
 source_enabled: false
 bouncer_enabled: true
+signing_class: "release-signing"
+signing_cert: "release"
+root_home_dir: "mobile"
 # funsize
 updates_enabled: false
 checksums_enabled: false

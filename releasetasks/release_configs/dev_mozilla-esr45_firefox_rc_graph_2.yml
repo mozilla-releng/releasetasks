@@ -21,6 +21,9 @@ sha1_repacks_platforms: []
 updates_builder_enabled: false
 source_enabled: false
 bouncer_enabled: false
+signing_class: "release-signing"
+signing_cert: "release"
+root_home_dir: "desktop"
 # funsize
 updates_enabled: false
 checksums_enabled: false

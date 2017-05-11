@@ -1,0 +1,223 @@
+# store all en-US artifact generating tasks for upstream builder purposes
+{% set artifact_completes_builders = [] %}
+{% set artifact_partials_builders = [] %}
+{% set balrog_submission_builders = [] %}
+{% set push_to_releases_extra_upstream_builders = [] %}
+{% set all_update_verify_builders = [] %}
+
+{% macro common_extras(taskname, locales, platform) %}
+{% include "common_extras.yml.tmpl" %}
+{% endmacro %}
+
+{% macro task_notifications(taskname, failed=None, exception=None, artifact=None, completed=None) %}
+{% include "notifications.yml.tmpl" %}
+{% endmacro %}
+
+{% macro email_release_drivers_task(product, version, channel, requires, update_channel=None) %}
+{% include "email_release_drivers_task.yml.tmpl" %}
+{% endmacro %}
+
+---
+metadata:
+    name: "Release Promotion"
+    description: "Release Promotion"
+    owner: "release@mozilla.com"
+    source: "https://github.com/mozilla/releasetasks"
+
+scopes:
+  - project:releng:signing:format:gpg
+  - queue:define-task:buildbot-bridge/buildbot-bridge
+  - queue:create-task:buildbot-bridge/buildbot-bridge
+  - queue:task-priority:high
+  # TODO: need a better way to specify dev/prod scopes
+  - project:releng:buildbot-bridge:builder-name:release-*
+  - queue:define-task:aws-provisioner-v1/gecko-3-b-linux
+  - queue:create-task:aws-provisioner-v1/gecko-3-b-linux
+  - docker-worker:cache:tc-vcs
+  - docker-worker:image:taskcluster/builder:*
+  - queue:define-task:aws-provisioner-v1/build-c4-2xlarge
+  - queue:create-task:aws-provisioner-v1/build-c4-2xlarge
+  - docker-worker:cache:build-{{ branch }}-release-workspace
+  - docker-worker:cache:tooltool-cache
+  - project:releng:signing:cert:{{ signing_class }}
+  - docker-worker:relengapi-proxy:tooltool.download.public
+  - queue:*
+  - docker-worker:*
+  - scheduler:*
+  - project:releng:signing:format:mar
+{# dep signing uses Balrog dev environment, which is publicly available and
+   this doesn't need to use the proxy
+#}
+{% if signing_class != "dep-signing" %}
+  - docker-worker:feature:balrogVPNProxy
+{% endif %}
+
+tasks:
+    {% if updates_enabled is defined and updates_enabled %}
+        {% macro funsize_images_tasks() %}
+            {% include "funsize_image.yml.tmpl" %}
+        {% endmacro %}
+        {{ funsize_images_tasks()|indent(4) }}
+    {% endif %}
+    {% if push_to_candidates_enabled is defined and push_to_candidates_enabled %}
+        {% macro beetmove_image_task() %}
+            {% include "beetmove_image.yml.tmpl" %}
+        {% endmacro %}
+        {{ beetmove_image_task()|indent(4) }}
+    {% endif %}
+    {% if en_US_config.get("platforms") %}
+        # partials (funsize) and push to candidates (beetmover)
+        {% macro enUS_tasks() %}
+            {% include "enUS.yml.tmpl" %}
+        {% endmacro %}
+        {{ enUS_tasks()|indent(4) }}
+
+    {% endif %}
+
+    {% if l10n_config.get("platforms") %}
+        # repacks, partials (funsize) and push to candidates (beetmover)
+        {% macro l10n_tasks() %}
+            {% include "l10n.yml.tmpl" %}
+        {% endmacro %}
+        {{ l10n_tasks()|indent(4) }}
+    {% endif %}
+
+    {% if l10n_changesets is defined and l10n_changesets %}
+        {% macro l10n_changesets_tasks() %}
+            {% include "l10n_changesets.yml.tmpl" %}
+        {% endmacro %}
+        {{ l10n_changesets_tasks()|indent(4) }}
+    {% endif %}
+
+    {% if source_enabled %}
+        {% macro source_tasks() %}
+            {% include "source.yml.tmpl" %}
+        {% endmacro %}
+        {{ source_tasks()|indent(4) }}
+    {% endif %}
+
+    {% if snap_enabled is defined and snap_enabled %}
+        {% macro snap_tasks() %}
+            {% include "snap.yml.tmpl" %}
+        {% endmacro %}
+        {{ snap_tasks()|indent(4) }}
+    {% endif %}
+
+    {% if (push_to_candidates_enabled and l10n_config.get("platforms")) and
+           (partner_repacks_platforms is defined or
+            eme_free_repacks_platforms is defined or
+            sha1_repacks_platforms is defined) %}
+    {# partner repacks require l10n in the candidates directory #}
+        {% macro partner_repacks_tasks() %}
+            {% include "partner_repacks.yml.tmpl" %}
+        {% endmacro %}
+        {{ partner_repacks_tasks()|indent(4) }}
+    {% endif %}
+
+    {% if bouncer_enabled %}
+        {% macro bouncer_tasks() %}
+            {% include "bouncer.yml.tmpl" %}
+        {% endmacro %}
+        {{ bouncer_tasks()|indent(4) }}
+    {% endif %}
+
+    {% if checksums_enabled %}
+      {% macro checksums_tasks() %}
+          {% include "checksums.yml.tmpl" %}
+      {% endmacro %}
+      {{ checksums_tasks()|indent(4) }}
+    {% endif %}
+
+    {% if updates_builder_enabled is defined and updates_builder_enabled %}
+        {% macro updates_task() %}
+            {% include "updates.yml.tmpl" %}
+        {% endmacro %}
+        {{ updates_task()|indent(4) }}
+    {% endif %}
+
+    {% if update_verify_enabled is defined and update_verify_enabled %}
+        {% macro updateVerify_task(platform) %}
+            {% if platform in ["linux", "linux64"] %}
+                {% include "tc_update_verify.yml.tmpl" %}
+            {% else %}
+                {% include "bb_update_verify.yml.tmpl" %}
+            {% endif %}
+        {% endmacro %}
+        {% for plat in en_US_config["platforms"].keys() %}
+            {{ updateVerify_task(plat)|indent(4) }}
+        {% endfor %}
+
+        {% macro email_localtest() %}
+            {% include "emails/localtest.yml.tmpl" %}
+        {% endmacro %}
+        {{ email_localtest()|indent(4) }}
+    {% endif %}
+
+    # push to mirrors
+    {% if push_to_releases_enabled %}
+        {% macro push_to_releases_tasks() %}
+            {% include "push_to_releases.yml.tmpl" %}
+        {% endmacro %}
+        {{ push_to_releases_tasks()|indent(4) }}
+
+        {% if uptake_monitoring_enabled %}
+          {% macro uptake_monitoring_tasks() %}
+              {% include "uptake_monitoring.yml.tmpl" %}
+          {% endmacro %}
+          {{ uptake_monitoring_tasks()|indent(4) }}
+
+          {% macro email_cdntest() %}
+              {% include "emails/cdntest.yml.tmpl" %}
+          {% endmacro %}
+          {{ email_cdntest()|indent(4) }}
+        {% endif %}
+
+    {% endif %}
+
+    {% if final_verify_channels is defined and final_verify_platforms is defined %}
+        {% macro finalVerify_tasks() %}
+            {% include "final_verify.yml.tmpl" %}
+        {% endmacro %}
+        {{ finalVerify_tasks()|indent(4) }}
+    {% endif %}
+
+
+    {% if postrelease_bouncer_aliases_enabled or postrelease_version_bump_enabled or postrelease_mark_as_shipped_enabled or publish_to_balrog_channels %}
+        {% macro publish_release_human_decision_tasks() %}
+            {% include "publish_release_human_decision.yml.tmpl" %}
+        {% endmacro %}
+        {{ publish_release_human_decision_tasks()|indent(4) }}
+    {% endif %}
+
+    {% if publish_to_balrog_channels %}
+        {% macro publish_balrog_tasks() %}
+            {% include "publish_balrog.yml.tmpl" %}
+        {% endmacro %}
+        {{ publish_balrog_tasks()|indent(4) }}
+
+        {% macro email_final() %}
+            {% include "emails/final.yml.tmpl" %}
+        {% endmacro %}
+        {{ email_final()|indent(4) }}
+    {% endif %}
+
+    {% if postrelease_bouncer_aliases_enabled %}
+        {% macro bouncer_aliases_tasks() %}
+            {% include "bouncer_aliases.yml.tmpl" %}
+        {% endmacro %}
+        {{ bouncer_aliases_tasks()|indent(4) }}
+    {% endif %}
+
+    {% if postrelease_version_bump_enabled %}
+        {% macro version_bump_tasks() %}
+            {% include "version_bump.yml.tmpl" %}
+        {% endmacro %}
+        {{ version_bump_tasks()|indent(4) }}
+    {% endif %}
+
+    {% if postrelease_mark_as_shipped_enabled %}
+        {% macro mark_as_shipped_tasks() %}
+            {% include "mark_as_shipped.yml.tmpl" %}
+        {% endmacro %}
+        {{ mark_as_shipped_tasks()|indent(4) }}
+    {% endif %}

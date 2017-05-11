@@ -15,13 +15,13 @@ from releasetasks.util import (
 DEFAULT_TEMPLATE_DIR = path.join(path.dirname(__file__), "templates")
 
 
-def make_task_graph(public_key, signing_pvt_key, product,
+def make_task_graph(public_key, signing_pvt_key, product, root_home_dir,
                     root_template="release_graph.yml.tmpl",
                     template_dir=DEFAULT_TEMPLATE_DIR,
                     **template_kwargs):
     # TODO: some validation of template_kwargs + defaults
     env = Environment(
-        loader=FileSystemLoader([path.join(template_dir, product), path.join(template_dir, 'notification')]),
+        loader=FileSystemLoader([path.join(template_dir, root_home_dir), path.join(template_dir, 'notification')]),
         undefined=StrictUndefined,
         extensions=['jinja2.ext.do'])
 
