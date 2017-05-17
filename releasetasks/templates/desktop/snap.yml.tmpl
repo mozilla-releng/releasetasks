@@ -148,7 +148,7 @@
                 - >
                   wget -O mozharness.tar.bz2 https://hg.mozilla.org/{{ repo_path }}/archive/{{ mozharness_changeset }}.tar.bz2/testing/mozharness &&
                   mkdir mozharness && tar xvfj mozharness.tar.bz2 -C mozharness --strip-components 3 && cd mozharness &&
-                  python scripts/release/beet_mover.py --no-refresh-antivirus --template configs/beetmover/snap.yml.tmpl --platform linux64 --version {{ version }} --locale en-US --taskid {{ stableSlugId(buildername) }} --build-num build{{ buildNumber }} --bucket {{ beetmover_candidates_bucket }}
+                  python scripts/release/beet_mover.py --no-refresh-antivirus --template configs/beetmover/snap.yml.tmpl --platform linux64 --product {{ product }} --version {{ version }} --locale en-US --taskid {{ stableSlugId(buildername) }} --build-num build{{ buildNumber }} --bucket {{ beetmover_candidates_bucket }}
             env:
                 DUMMY_ENV_FOR_ENCRYPT: "fake"
             encryptedEnv:
@@ -211,7 +211,7 @@
                 - >
                   wget -O mozharness.tar.bz2 https://hg.mozilla.org/{{ repo_path }}/archive/{{ mozharness_changeset }}.tar.bz2/testing/mozharness &&
                   mkdir mozharness && tar xvfj mozharness.tar.bz2 -C mozharness --strip-components 3 && cd mozharness &&
-                  python scripts/release/beet_mover.py --no-refresh-antivirus --template configs/beetmover/snap_checksums.yml.tmpl --platform linux64 --version {{ version }} --locale en-US  --artifact-subdir env --taskid "{{ stableSlugId(buildername_signing) }}" --build-num build{{ buildNumber }} --bucket {{ beetmover_candidates_bucket }}
+                  python scripts/release/beet_mover.py --no-refresh-antivirus --template configs/beetmover/snap_checksums.yml.tmpl --platform linux64 --product {{ product }} --version {{ version }} --locale en-US  --artifact-subdir env --taskid "{{ stableSlugId(buildername_signing) }}" --build-num build{{ buildNumber }} --bucket {{ beetmover_candidates_bucket }}
             env:
                 DUMMY_ENV_FOR_ENCRYPT: "fake"
             encryptedEnv:

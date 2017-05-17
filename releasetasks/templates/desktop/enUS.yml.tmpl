@@ -33,8 +33,8 @@
                 - >
                   wget -O mozharness.tar.bz2 https://hg.mozilla.org/{{ repo_path }}/archive/{{ mozharness_changeset }}.tar.bz2/testing/mozharness &&
                   mkdir mozharness && tar xvfj mozharness.tar.bz2 -C mozharness --strip-components 3 && cd mozharness &&
-                  python scripts/release/beet_mover.py --no-refresh-antivirus --template configs/beetmover/en_us_signing.yml.tmpl --platform {{ buildbot2ftp(platform) }} --version {{ version }} --app-version {{ appVersion }} --locale en-US --taskid {{ platform_info['signed_task_id'] }} --build-num build{{ buildNumber }} --bucket {{ beetmover_candidates_bucket }} &&
-                  python scripts/release/beet_mover.py --no-refresh-antivirus --template configs/beetmover/en_us_build.yml.tmpl --platform {{ buildbot2ftp(platform) }} --version {{ version }} --app-version {{ appVersion }} --locale en-US --taskid {{ platform_info['unsigned_task_id'] }} --build-num build{{ buildNumber }} --bucket {{ beetmover_candidates_bucket }}
+                  python scripts/release/beet_mover.py --no-refresh-antivirus --template configs/beetmover/en_us_signing.yml.tmpl --platform {{ buildbot2ftp(platform) }} --product {{ product }} --version {{ version }} --app-version {{ appVersion }} --locale en-US --taskid {{ platform_info['signed_task_id'] }} --build-num build{{ buildNumber }} --bucket {{ beetmover_candidates_bucket }} &&
+                  python scripts/release/beet_mover.py --no-refresh-antivirus --template configs/beetmover/en_us_build.yml.tmpl --platform {{ buildbot2ftp(platform) }} --product {{ product }} --version {{ version }} --app-version {{ appVersion }} --locale en-US --taskid {{ platform_info['unsigned_task_id'] }} --build-num build{{ buildNumber }} --bucket {{ beetmover_candidates_bucket }}
             env:
                 DUMMY_ENV_FOR_ENCRYPT: "fake"
             encryptedEnv:
@@ -341,7 +341,7 @@
                 - >
                   wget -O mozharness.tar.bz2 https://hg.mozilla.org/{{ repo_path }}/archive/{{ mozharness_changeset }}.tar.bz2/testing/mozharness &&
                   mkdir mozharness && tar xvfj mozharness.tar.bz2 -C mozharness --strip-components 3 && cd mozharness &&
-                  python scripts/release/beet_mover.py --no-refresh-antivirus --template configs/beetmover/partials.yml.tmpl --platform {{ buildbot2ftp(platform) }} --version {{ version }} --partial-version {{ partial_version }} --artifact-subdir env --locale en-US --taskid {{ stableSlugId('{}_signing_task'.format(funsize_basename)) }} --build-num build{{ buildNumber }} --bucket {{ beetmover_candidates_bucket }}
+                  python scripts/release/beet_mover.py --no-refresh-antivirus --template configs/beetmover/partials.yml.tmpl --platform {{ buildbot2ftp(platform) }} --product {{ product }} --version {{ version }} --partial-version {{ partial_version }} --artifact-subdir env --locale en-US --taskid {{ stableSlugId('{}_signing_task'.format(funsize_basename)) }} --build-num build{{ buildNumber }} --bucket {{ beetmover_candidates_bucket }}
             env:
                 DUMMY_ENV_FOR_ENCRYPT: "fake"
             encryptedEnv:
