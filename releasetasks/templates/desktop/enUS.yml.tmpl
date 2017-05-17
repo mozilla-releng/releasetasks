@@ -155,12 +155,12 @@
             env:
                 FILENAME_TEMPLATE: "{{ product }}-{{ partial_version }}-{{ version }}.en-US.{{ buildbot2ftp(platform) }}.partial.mar"
                 {% if moz_disable_mar_cert_verification is defined and moz_disable_mar_cert_verification %}
-                MOZ_DISABLE_MAR_CERT_VERIFICATION: moz_disable_mar_cert_verification
+                MOZ_DISABLE_MAR_CERT_VERIFICATION: {{ moz_disable_mar_cert_verification }}
                 {% endif %}
                 SIGNING_CERT: {{ signing_cert }}
                 {% if accepted_mar_channel_id is defined and accepted_mar_channel_id %}
                 # explicitly set MAR channel name, ACCEPTED_MAR_CHANNEL_IDS is the corresponding variable in funsize.py
-                ACCEPTED_MAR_CHANNEL_IDS: accepted_mar_channel_id
+                ACCEPTED_MAR_CHANNEL_IDS: {{ accepted_mar_channel_id }}
                 {% endif %}
                 EXTRA_PARAMS: "--no-freshclam"
 
@@ -285,7 +285,7 @@
                     expires: "{{ never }}"
             env:
                 {% if moz_disable_mar_cert_verification is defined and moz_disable_mar_cert_verification%}
-                MOZ_DISABLE_MAR_CERT_VERIFICATION: moz_disable_mar_cert_verification
+                MOZ_DISABLE_MAR_CERT_VERIFICATION: {{ moz_disable_mar_cert_verification }}
                 {% endif %}
                 SIGNING_CERT: {{ signing_cert }}
                 PARENT_TASK_ARTIFACTS_URL_PREFIX: "https://queue.taskcluster.net/v1/task/{{ stableSlugId('{}_signing_task'.format(funsize_basename)) }}/artifacts/public/env"
