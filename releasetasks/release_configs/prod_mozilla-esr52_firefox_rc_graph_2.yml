@@ -43,6 +43,7 @@ postrelease_mark_as_shipped_enabled: true
 
 product: "firefox"
 stage_product: "firefox"
+funsize_product: "firefox"
 repo_path: "releases/mozilla-esr52"
 branch: "mozilla-esr52"
 funsize_balrog_api_root: "http://balrog/api"

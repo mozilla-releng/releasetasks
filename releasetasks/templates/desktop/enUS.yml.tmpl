@@ -153,7 +153,7 @@
                 - /runme.sh
 
             env:
-                FILENAME_TEMPLATE: "{{ product }}-{{ partial_version }}-{{ version }}.en-US.{{ buildbot2ftp(platform) }}.partial.mar"
+                FILENAME_TEMPLATE: "{{ funsize_product }}-{{ partial_version }}-{{ version }}.en-US.{{ buildbot2ftp(platform) }}.partial.mar"
                 {% if moz_disable_mar_cert_verification is defined and moz_disable_mar_cert_verification %}
                 MOZ_DISABLE_MAR_CERT_VERIFICATION: {{ moz_disable_mar_cert_verification }}
                 {% endif %}

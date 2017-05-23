@@ -43,6 +43,7 @@ postrelease_mark_as_shipped_enabled: true
 
 product: "firefox"
 stage_product: "firefox"
+funsize_product: "firefox"
 repo_path: "projects/jamun"
 branch: "jamun"
 funsize_balrog_api_root: "http://ec2-54-241-39-23.us-west-1.compute.amazonaws.com:443/api"

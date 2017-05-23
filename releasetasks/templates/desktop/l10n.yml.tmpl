@@ -192,7 +192,7 @@
                         locale: {{ locale }}
                         # TODO: consider using stable URL for from_mar
                         from_mar: "http://download.mozilla.org/?product={{ product }}-{{ partial_version }}-complete&os={{ buildbot2bouncer(platform) }}&lang={{ locale }}"
-                        to_mar: "https://queue.taskcluster.net/v1/task/{{ stableSlugId('{}_artifacts_{}'.format(buildername, chunk)) }}/artifacts/public/build/{{ product }}-{{ appVersion }}.{{ locale }}.{{ buildbot2ftp(platform) }}.complete.mar"
+                        to_mar: "https://queue.taskcluster.net/v1/task/{{ stableSlugId('{}_artifacts_{}'.format(buildername, chunk)) }}/artifacts/public/build/{{ funsize_product }}-{{ appVersion }}.{{ locale }}.{{ buildbot2ftp(platform) }}.complete.mar"
                         platform: {{ platform }}
                         branch: {{ branch }}
                         previousVersion: "{{ partial_version }}"
@@ -230,7 +230,7 @@
 
             env:
                 # {locale} is interpreted by funsize, don't use double brackets
-                FILENAME_TEMPLATE: "{{ product }}-{{ partial_version }}-{{ version }}.{locale}.{{ buildbot2ftp(platform) }}.partial.mar"
+                FILENAME_TEMPLATE: "{{ funsize_product }}-{{ partial_version }}-{{ version }}.{locale}.{{ buildbot2ftp(platform) }}.partial.mar"
                 {% if moz_disable_mar_cert_verification is defined and moz_disable_mar_cert_verification %}
                 MOZ_DISABLE_MAR_CERT_VERIFICATION: {{ moz_disable_mar_cert_verification }}
                 {% endif %}
