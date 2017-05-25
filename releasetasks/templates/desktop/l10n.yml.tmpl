@@ -92,8 +92,8 @@
         - "{{ stableSlugId("beetmove_image") }}"
     reruns: 5
     task:
-        provisionerId: aws-provisioner-v1
-        workerType: gecko-3-b-linux
+        provisionerId: {{ provisionerid(platform) }}
+        workerType: {{ workertype(platform) }}
         created: "{{ now }}"
         deadline: "{{ now.replace(days=4) }}"
         expires: "{{ never }}"
@@ -396,8 +396,8 @@
         - "{{ stableSlugId("beetmove_image") }}"
     reruns: 5
     task:
-        provisionerId: aws-provisioner-v1
-        workerType: gecko-3-b-linux
+        provisionerId: {{ provisionerid(platform) }}
+        workerType: {{ workertype(platform) }}
         created: "{{ now }}"
         deadline: "{{ now.replace(days=4) }}"
         expires: "{{ never }}"

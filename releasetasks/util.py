@@ -21,6 +21,25 @@ bouncer_platform_map = {
     'macosx64': 'osx'
 }
 
+workertype_map = {
+    'win32': 'gecko-3-b-linux',
+    'win64': 'gecko-3-b-linux',
+    'linux': 'gecko-3-b-linux',
+    'linux64': 'gecko-3-b-linux',
+    'macosx64': 'os-x-10-10-gw'
+}
+
+provisionerid_map = {
+    'win32': 'aws-provisioner-v1',
+    'win64': 'aws-provisioner-v1',
+    'linux': 'aws-provisioner-v1',
+    'linux64': 'aws-provisioner-v1',
+    'macosx64': 'scl3-puppet'
+}
+
+DEFAULT_WORKER_TYPE = 'gecko-3-b-linux'
+DEFAULT_PROVISIONER_ID = 'aws-provisioner-v1'
+
 
 def treeherder_platform(platform):
     # See https://github.com/mozilla/treeherder/blob/master/ui/js/values.js
@@ -57,6 +76,14 @@ def buildbot2ftp(platform):
 
 def buildbot2bouncer(platform):
     return bouncer_platform_map.get(platform, platform)
+
+
+def get_worker_type(platform):
+    return workertype_map.get(platform, DEFAULT_WORKER_TYPE)
+
+
+def get_provisionerid(platform):
+    return provisionerid_map.get(platform, DEFAULT_PROVISIONER_ID)
 
 
 @retriable(sleeptime=0, jitter=0, retry_exceptions=(requests.HTTPError,))

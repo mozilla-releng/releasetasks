@@ -10,7 +10,7 @@ from taskcluster.utils import stableSlugId, encryptEnvVar
 
 from releasetasks.util import (
     treeherder_platform, sign_task, buildbot2ftp, buildbot2bouncer,
-    get_json_rev)
+    get_json_rev, get_worker_type, get_provisionerid)
 
 DEFAULT_TEMPLATE_DIR = path.join(path.dirname(__file__), "templates")
 
@@ -52,6 +52,8 @@ def make_task_graph(public_key, signing_pvt_key, product, root_home_dir,
         "buildbot2ftp": buildbot2ftp,
         "buildbot2bouncer": buildbot2bouncer,
         "sign_task": partial(sign_task, pvt_key=pvt_key),
+        "workertype": get_worker_type,
+        "provisionerid": get_provisionerid,
     }
     template_vars.update(template_kwargs)
 

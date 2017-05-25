@@ -4,7 +4,7 @@ from releasetasks.test.desktop import make_task_graph, do_common_assertions, \
     get_task_by_name, create_firefox_test_args
 from releasetasks.test import generate_scope_validator, PVT_KEY_FILE, verify
 from releasetasks.util import buildbot2ftp
-from voluptuous import Schema, truth
+from voluptuous import Schema, truth, Required, Any
 
 
 EN_US_CONFIG = {
@@ -43,8 +43,8 @@ class TestBeetmoverEnUSCandidates(unittest.TestCase, BaseTestBeetmoverCandidates
     def setUp(self):
         self.task_schema = Schema({
             'task': {
-                'provisionerId': 'aws-provisioner-v1',
-                'workerType': 'gecko-3-b-linux',
+                'provisionerId': Required(Any(str, ['aws-provisioner-v1', 'scl3-puppet'])),
+                'workerType': Required(Any(str, ['gecko-3-b-linux', 'os-x-10-10-gw'])),
                 'extra': {
                     'build_props': {
                         'product': 'firefox',
@@ -140,8 +140,8 @@ class TestBeetmover110nCandidates(unittest.TestCase, BaseTestBeetmoverCandidates
     def setUp(self):
         self.task_schema = Schema({
             'task': {
-                'provisionerId': 'aws-provisioner-v1',
-                'workerType': 'gecko-3-b-linux',
+                'provisionerId': Required(Any(str, ['aws-provisioner-v1', 'scl3-puppet'])),
+                'workerType': Required(Any(str, ['gecko-3-b-linux', 'os-x-10-10-gw'])),
                 'extra': {
                     'build_props': {
                         'product': 'firefox',
@@ -226,8 +226,8 @@ class TestBeetmoverEnUSPartialsCandidates(unittest.TestCase, BaseTestBeetmoverCa
     def setUp(self):
         self.task_schema = Schema({
             'task': {
-                'provisionerId': 'aws-provisioner-v1',
-                'workerType': 'gecko-3-b-linux',
+                'provisionerId': Required(Any(str, ['aws-provisioner-v1', 'scl3-puppet'])),
+                'workerType': Required(Any(str, ['gecko-3-b-linux', 'os-x-10-10-gw'])),
             }
         }, extra=True, required=True)
 
@@ -332,8 +332,8 @@ class TestBeetmoverl10nPartialsCandidates(unittest.TestCase, BaseTestBeetmoverCa
     def setUp(self):
         self.task_schema = Schema({
             'task': {
-                'provisionerId': 'aws-provisioner-v1',
-                'workerType': 'gecko-3-b-linux',
+                'provisionerId': Required(Any(str, ['aws-provisioner-v1', 'scl3-puppet'])),
+                'workerType': Required(Any(str, ['gecko-3-b-linux', 'os-x-10-10-gw'])),
             }
         }, extra=True, required=True)
 
