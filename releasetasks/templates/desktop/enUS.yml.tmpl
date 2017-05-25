@@ -116,7 +116,7 @@
                         {% if platform_info["signed_task_id"] != platform_info["unsigned_task_id"] %}
                         to_mar: "https://queue.taskcluster.net/v1/task/{{ platform_info["signed_task_id"] }}/artifacts/public/build/update/target.complete.mar"
                         {% else %}
-                        to_mar: "https://queue.taskcluster.net/v1/task/{{ platform_info["signed_task_id"] }}/artifacts/public/build/{{ product }}-{{ appVersion }}.{{ locale }}.{{ buildbot2ftp(platform) }}.complete.mar"
+                        to_mar: "https://queue.taskcluster.net/v1/task/{{ platform_info["signed_task_id"] }}/artifacts/public/build/{{ funsize_product }}-{{ appVersion }}.{{ locale }}.{{ buildbot2ftp(platform) }}.complete.mar"
                         {% endif %}
                         platform: {{ platform }}
                         branch: {{ branch }}
