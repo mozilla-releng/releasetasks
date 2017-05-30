@@ -34,6 +34,7 @@ postrelease_mark_as_shipped_enabled: true
 
 product: "fennec"
 stage_product: "mobile"
+funsize_product: "fennec"
 repo_path: "projects/jamun"
 branch: "jamun"
 funsize_balrog_api_root: "http://ec2-54-241-39-23.us-west-1.compute.amazonaws.com:443/api"

@@ -34,6 +34,7 @@ postrelease_mark_as_shipped_enabled: true
 
 product: "fennec"
 stage_product: "mobile"
+funsize_product: "fennec"
 repo_path: "releases/mozilla-beta"
 branch: "mozilla-beta"
 funsize_balrog_api_root: "http://balrog/api"
