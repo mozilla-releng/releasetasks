@@ -30,8 +30,8 @@ checksums_enabled: false
 push_to_candidates_enabled: false
 update_verify_enabled: false
 push_to_releases_enabled: true
-# rc graph 2 only needs final_verify_channels
 channels:
+    - "release"
 publish_to_balrog_channels:
     - "release"
 final_verify_channels:
