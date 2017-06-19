@@ -54,3 +54,4 @@ update_verify_enabled: False
 updates_builder_enabled: False
 publish_to_balrog_channels: null
 snap_enabled: false
+release_eta: null

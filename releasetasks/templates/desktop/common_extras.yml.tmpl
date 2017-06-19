@@ -15,6 +15,7 @@ build_props:
     mozharness_changeset: "{{ mozharness_changeset }}"
     build_number: {{ buildNumber }}
     partials: {% set pipe = joiner(",") %}{% for p, e in sorted(partial_updates.items()) %}{{ pipe() }}{{ "{}build{}".format(p, e["buildNumber"]) }}{% endfor %}
+    release_eta: {% if release_eta %}"{{ release_eta }}"{% else %}null{% endif %}
 
 signing:
    signature: {{ sign_task(stableSlugId(taskname), valid_for=4 * 24 * 3600) }}

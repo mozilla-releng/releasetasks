@@ -7,7 +7,8 @@ import yaml
 
 from releasetasks import make_task_graph as make_task_graph_orig
 from releasetasks.test import PUB_KEY, DUMMY_PUBLIC_KEY, verify
-from voluptuous import All, Any, Email, Extra, Length, Match, Optional, Range, Required, Schema, truth, Unique, Url
+from voluptuous import All, Any, Email, Extra, Length, Match, Optional, \
+    Range, Required, Schema, truth, Unique, Url, Datetime
 
 TASKCLUSTER_ID_REGEX = r'^[A-Za-z0-9_-]{8}[Q-T][A-Za-z0-9_-][CGKOSWaeimquy26-][A-Za-z0-9_-]{10}[AQgw]$'
 
@@ -68,6 +69,7 @@ COMMON_TASK_SCHEMA = Schema(All(task_signature_test, {  # Must pass task signatu
                             'version': str,
                             'revision': str,
                             'build_number': int,
+                            'release_eta': Any(None, Datetime(format='%Y-%m-%dT%H:%M:%S.%f')),
                             Extra: object,
                         },
                         'signing': {

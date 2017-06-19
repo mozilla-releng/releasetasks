@@ -14,6 +14,6 @@ build_props:
     revision: {{ revision }}
     mozharness_changeset: "{{ mozharness_changeset }}"
     build_number: {{ buildNumber }}
-
+    release_eta: {% if release_eta %}"{{ release_eta }}"{% else %}null{% endif %}
 signing:
    signature: {{ sign_task(stableSlugId(taskname), valid_for=4 * 24 * 3600) }}

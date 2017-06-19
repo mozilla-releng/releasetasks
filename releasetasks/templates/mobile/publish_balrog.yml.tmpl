@@ -1,3 +1,4 @@
+{% if not release_eta %}
 {% set buildername = "release-{}-{}_publish_balrog".format(branch, product) %}
 
 -
@@ -43,3 +44,50 @@
         extra:
             {{ common_extras(taskname=buildername, locales=["null"], platform="null") | indent(12)}}
             {{ task_notifications(taskname="{} {} publish balrog".format(product, branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12)}}
+{% else %}
+{% set buildername = "release-{}-{}_schedule_publishing_in_balrog".format(branch, product) %}
+-
+    taskId: "{{ stableSlugId(buildername) }}"
+    requires:
+        - "{{ stableSlugId('release-{}-{}_push_to_releases'.format(branch, product)) }}"
+    reruns: 5
+    task:
+        provisionerId: "buildbot-bridge"
+        workerType: "buildbot-bridge"
+        created: "{{ now }}"
+        deadline: "{{ now.replace(days=4) }}"
+        expires: "{{ never }}"
+        priority: "high"
+        retries: 5
+        scopes:
+            - project:releng:buildbot-bridge:builder-name:{{ buildername }}
+        routes:
+            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.schedule_publishing_in_balrog
+            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.schedule_publishing_in_balrog
+        payload:
+            buildername: "{{ buildername }}"
+            sourcestamp:
+                branch: "{{ repo_path }}"
+                revision: "{{ mozharness_changeset }}"
+            properties:
+                product: "{{ product }}"
+                version: "{{ version }}"
+                build_number: {{ buildNumber }}
+                repo_path: "{{ repo_path }}"
+                script_repo_revision: "{{ mozharness_changeset }}"
+                release_promotion: true
+                revision: "{{ revision }}"
+                balrog_api_root: {{ balrog_api_root }}
+                channels: {{ publish_to_balrog_channels | sort() | join(", ") }}
+                schedule_at: "{{ release_eta }}"
+
+        metadata:
+            name: "{{ product }} {{ branch }} schedule publishing in balrog"
+            description: "schedule publishing in balrog"
+            owner: "release@mozilla.com"
+            source: https://github.com/mozilla/releasetasks
+
+        extra:
+            {{ common_extras(taskname=buildername, locales=["null"], platform="null") | indent(12)}}
+            {{ task_notifications(taskname="{} {} schedule publishing in balrog".format(product, branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12)}}
+{% endif %}
