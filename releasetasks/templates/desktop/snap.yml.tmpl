@@ -43,6 +43,8 @@
                 VERSION: "{{ version }}"
                 BUILD_NUMBER: "{{ buildNumber }}"
                 CANDIDATES_DIR: "https://{{ beetmover_candidates_bucket }}.s3.amazonaws.com/pub/firefox/candidates"
+                LC_ALL: "C.UTF-8"
+                LANG: "C.UTF-8"
         metadata:
             owner: release@mozilla.com
             source: https://github.com/mozilla/releasetasks

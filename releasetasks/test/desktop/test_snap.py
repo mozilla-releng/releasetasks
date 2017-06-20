@@ -49,6 +49,8 @@ class TestSnapBuilder(unittest.TestCase):
                     'artifacts': dict,
                     'env': {
                         'VERSION': '42.0b2',
+                        'LANG': 'C.UTF-8',
+                        'LC_ALL': 'C.UTF-8',
                     },
                 }
             }
