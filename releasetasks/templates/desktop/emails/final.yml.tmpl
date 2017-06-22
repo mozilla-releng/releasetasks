@@ -1,4 +1,8 @@
+{% if not release_eta %}
 {% set publish_balrog_buildername = "release-{}-{}_publish_balrog".format(branch, product) %}
+{% else %}
+{% set publish_balrog_buildername = "release-{}-{}_schedule_publishing_in_balrog".format(branch, product) %}
+{% endif %}
 
 {% for channel in release_channels %}
 {{ email_release_drivers_task(product=product, version=version, channel=channel, requires=[publish_balrog_buildername]) }}
