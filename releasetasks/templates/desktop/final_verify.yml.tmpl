@@ -54,7 +54,7 @@
 
         extra:
             {{ common_extras(taskname=buildername, locales=["null"], platform="null") | indent(12)}}
-            {{ task_notifications(taskname="{} {} final verification".format(branch, channel), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
+            {{ task_notifications(taskname="[{} {} build{}] {} {} final verification".format(product, version, buildNumber, branch, channel), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
             treeherderEnv:
                 - production
                 - staging

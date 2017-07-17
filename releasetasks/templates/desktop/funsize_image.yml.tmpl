@@ -54,7 +54,7 @@
                     platform: linux64
                 build:
                     platform: linux64
-            {{ task_notifications("Generate funsize-update-generator docker image", completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"])|indent(12) }}
+            {{ task_notifications("[{} {} build{}] Generate funsize-update-generator docker image".format(product, version, buildNumber), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"])|indent(12) }}
 
 -
     taskId: "{{ stableSlugId("funsize_balrog_image") }}"

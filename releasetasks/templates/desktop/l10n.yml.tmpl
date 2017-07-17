@@ -80,7 +80,7 @@
 
         extra:
             {{ common_extras(taskname='{}_artifacts_{}'.format(buildername, chunk), locales=our_locales, platform=platform) | indent(12)}}
-            {{ task_notifications("{} {} {} l10n repack artifacts {}/{}".format(product, branch, platform, chunk, platform_info.chunks), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
+            {{ task_notifications("[{} {} build{}] {} {} {} l10n repack artifacts {}/{}".format(product, version, buildNumber, product, branch, platform, chunk, platform_info.chunks), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
 
 # repacks beetmover
 {% if push_to_candidates_enabled %}

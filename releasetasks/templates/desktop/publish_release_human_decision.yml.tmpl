@@ -23,4 +23,4 @@
 
         extra:
             {{ common_extras(taskname="publish_release_human_decision", locales=["null"], platform="null") | indent(12)}}
-            {{ task_notifications("{} {} publish release human decision task".format(product, branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
+            {{ task_notifications("[{} {} build{}] {} {} publish release human decision task".format(product, version, buildNumber, product, branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}

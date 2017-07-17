@@ -60,7 +60,7 @@
 
         extra:
             {{ common_extras(taskname=task_name, locales=["null"], platform=platform) | indent(12)}}
-            {{ task_notifications("{} {} update verification {}/{}".format(platform, channel, chunk, uv_totalchunks), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
+            {{ task_notifications("[{} {} build{}] {} {} update verification {}/{}".format(product, version, buildNumber, platform, channel, chunk, uv_totalchunks), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
 
 {% endfor %}
 {% endfor %}

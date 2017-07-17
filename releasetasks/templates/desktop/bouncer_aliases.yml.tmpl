@@ -40,5 +40,5 @@
             source: https://github.com/mozilla/releasetasks
 
         extra:
-            {{ task_notifications("{} {} bouncer aliases".format(product, branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
+            {{ task_notifications("[{} {} build{}] {} {} bouncer aliases".format(product, version, buildNumber, product, branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
             {{ common_extras(taskname=buildername, locales=["null"], platform="null") | indent(12)}}

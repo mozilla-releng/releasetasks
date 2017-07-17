@@ -64,7 +64,7 @@
                     platform: {{ get_treeherder_platform(platform) }}
                 build:
                     platform: {{ get_treeherder_platform(platform) }}
-            {{ task_notifications(taskname="[beetmover] {} {} {} en_US completes candidates".format(product, branch, platform), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
+            {{ task_notifications(taskname="[{} {} build{}] [beetmover] {} {} {} en_US completes candidates".format(product, version, buildNumber, product, branch, platform), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
 
 
 {% endif %}  # push_to_candidates_enabled

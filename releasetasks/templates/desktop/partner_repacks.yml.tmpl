@@ -42,7 +42,7 @@
 
         extra:
             {{ common_extras(taskname=buildername, locales=["null"], platform="null") | indent(12)}}
-            {{ task_notifications("{} {} {} partner repacks".format(product, branch, platform), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
+            {{ task_notifications("[{} {} build{}] {} {} {} partner repacks".format(product, version, buildNumber, product, branch, platform), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
 {% endfor %}
 
 {% for platform in eme_free_repacks_platforms %}

@@ -191,7 +191,7 @@
                     platform: android-4-0-armv7-api15
                 build:
                     platform: android-4-0-armv7-api15
-            {{ task_notifications("[beetmover] {} {} move source bundles".format(product, branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
+            {{ task_notifications("[{} {} build{}] [beetmover] {} {} move source bundles".format(product, version, buildNumber, product, branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
 
 -
     taskId: "{{ stableSlugId(buildername_beet_signing) }}"

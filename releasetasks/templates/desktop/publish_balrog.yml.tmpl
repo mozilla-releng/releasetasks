@@ -42,7 +42,7 @@
 
         extra:
             {{ common_extras(taskname=buildername, locales=["null"], platform="null") | indent(12)}}
-            {{ task_notifications(taskname="{} {} publish balrog".format(product, branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12)}}
+            {{ task_notifications(taskname="[{} {} build{}] {} {} publish balrog".format(product, version, buildNumber, product, branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12)}}
 {% else %}
 {% set buildername = "release-{}-{}_schedule_publishing_in_balrog".format(branch, product) %}
 -
