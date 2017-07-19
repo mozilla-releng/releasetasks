@@ -6,6 +6,34 @@ from releasetasks.test import generate_scope_validator, PVT_KEY_FILE, verify
 from releasetasks.test.desktop import create_firefox_test_args
 from voluptuous import Match, Schema, truth
 
+EN_US_CONFIG = {
+    "platforms": {
+        "linux": {
+            "unsigned_task_id": "xyz", "signed_task_id": "xyx",
+            "ci_system": "tc"
+        },
+        "linux64": {
+            "unsigned_task_id": "xyz", "signed_task_id": "xyx",
+            "ci_system": "tc"
+        },
+        "macosx64": {
+            "unsigned_task_id": "xyz", "signed_task_id": "xyx",
+            "repackage_task_id": "xyx",
+            "repackage-signing_task_id": "xyx", "ci_system": "tc"
+        },
+        "win32": {
+            "unsigned_task_id": "xyz", "signed_task_id": "xyx",
+            "repackage_task_id": "xyx",
+            "repackage-signing_task_id": "xyx", "ci_system": "tc"
+        },
+        "win64": {
+            "unsigned_task_id": "xyz", "signed_task_id": "xyx",
+            "repackage_task_id": "xyx",
+            "repackage-signing_task_id": "xyx", "ci_system": "tc"
+        },
+    }
+}
+
 
 class TestFinalVerification(unittest.TestCase):
     maxDiff = 30000
@@ -42,15 +70,7 @@ class TestFinalVerification(unittest.TestCase):
             'accepted_mar_channel_id': 'firefox-mozilla-beta',
             'signing_cert': 'dep',
             'moz_disable_mar_cert_verification': True,
-            'en_US_config': {
-                "platforms": {
-                    "macosx64": {},
-                    "win32": {},
-                    "win64": {},
-                    "linux": {},
-                    "linux64": {},
-                },
-            },
+            'en_US_config': EN_US_CONFIG,
         })
         self.graph = make_task_graph(**test_args)
         self.task = get_task_by_name(self.graph, "foo_final_verify")
@@ -111,15 +131,7 @@ class TestFinalVerificationMultiChannel(unittest.TestCase):
             'accepted_mar_channel_id': 'firefox-mozilla-beta',
             'signing_cert': 'dep',
             'moz_disable_mar_cert_verification': True,
-            'en_US_config': {
-                "platforms": {
-                    "macosx64": {},
-                    "win32": {},
-                    "win64": {},
-                    "linux": {},
-                    "linux64": {},
-                }
-            },
+            'en_US_config': EN_US_CONFIG,
         })
 
         self.graph = make_task_graph(**test_kwargs)
@@ -165,19 +177,32 @@ class TestFinalVerifyNoMirrors(unittest.TestCase):
             'accepted_mar_channel_id': 'firefox-mozilla-beta',
             'signing_cert': 'dep',
             'moz_disable_mar_cert_verification': True,
-            'enUS_platforms': ["win32", "macosx64"],
-            'final_verify_platforms': ["macosx64", "win32"],
+            'enUS_platforms': ["win32", "macosx64", "linux", "linux64", "win64"],
+            'final_verify_platforms': ["win32", "macosx64", "linux", "linux64", "win64"],
             'release_channels': ['beta'],
             'final_verify_channels': ['beta'],
-            'en_US_config': {
-                "platforms": {
-                    "macosx64": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
-                    "win32": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
-                }
-            },
+            'en_US_config': EN_US_CONFIG,
             'l10n_config': {
                 "platforms": {
                     "win32": {
+                        "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.exe",
+                        "mar_tools_url": "https://queue.taskcluster.net/something/",
+                        "locales": ["de", "en-GB", "zh-TW"],
+                        "chunks": 1,
+                    },
+                    "win64": {
+                        "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.exe",
+                        "mar_tools_url": "https://queue.taskcluster.net/something/",
+                        "locales": ["de", "en-GB", "zh-TW"],
+                        "chunks": 1,
+                    },
+                    "linux": {
+                        "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.exe",
+                        "mar_tools_url": "https://queue.taskcluster.net/something/",
+                        "locales": ["de", "en-GB", "zh-TW"],
+                        "chunks": 1,
+                    },
+                    "linux64": {
                         "en_us_binary_url": "https://queue.taskcluster.net/something/firefox.exe",
                         "mar_tools_url": "https://queue.taskcluster.net/something/",
                         "locales": ["de", "en-GB", "zh-TW"],
@@ -211,13 +236,13 @@ class TestFinalVerifyNoMirrors(unittest.TestCase):
         for completes in (en_US_tmpl, l10n_tmpl):
             requires.extend([
                                 get_task_by_name(self.graph, completes.format(p))["taskId"]
-                                for p in ("macosx64", "win32")
+                                for p in ("macosx64", "win32", "linux", "linux64", "win64")
                                 ])
         for partials in (en_US_partials_tmpl, l10n_partials_tmpl):
             requires.extend([
                                 get_task_by_name(self.graph, partials.format(platform, p_version, p_build_num))[
                                     "taskId"]
-                                for platform in ("macosx64", "win32")
+                                for platform in ("macosx64", "win32", "linux", "linux64", "win64")
                                 for p_version, p_build_num in (('38.0', '1'), ('37.0', '2'))
                                 ])
 

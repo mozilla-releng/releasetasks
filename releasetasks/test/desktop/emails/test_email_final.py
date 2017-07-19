@@ -47,11 +47,11 @@ class TestEmailFinal(unittest.TestCase):
             'moz_disable_mar_cert_verification': True,
             'en_US_config': {
                 "platforms": {
-                    "macosx64": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
-                    "win32": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
-                    "win64": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
+                    "macosx64": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc', "ci_system": "tc"},
+                    "win32": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc', "ci_system": "tc"},
+                    "win64": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc', "ci_system": "tc"},
                     "linux": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
-                    "linux64": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
+                    "linux64": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc', "ci_system": "tc"},
                 }
             },
         })

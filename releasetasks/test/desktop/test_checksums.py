@@ -42,9 +42,20 @@ class TestChecksums(unittest.TestCase):
             'final_verify_channels': ['foo'],
             'en_US_config': {
                 "platforms": {
-                    "macosx64": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
-                    "win64": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
-                    "linux64": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
+                    "macosx64": {
+                        "unsigned_task_id": "xyz", "signed_task_id": "xyx",
+                        "repackage_task_id": "xyx",
+                        "repackage-signing_task_id": "xyx", "ci_system": "tc"
+                    },
+                    "win64": {
+                        "unsigned_task_id": "xyz", "signed_task_id": "xyx",
+                        "repackage_task_id": "xyx",
+                        "repackage-signing_task_id": "xyx", "ci_system": "tc"
+                    },
+                    "linux64": {
+                        "unsigned_task_id": "xyz", "signed_task_id": "xyx",
+                        "ci_system": "tc"
+                    },
                 }
             },
         })

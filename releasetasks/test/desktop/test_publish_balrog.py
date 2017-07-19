@@ -35,11 +35,29 @@ class TestPublishBalrog(unittest.TestCase):
             'publish_to_balrog_channels': ["release-dev", "alpha"],
             'en_US_config': {
                 "platforms": {
-                    "macosx64": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
-                    "win32": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
-                    "win64": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
-                    "linux": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
-                    "linux64": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
+                    "macosx64": {
+                        "unsigned_task_id": "xyz", "signed_task_id": "xyx",
+                        "repackage_task_id": "xyx",
+                        "repackage-signing_task_id": "xyx", "ci_system": "tc"
+                    },
+                    "win32": {
+                        "unsigned_task_id": "xyz", "signed_task_id": "xyx",
+                        "repackage_task_id": "xyx",
+                        "repackage-signing_task_id": "xyx", "ci_system": "tc"
+                    },
+                    "win64": {
+                        "unsigned_task_id": "xyz", "signed_task_id": "xyx",
+                        "repackage_task_id": "xyx",
+                        "repackage-signing_task_id": "xyx", "ci_system": "tc"
+                    },
+                    "linux": {
+                        "unsigned_task_id": "xyz", "signed_task_id": "xyx",
+                        "ci_system": "tc"
+                    },
+                    "linux64": {
+                        "unsigned_task_id": "xyz", "signed_task_id": "xyx",
+                        "ci_system": "tc"
+                    },
                 }
             },
         })
@@ -94,11 +112,29 @@ class TestSchedulePublishBalrog(unittest.TestCase):
             'publish_to_balrog_channels': ["release-dev", "alpha"],
             'en_US_config': {
                 "platforms": {
-                    "macosx64": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
-                    "win32": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
-                    "win64": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
-                    "linux": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
-                    "linux64": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
+                    "macosx64": {
+                        "unsigned_task_id": "xyz", "signed_task_id": "xyx",
+                        "repackage_task_id": "xyx",
+                        "repackage-signing_task_id": "xyx", "ci_system": "tc"
+                    },
+                    "win32": {
+                        "unsigned_task_id": "xyz", "signed_task_id": "xyx",
+                        "repackage_task_id": "xyx",
+                        "repackage-signing_task_id": "xyx", "ci_system": "tc"
+                    },
+                    "win64": {
+                        "unsigned_task_id": "xyz", "signed_task_id": "xyx",
+                        "repackage_task_id": "xyx",
+                        "repackage-signing_task_id": "xyx", "ci_system": "tc"
+                    },
+                    "linux": {
+                        "unsigned_task_id": "xyz", "signed_task_id": "xyx",
+                        "ci_system": "tc"
+                    },
+                    "linux64": {
+                        "unsigned_task_id": "xyz", "signed_task_id": "xyx",
+                        "ci_system": "tc"
+                    },
                 }
             },
             'release_eta': '2017-06-16T13:49:31.719007',

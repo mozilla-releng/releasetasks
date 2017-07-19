@@ -5,6 +5,34 @@ from releasetasks.test.desktop import make_task_graph, do_common_assertions, \
 from releasetasks.test import generate_scope_validator, PVT_KEY_FILE, verify
 from voluptuous import Schema, truth
 
+EN_US_CONFIG = {
+    "platforms": {
+        "linux": {
+            "unsigned_task_id": "xyz", "signed_task_id": "xyx",
+            "ci_system": "tc"
+        },
+        "linux64": {
+            "unsigned_task_id": "xyz", "signed_task_id": "xyx",
+            "ci_system": "tc"
+        },
+        "macosx64": {
+            "unsigned_task_id": "xyz", "signed_task_id": "xyx",
+            "repackage_task_id": "xyx",
+            "repackage-signing_task_id": "xyx", "ci_system": "tc"
+        },
+        "win32": {
+            "unsigned_task_id": "xyz", "signed_task_id": "xyx",
+            "repackage_task_id": "xyx",
+            "repackage-signing_task_id": "xyx", "ci_system": "tc"
+        },
+        "win64": {
+            "unsigned_task_id": "xyz", "signed_task_id": "xyx",
+            "repackage_task_id": "xyx",
+            "repackage-signing_task_id": "xyx", "ci_system": "tc"
+        },
+    }
+}
+
 
 class TestUpdates(unittest.TestCase):
     maxDiff = 30000
@@ -48,15 +76,7 @@ class TestUpdates(unittest.TestCase):
             'accepted_mar_channel_id': 'firefox-mozilla-beta',
             'signing_cert': 'dep',
             'moz_disable_mar_cert_verification': True,
-            'en_US_config': {
-                'platforms': {
-                    'macosx64': {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
-                    'win32': {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
-                    'win64': {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
-                    'linux': {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
-                    'linux64': {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
-                }
-            }
+            'en_US_config': EN_US_CONFIG,
         })
         self.graph = make_task_graph(**test_kwargs)
         self.task = get_task_by_name(self.graph, "release-foo-firefox_updates")

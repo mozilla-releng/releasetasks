@@ -54,7 +54,11 @@ class TestL10NSingleChunk(unittest.TestCase):
 
             'en_US_config': {
                 "platforms": {
-                    "win32": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'}
+                    "win32": {
+                        "unsigned_task_id": "xyz", "signed_task_id": "xyx",
+                        "repackage_task_id": "xyx",
+                        "repackage-signing_task_id": "xyx", "ci_system": "tc"
+                    },
                 }
             },
             'l10n_config': {
@@ -202,7 +206,11 @@ class TestL10NMultipleChunks(unittest.TestCase):
             'en_US_platforms': ['win32'],
             'en_US_config': {
                 "platforms": {
-                    "win32": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'}
+                    "win32": {
+                        "unsigned_task_id": "xyz", "signed_task_id": "xyx",
+                        "repackage_task_id": "xyx",
+                        "repackage-signing_task_id": "xyx", "ci_system": "tc"
+                    },
                 }
             },
             'l10n_config': {
@@ -326,7 +334,11 @@ class TestL10NNewLocales(unittest.TestCase):
             'enUS_platforms': ['win32'],
             'en_US_config': {
                 "platforms": {
-                    "win32": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'}
+                    "win32": {
+                        "unsigned_task_id": "xyz", "signed_task_id": "xyx",
+                        "repackage_task_id": "xyx",
+                        "repackage-signing_task_id": "xyx", "ci_system": "tc"
+                    },
                 }
             },
             'l10n_config': {

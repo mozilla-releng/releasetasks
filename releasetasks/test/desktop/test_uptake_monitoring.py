@@ -5,6 +5,21 @@ from releasetasks.test.desktop import make_task_graph, do_common_assertions, \
 from releasetasks.test import PVT_KEY_FILE, verify
 from voluptuous import Schema, truth
 
+EN_US_CONFIG = {
+    "platforms": {
+        "macosx64": {
+            "unsigned_task_id": "xyz", "signed_task_id": "xyx",
+            "repackage_task_id": "xyx",
+            "repackage-signing_task_id": "xyx", "ci_system": "tc"
+        },
+        "win32": {
+            "unsigned_task_id": "xyz", "signed_task_id": "xyx",
+            "repackage_task_id": "xyx",
+            "repackage-signing_task_id": "xyx", "ci_system": "tc"
+        },
+    }
+}
+
 
 class TestUptakeMonitoring(unittest.TestCase):
     maxDiff = 30000
@@ -40,15 +55,7 @@ class TestUptakeMonitoring(unittest.TestCase):
             'uptake_monitoring_platforms': ["macosx64", "win32", "win64", "linux", "linux64"],
             'release_channels': ['foo'],
             'final_verify_channels': ['foo'],
-            'en_US_config': {
-                "platforms": {
-                    "macosx64": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
-                    "win32": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
-                    "win64": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
-                    "linux": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
-                    "linux64": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
-                }
-            },
+            'en_US_config': EN_US_CONFIG,
         })
         self.graph = make_task_graph(**test_kwargs)
         self.task = get_task_by_name(self.graph, "release-foo-firefox_uptake_monitoring")
@@ -88,15 +95,7 @@ class TestUptakeMonitoringSHA1(unittest.TestCase):
             'sha1_repacks_platforms': ['win32'],
             'release_channels': ['foo'],
             'final_verify_channels': ['foo'],
-            'en_US_config': {
-                "platforms": {
-                    "macosx64": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
-                    "win32": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
-                    "win64": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
-                    "linux": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
-                    "linux64": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
-                }
-            },
+            'en_US_config': EN_US_CONFIG,
             'l10n_config': {
                 "platforms": {
                     "win32": {

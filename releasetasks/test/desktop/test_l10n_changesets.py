@@ -36,8 +36,15 @@ class TestL10NChangesets(unittest.TestCase):
             'l10n_changesets': {"ab": "cd", "ef": "gh", "ij": "kl"},
             'en_US_config': {
                 "platforms": {
-                    "linux": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
-                    "win32": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
+                    "linux": {
+                        "unsigned_task_id": "xyz", "signed_task_id": "xyx",
+                        "ci_system": "tc"
+                    },
+                    "win32": {
+                        "unsigned_task_id": "xyz", "signed_task_id": "xyx",
+                        "repackage_task_id": "xyx",
+                        "repackage-signing_task_id": "xyx", "ci_system": "tc"
+                    },
                 },
             },
             'l10n_config': {

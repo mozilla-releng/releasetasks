@@ -59,8 +59,16 @@ class TestEncryption(unittest.TestCase):
             'moz_disable_mar_cert_verification': True,
             'en_US_config': {
                 "platforms": {
-                    "macosx64": {"unsigned_task_id": "xyz", "signed_task_id": "xyz"},
-                    "win32": {"unsigned_task_id": "xyz", "signed_task_id": "xyz"},
+                    "macosx64": {
+                        "unsigned_task_id": "xyz", "signed_task_id": "xyx",
+                        "repackage_task_id": "xyx",
+                        "repackage-signing_task_id": "xyx", "ci_system": "tc"
+                    },
+                    "win32": {
+                        "unsigned_task_id": "xyz", "signed_task_id": "xyx",
+                        "repackage_task_id": "xyx",
+                        "repackage-signing_task_id": "xyx", "ci_system": "tc"
+                    },
                 }
             },
         })
@@ -92,8 +100,15 @@ class TestGraphScopes(unittest.TestCase):
             'signing_pvt_key': PVT_KEY_FILE,
             'en_US_config': {
                 "platforms": {
-                    "linux": {"unsigned_task_id": "xyz", "signed_task_id": "xyx"},
-                    "win32": {"unsigned_task_id": "xyz", "signed_task_id": "xyz"},
+                    "linux": {
+                        "unsigned_task_id": "xyz", "signed_task_id": "xyx",
+                        "ci_system": "tc"
+                    },
+                    "win32": {
+                        "unsigned_task_id": "xyz", "signed_task_id": "xyx",
+                        "repackage_task_id": "xyx",
+                        "repackage-signing_task_id": "xyx", "ci_system": "tc"
+                    },
                 }
             },
         })

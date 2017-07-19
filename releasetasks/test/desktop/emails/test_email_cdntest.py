@@ -51,11 +51,11 @@ class TestEmailFinal(unittest.TestCase):
             'final_verify_channels': ['foo'],
             'en_US_config': {
                 "platforms": {
-                    "macosx64": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
-                    "win32": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
-                    "win64": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
-                    "linux": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
-                    "linux64": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
+                    "macosx64": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc', "ci_system": "tc"},
+                    "win32": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc', "ci_system": "tc"},
+                    "win64": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc', "ci_system": "tc"},
+                    "linux": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc', "ci_system": "tc"},
+                    "linux64": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc', "ci_system": "tc"},
                 }
             },
             'l10n_config': {

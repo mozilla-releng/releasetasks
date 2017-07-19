@@ -3,6 +3,26 @@ from releasetasks.test import PVT_KEY_FILE, verify
 from releasetasks.test.desktop import make_task_graph, create_firefox_test_args
 from voluptuous import Any, Schema
 
+EN_US_CONFIG = {
+    "platforms": {
+        "macosx64": {
+            "unsigned_task_id": "xyz", "signed_task_id": "xyx",
+            "repackage_task_id": "xyx",
+            "repackage-signing_task_id": "xyx", "ci_system": "tc"
+        },
+        "win32": {
+            "unsigned_task_id": "xyz", "signed_task_id": "xyx",
+            "repackage_task_id": "xyx",
+            "repackage-signing_task_id": "xyx", "ci_system": "tc"
+        },
+        "win64": {
+            "unsigned_task_id": "xyz", "signed_task_id": "xyx",
+            "repackage_task_id": "xyx",
+            "repackage-signing_task_id": "xyx", "ci_system": "tc"
+        },
+    }
+}
+
 
 class TestFirefoxTaskNotifications(unittest.TestCase):
 
@@ -44,15 +64,7 @@ class TestFirefoxTaskNotifications(unittest.TestCase):
             'accepted_mar_channel_id': 'firefox-mozilla-beta',
             'signing_cert': 'dep',
             'moz_disable_mar_cert_verification': True,
-            'en_US_config': {
-                "platforms": {
-                    "macosx64": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
-                    "win32": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
-                    "win64": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
-                    "linux": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
-                    "linux64": {'signed_task_id': 'abc', 'unsigned_task_id': 'abc'},
-                }
-            },
+            'en_US_config': EN_US_CONFIG,
         })
         self.graph = make_task_graph(**test_kwargs)
 

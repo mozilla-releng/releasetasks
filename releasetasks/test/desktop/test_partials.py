@@ -34,8 +34,16 @@ class TestEnUSPartials(unittest.TestCase):
             'moz_disable_mar_cert_verification': True,
             'en_US_config': {
                 "platforms": {
-                    "macosx64": {"unsigned_task_id": "xyz", "signed_task_id": "xyz"},
-                    "win32": {"unsigned_task_id": "xyy", "signed_task_id": "xyy"},
+                    "macosx64": {
+                        "unsigned_task_id": "xyz", "signed_task_id": "xyx",
+                        "repackage_task_id": "xyx",
+                        "repackage-signing_task_id": "xyy", "ci_system": "bb"
+                    },
+                    "win32": {
+                        "unsigned_task_id": "xyz", "signed_task_id": "xyx",
+                        "repackage_task_id": "xyx",
+                        "repackage-signing_task_id": "xyx", "ci_system": "tc"
+                    },
                 }
             },
         })
@@ -105,7 +113,7 @@ class TestEnUSPartials(unittest.TestCase):
                                     'partials': [
                                         {
                                             'from_mar': "http://download.mozilla.org/?product=firefox-%s-complete&os=win&lang=en-US" % appV,
-                                            'to_mar': "https://queue.taskcluster.net/v1/task/xyy/artifacts/public/build/firefox-42.0.en-US.win32.complete.mar",
+                                            'to_mar': "https://queue.taskcluster.net/v1/task/xyx/artifacts/public/build/target.complete.mar",
                                         }
                                     ]
                                 }
@@ -121,7 +129,7 @@ class TestEnUSPartials(unittest.TestCase):
                                     'partials': [
                                         {
                                             'from_mar': "http://download.mozilla.org/?product=firefox-%s-complete&os=osx&lang=en-US" % appV,
-                                            'to_mar': "https://queue.taskcluster.net/v1/task/xyz/artifacts/public/build/firefox-42.0.en-US.mac.complete.mar",
+                                            'to_mar': "https://queue.taskcluster.net/v1/task/xyx/artifacts/public/build/firefox-42.0.en-US.mac.complete.mar",
                                         }
                                     ]
                                 }

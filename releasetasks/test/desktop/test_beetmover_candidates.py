@@ -9,8 +9,16 @@ from voluptuous import Schema, truth
 
 EN_US_CONFIG = {
     "platforms": {
-        "macosx64": {"unsigned_task_id": "xyz", "signed_task_id": "xyx"},
-        "win32": {"unsigned_task_id": "xyz", "signed_task_id": "xyx"},
+        "macosx64": {
+            "unsigned_task_id": "xyz", "signed_task_id": "xyx",
+            "repackage_task_id": "xyx",
+            "repackage-signing_task_id": "xyx", "ci_system": "tc"
+        },
+        "win32": {
+            "unsigned_task_id": "xyz", "signed_task_id": "xyx",
+            "repackage_task_id": "xyx",
+            "repackage-signing_task_id": "xyx", "ci_system": "tc"
+        },
     }
 }
 
