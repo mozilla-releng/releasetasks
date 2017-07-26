@@ -50,7 +50,7 @@ class TestFinalVerification(unittest.TestCase):
                 'payload': {
                     'command': [str],
                     'env': dict,
-                    'image': Match(r'^rail/python-test-runner'),
+                    'image': Match(r'^mozillareleases/python-test-runner'),
                 }
             }
         }, extra=True, required=True)
@@ -115,7 +115,7 @@ class TestFinalVerificationMultiChannel(unittest.TestCase):
                 'provisionerId': 'aws-provisioner-v1',
                 'workerType': 'b2gtest',
                 'payload': {
-                    'image': Match(r'^rail/python-test-runner'),
+                    'image': Match(r'^mozillareleases/python-test-runner'),
                     'command': [str],
                     'env': dict,
                 }

@@ -64,7 +64,7 @@ class TestSourceBuilder(unittest.TestCase):
                     'artifacts': dict,
                     'command': list,
                     'cache': dict,
-                    'image': Match(r'^rail/source-builder@sha256'),
+                    'image': Match(r'^mozillareleases/source-builder@sha256'),
                     'env': {
                         'MOZ_PKG_VERSION': '42.0b2',
                     }

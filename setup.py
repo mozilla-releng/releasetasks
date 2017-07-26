@@ -34,9 +34,9 @@ setup(
     description="""Mozilla Release Promotion Tasks contains code to generate
     release-related Taskcluster graphs.""",
     long_description=readme,
-    author="Rail Aliiev",
-    author_email='rail@mozilla.com',
-    url='https://github.com/rail/releasetasks',
+    author="Mozilla Release Engineering",
+    author_email='release@mozilla.com',
+    url='https://github.com/mozilla-releng/releasetasks',
     packages=[
         'releasetasks',
     ],
