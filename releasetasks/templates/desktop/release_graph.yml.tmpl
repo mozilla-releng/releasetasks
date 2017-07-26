@@ -126,6 +126,13 @@ tasks:
           {% include "checksums.yml.tmpl" %}
       {% endmacro %}
       {{ checksums_tasks()|indent(4) }}
+
+      {% if binary_transparency_enabled is defined and binary_transparency_enabled %}
+        {% macro binary_transparency_tasks() %}
+            {% include "binary_transparency.yml.tmpl" %}
+        {% endmacro %}
+        {{ binary_transparency_tasks()|indent(4) }}
+      {% endif %}
     {% endif %}
 
     {% if updates_builder_enabled is defined and updates_builder_enabled %}

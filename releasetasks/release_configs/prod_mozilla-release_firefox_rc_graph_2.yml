@@ -27,6 +27,7 @@ root_home_dir: "desktop"
 # funsize
 updates_enabled: false
 checksums_enabled: false
+binary_transparency_enabled: false
 push_to_candidates_enabled: false
 update_verify_enabled: false
 push_to_releases_enabled: true

@@ -1,0 +1,38 @@
+{% set buildername = "release-{}-{}_binary_transparency".format(branch, product) %}
+-
+    taskId: "{{ stableSlugId(buildername) }}"
+    requires:
+        - "{{ stableSlugId('release-{}-{}_chcksms'.format(branch, product)) }}"
+    reruns: 5
+    task:
+        provisionerId: "scriptworker-prov-v1"
+        workerType: "dummy-worker-transpar"
+        created: "{{ now }}"
+        deadline: "{{ now.replace(days=4) }}"
+        expires: "{{ never }}"
+        priority: "high"
+        retries: 5
+
+        # Add scopes when using in production
+
+        routes:
+            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.binary_transparency
+            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.binary_transparency
+
+        payload:
+            version: "{{ version }}"
+            chain: "TRANSPARENCY.pem"
+            contact: "btang@mozilla.com"
+            maxRunTime: 600
+            stage-product: "{{ product }}"
+            summary: "https://archive.mozilla.org/pub/{{ product }}/candidates/{{ version }}-candidates/build{{ buildNumber }}/SHA256SUMMARY"
+
+        metadata:
+            name: "Binary transparency job"
+            description: "Binary transparency to issue a certificate"
+            owner: "release@mozilla.com"
+            source: https://github.com/mozilla/releasetasks
+
+        extra:
+            {{ task_notifications("[{} {} build{}] {} {} binary transparency".format(product, version, buildNumber, product, branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
+            {{ common_extras(taskname=buildername, locales=["null"], platform="null") | indent(12)}}
