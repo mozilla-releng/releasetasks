@@ -238,6 +238,8 @@
                 MOZ_DISABLE_MAR_CERT_VERIFICATION: {{ moz_disable_mar_cert_verification }}
                 {% endif %}
                 SIGNING_CERT: {{ signing_cert }}
+                SHA1_SIGNING_CERT: {{ signing_cert }}_sha1
+                SHA384_SIGNING_CERT: {{ signing_cert }}_sha384
                 {% if accepted_mar_channel_id is defined and accepted_mar_channel_id %}
                 # explicitly set MAR channel name, ACCEPTED_MAR_CHANNEL_IDS is the corresponding variable in funsize.py
                 ACCEPTED_MAR_CHANNEL_IDS: {{ accepted_mar_channel_id }}
