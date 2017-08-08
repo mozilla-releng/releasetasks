@@ -1,7 +1,7 @@
 {#
 Emails release-drivers via Pulse-Notify service
 The macro call should look like
-    email_release_drivers_task(product, version, channel, requires, update_channel=None)
+    email_release_drivers_task(product, version, channel, requires, update_channel=None, release_eta=None)
 As defined at the top of release_graph.yml.tmpl
 #}
 
@@ -9,6 +9,9 @@ As defined at the top of release_graph.yml.tmpl
 
     {% set full_channel_name = "{}-{}".format(channel, update_channel) if update_channel else channel %}
     {% set buildername = "release-{}-{}_email_{}".format(branch, product, full_channel_name) %}
+    {% set message = (release_eta is defined and release_eta)
+           and "{} {} {} updates will be scheduled for {} channel on {} <EOM>".format(product, channel, version, full_channel_name, release_eta)
+            or "{} {} {} updates are available on the {} channel now <EOM>".format(product, channel, version, full_channel_name) %}
 
 -
     taskId: "{{ stableSlugId(buildername) }}"
@@ -44,8 +47,8 @@ As defined at the top of release_graph.yml.tmpl
             {{ common_extras(taskname=buildername, locales=["null"], platform="null") | indent(12)}}
             notifications:
                 task-completed:
-                    subject: "{{ product }} {{ channel }} {{ version }} updates are available on the {{ full_channel_name }} channel now <EOM>"
-                    message: "{{ product }} {{ channel }} {{ version }} updates are available on the {{ full_channel_name }} channel now <EOM>"
+                    subject: "{{ message }}"
+                    message: "{{ message }}"
                     ids:
                         - release-drivers
 {% endif %}

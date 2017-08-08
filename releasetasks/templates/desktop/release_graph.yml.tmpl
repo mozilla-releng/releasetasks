@@ -13,7 +13,7 @@
 {% include "notifications.yml.tmpl" %}
 {% endmacro %}
 
-{% macro email_release_drivers_task(product, version, channel, requires, update_channel=None) %}
+{% macro email_release_drivers_task(product, version, channel, requires, update_channel=None, release_eta=None) %}
 {% include "email_release_drivers_task.yml.tmpl" %}
 {% endmacro %}
 

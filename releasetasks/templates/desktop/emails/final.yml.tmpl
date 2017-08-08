@@ -5,5 +5,8 @@
 {% endif %}
 
 {% for channel in release_channels %}
-{{ email_release_drivers_task(product=product, version=version, channel=channel, requires=[publish_balrog_buildername]) }}
+# Bug 1386319 - we get "available" on the release channel for RC shipping to beta. We need to fix that urgently in order to stop scaring people off.
+{% if release_channels|length != 2 or channel != 'release' %}
+{{ email_release_drivers_task(product=product, version=version, channel=channel, requires=[publish_balrog_buildername], release_eta=release_eta) }}
+{% endif %}
 {% endfor %}
