@@ -23,6 +23,7 @@
             - queue:create-task:aws-provisioner-v1/gecko-3-b-linux
             - queue:define-task:aws-provisioner-v1/build-c4-2xlarge
             - queue:create-task:aws-provisioner-v1/build-c4-2xlarge
+            - secrets:get:project/releng/snapcraft/firefox/edge
 
         payload:
             maxRunTime: 7200
@@ -45,6 +46,8 @@
                 CANDIDATES_DIR: "https://{{ beetmover_candidates_bucket }}.s3.amazonaws.com/pub/firefox/candidates"
                 LC_ALL: "C.UTF-8"
                 LANG: "C.UTF-8"
+            features:
+              taskclusterProxy: true
         metadata:
             owner: release@mozilla.com
             source: https://github.com/mozilla/releasetasks
