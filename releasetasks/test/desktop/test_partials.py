@@ -16,7 +16,7 @@ class TestEnUSPartials(unittest.TestCase):
                 "docker-worker:*",
                 "scheduler:*",
                 "project:releng:signing:format:gpg",
-                "project:releng:signing:format:mar",
+                "project:releng:signing:format:mar_sha384",
                 "project:releng:signing:cert:release-signing",
                 "docker-worker:feature:balrogVPNProxy"
             })
@@ -46,6 +46,7 @@ class TestEnUSPartials(unittest.TestCase):
                     },
                 }
             },
+            'mar_signing_format': 'mar_sha384',
         })
         self.graph = make_task_graph(**test_kwargs)
         self.generator_image = get_task_by_name(self.graph, "funsize_update_generator_image")
@@ -89,7 +90,7 @@ class TestEnUSPartials(unittest.TestCase):
                         },
                         'scopes': [
                             "project:releng:signing:cert:release-signing",
-                            "project:releng:signing:format:mar",
+                            "project:releng:signing:format:mar_sha384",
                             "project:releng:signing:format:gpg",
                         ],
                     },

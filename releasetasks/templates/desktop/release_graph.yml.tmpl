@@ -44,7 +44,7 @@ scopes:
   - queue:*
   - docker-worker:*
   - scheduler:*
-  - project:releng:signing:format:mar
+  - project:releng:signing:format:{{ mar_signing_format }}
 {# dep signing uses Balrog dev environment, which is publicly available and
    this doesn't need to use the proxy
 #}

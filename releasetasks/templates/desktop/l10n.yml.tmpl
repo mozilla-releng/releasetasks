@@ -296,7 +296,7 @@
         scopes:
             - project:releng:signing:cert:{{ signing_class }}
             - project:releng:signing:format:gpg
-            - project:releng:signing:format:mar
+            - project:releng:signing:format:{{ mar_signing_format }}
         tags:
             createdForUser: release+funsize@mozilla.com
 
