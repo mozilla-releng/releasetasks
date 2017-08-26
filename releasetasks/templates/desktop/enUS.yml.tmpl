@@ -119,10 +119,10 @@
                         {% if platform_info["ci_system"] == "bb" %}
                         to_mar: "https://queue.taskcluster.net/v1/task/{{ platform_info["signed_task_id"] }}/artifacts/public/build/{{ funsize_product }}-{{ appVersion }}.{{ locale }}.{{ buildbot2ftp(platform) }}.complete.mar"
                         {% else %}
-                        {% if platform.startswith("linux") %}
-                        to_mar: "https://queue.taskcluster.net/v1/task/{{ platform_info["signed_task_id"] }}/artifacts/public/build/update/target.complete.mar"
-                        {% else %}
+                        {% if "repackage-signing_task_id" in platform_info %}
                         to_mar: "https://queue.taskcluster.net/v1/task/{{ platform_info["repackage-signing_task_id"] }}/artifacts/public/build/target.complete.mar"
+                        {% else %}
+                        to_mar: "https://queue.taskcluster.net/v1/task/{{ platform_info["signed_task_id"] }}/artifacts/public/build/update/target.complete.mar"
                         {% endif %}
                         {% endif %}
                         platform: {{ platform }}
