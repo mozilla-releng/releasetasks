@@ -141,7 +141,7 @@ class TestBB_UpdateVerify(unittest.TestCase):
 
     def test_all_builders_exist(self):
         for p in ['win32', 'win64', 'macosx64']:
-            for i in xrange(1, 7):  # test full chunk size
+            for i in range(1, 7):  # test full chunk size
                 builder_task = get_task_by_name(self.graph, "release-beta_firefox_%s_update_verify_beta_%s" % (p, i))
                 verify(builder_task, self.builder_exists_schema)
 

@@ -1,0 +1,29 @@
+{% macro common_extras(taskname, locales, platform) %}
+{% include "common_extras.yml.tmpl" %}
+{% endmacro %}
+
+{% macro task_notifications(taskname, failed=None, exception=None, artifact=None, completed=None) %}
+{% include "notifications.yml.tmpl" %}
+{% endmacro %}
+
+provisionerId: "null-provisioner"
+workerType: "human-decision"
+created: "{{ now }}"
+deadline: "{{ now.replace(days=4) }}"
+expires: "{{ never }}"
+priority: "high"
+retries: 5
+routes:
+    - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.atomic_submission
+    - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.atomic_submission
+payload:
+    description: "required"
+metadata:
+    name: "{{ product }} {{ branch }} atomic submission task"
+    description: "Release Promotion atomic submission task"
+    owner: "release@mozilla.com"
+    source: https://github.com/mozilla/releasetasks
+
+extra:
+    {{ common_extras(taskname="atomic_submission", locales=["null"], platform="null") | indent(4)}}
+    {{ task_notifications("{} {} atomic submission task".format(product, branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(4) }}

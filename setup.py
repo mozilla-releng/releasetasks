@@ -19,6 +19,7 @@ requirements = [
     "PGPy",
     "python-jose<=0.5.6",
     "redo",
+    "toposort==1.5",
 ]
 test_requirements = [
     "pytest",

@@ -5,7 +5,8 @@ from jose.constants import ALGORITHMS
 import os
 import yaml
 
-from releasetasks import make_task_graph as make_task_graph_orig
+from releasetasks import make_task_graph as make_task_graph_orig, \
+    make_tasks as make_tasks_orig
 from releasetasks.test import PUB_KEY, DUMMY_PUBLIC_KEY, verify
 from voluptuous import All, Any, Email, Extra, Length, Match, Optional, \
     Range, Required, Schema, truth, Unique, Url, Datetime
@@ -166,3 +167,15 @@ def make_task_graph(*args, **kwargs):
                                 beetmover_aws_access_key_id="baz",
                                 beetmover_aws_secret_access_key="norf",
                                 running_tests=True, **kwargs)
+
+
+@mock.patch("releasetasks.get_json_rev")
+def make_tasks(*args, **kwargs):
+    args = list(args)
+    mocked_get_json_rev = args.pop()
+    mocked_get_json_rev.return_value = {"pushid": 78123}
+    return make_tasks_orig(*args, public_key=DUMMY_PUBLIC_KEY,
+                           balrog_username="fake", balrog_password="fake",
+                           beetmover_aws_access_key_id="baz",
+                           beetmover_aws_secret_access_key="norf",
+                           running_tests=True, **kwargs)

@@ -1,0 +1,34 @@
+{% macro common_extras(taskname, locales, platform) %}
+{% include "common_extras.yml.tmpl" %}
+{% endmacro %}
+
+{% macro task_notifications(taskname, failed=None, exception=None, artifact=None, completed=None) %}
+{% include "notifications.yml.tmpl" %}
+{% endmacro %}
+
+
+provisionerId: aws-provisioner-v1
+workerType: gecko-decision   # Fastest worker we have https://bugzilla.mozilla.org/show_bug.cgi?id=1318253#c3
+created: "{{ now }}"
+deadline: "{{ now.replace(days=4) }}"
+expires: "{{ never }}"
+priority: high
+retries: 0
+routes:
+    - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.dummy
+    - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.dummy
+payload:
+    maxRunTime: 600
+    image: ubuntu:16.10
+    command:
+        - /bin/echo
+        - Dummy task
+metadata:
+    owner: release@mozilla.com
+    source: https://github.com/mozilla/releasetasks
+    name: "{{ product }} dummy task"
+    description: |
+        dummy task
+extra:
+    {{ common_extras(taskname="dummy_task", locales=["null"], platform="null") | indent(4)}}
+    {{ task_notifications("dummy task".format(product, branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(4) }}

@@ -3,7 +3,10 @@ import requests
 from jose import jws
 from jose.constants import ALGORITHMS
 from redo import retriable
-
+from collections import OrderedDict
+from copy import deepcopy
+from toposort import toposort_flatten
+from taskcluster.utils import slugId
 
 ftp_platform_map = {
     'win32': 'win32',
@@ -66,3 +69,81 @@ def get_json_rev(repo_path, revision):
     req = requests.get(url, timeout=20)
     req.raise_for_status()
     return req.json()
+
+
+def graph_to_tasks(graph):
+    """Convert a graph into a list of tasks.
+    Replaces graph level "requires" into task-level "dependencies"
+    """
+    tasks = OrderedDict()
+    for t in graph["tasks"]:
+        # If a task doesn't have any dependencies it will be scheduled even if
+        # the whole submission fails. To make the submission atomic, we create
+        # a dummy task, which is resolved at the end of the submission to
+        # unblock the scheduling
+        task = t["task"]
+        # `requires` is `dependencies` in queue
+        if t.get("requires"):
+            task["dependencies"] = t["requires"]
+        # Poor man's replacement of taskgraph's `reruns`. Docker worker suports
+        # retrying on specific exit statuses. Using exit code 1 by default.
+        if task["provisionerId"] == "aws-provisioner-v1":
+            task["payload"]["onExitStatus"] = task["payload"].get("onExitStatus") or \
+                {'retry': [1]}
+
+        tasks[t["taskId"]] = task
+
+    return tasks
+
+
+def add_atomic_task(tasks, toplevel_task):
+    """Adds top level task to be resolved after successful submission"""
+    tasks = deepcopy(tasks)
+    tl_task_id, toplevel_task_def = toplevel_task
+    for t in tasks.itervalues():
+        if "dependencies" not in t:
+            t["dependencies"] = [tl_task_id]
+    tasks[tl_task_id] = toplevel_task_def
+    return tasks
+
+
+def sort_tasks(tasks):
+    to_sort = {task_id: set(task.get("dependencies", []))
+               for task_id, task in tasks.iteritems()}
+    ordered = toposort_flatten(to_sort)
+    return OrderedDict(
+        sorted(tasks.items(), key=lambda t: ordered.index(t[0]))
+    )
+
+
+def inject_dummy_tasks(tasks, dummy_task, max_deps=100):
+    # The current TC Queue implementation doesn't let one specify more than 100
+    # dependencies. To work around this issue we need to ddd dummy tasks and
+    # change the original "dependencies" value.
+    new_tasks = OrderedDict()
+    for task_id, task in tasks.iteritems():
+        task = deepcopy(task)
+        deps = task.get("dependencies", [])
+        if len(deps) > max_deps:
+            num_dummy_tasks = int(round(len(deps)/float(max_deps) + 0.5))
+            dummy_tasks = OrderedDict()
+            for i in range(num_dummy_tasks):
+                cur_deps = deps[i * max_deps:(i + 1) * max_deps]
+                curr_dummy_task = deepcopy(dummy_task)
+                curr_dummy_task["dependencies"] = cur_deps
+                dummy_tasks[slugId()] = curr_dummy_task
+            task["dependencies"] = dummy_tasks.keys()
+            new_tasks.update(dummy_tasks)
+
+        new_tasks[task_id] = task
+
+    return new_tasks
+
+
+def inject_taskGroupId(tasks, taskGroupId):
+    new_tasks = OrderedDict()
+    for task_id, task in tasks.iteritems():
+        task = deepcopy(task)
+        task["taskGroupId"] = taskGroupId
+        new_tasks[task_id] = task
+    return new_tasks
