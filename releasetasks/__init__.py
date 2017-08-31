@@ -6,12 +6,13 @@ from functools import partial
 from os import path
 from chunkify import chunkify
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
-from taskcluster.utils import stableSlugId, encryptEnvVar, slugId
+from taskcluster.utils import encryptEnvVar
 
 from releasetasks.util import (
     treeherder_platform, sign_task, buildbot2ftp, buildbot2bouncer,
     get_json_rev, sort_tasks, graph_to_tasks, add_atomic_task,
-    inject_dummy_tasks, inject_taskGroupId)
+    inject_dummy_tasks, inject_taskGroupId, slug_id, stable_slug_id
+)
 
 DEFAULT_TEMPLATE_DIR = path.join(path.dirname(__file__), "templates")
 
@@ -36,7 +37,7 @@ def make_task_graph(public_key, signing_pvt_key, product, root_home_dir,
     template = env.get_template(root_template)
     template_vars = {
         "product": product,
-        "stableSlugId": stableSlugId(),
+        "stableSlugId": stable_slug_id(),
         "chunkify": chunkify,
         "sorted": sorted,
         "now": now,
@@ -69,7 +70,7 @@ def make_tasks(public_key, signing_pvt_key, product, root_home_dir,
     tasks = graph_to_tasks(graph)
     with open(signing_pvt_key) as f:
         pvt_key = f.read()
-    toplevel_task_id = slugId()
+    toplevel_task_id = slug_id()
     env = Environment(
         loader=FileSystemLoader([
             path.join(template_dir, root_home_dir),
@@ -84,7 +85,7 @@ def make_tasks(public_key, signing_pvt_key, product, root_home_dir,
         "now": arrow.now(),
         "never": arrow.now().replace(years=1000),
         "sorted": sorted,
-        "stableSlugId": stableSlugId(),
+        "stableSlugId": stable_slug_id(),
         "sign_task": partial(sign_task, pvt_key=pvt_key),
     }
     template_vars.update(template_kwargs)
@@ -94,6 +95,6 @@ def make_tasks(public_key, signing_pvt_key, product, root_home_dir,
     dummy_task = yaml.safe_load(dummy_task_template.render(**template_vars))
     tasks = inject_dummy_tasks(tasks, dummy_task)
     tasks = add_atomic_task(tasks, (toplevel_task_id, toplevel_task))
-    taskGroupId = slugId()
+    taskGroupId = slug_id()
     tasks = inject_taskGroupId(tasks, taskGroupId)
     return taskGroupId, toplevel_task_id, sort_tasks(tasks)

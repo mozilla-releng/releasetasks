@@ -1,12 +1,12 @@
 import time
 import requests
+import slugid
 from jose import jws
 from jose.constants import ALGORITHMS
 from redo import retriable
 from collections import OrderedDict
 from copy import deepcopy
 from toposort import toposort_flatten
-from taskcluster.utils import slugId
 
 ftp_platform_map = {
     'win32': 'win32',
@@ -131,7 +131,7 @@ def inject_dummy_tasks(tasks, dummy_task, max_deps=100):
                 cur_deps = deps[i * max_deps:(i + 1) * max_deps]
                 curr_dummy_task = deepcopy(dummy_task)
                 curr_dummy_task["dependencies"] = cur_deps
-                dummy_tasks[slugId()] = curr_dummy_task
+                dummy_tasks[slug_id()] = curr_dummy_task
             task["dependencies"] = dummy_tasks.keys()
             new_tasks.update(dummy_tasks)
 
@@ -147,3 +147,25 @@ def inject_taskGroupId(tasks, taskGroupId):
         task["taskGroupId"] = taskGroupId
         new_tasks[task_id] = task
     return new_tasks
+
+
+def slug_id():
+    # TODO Bug 1257245: Replace by taskcluster.util.slugId() once we use taskcluster >= 0.0.26
+    return slugid.nice()
+
+
+# TODO Bug 1257245: Delete that duplication of taskcluster.util.stableSlugId(), once we use
+# taskcluster >= 0.0.26. It was copied so that nice slugIds are used, instead of regular ones
+def stable_slug_id():
+    """Returns a closure which can be used to generate stable slugIds.
+    Stable slugIds can be used in a graph to specify task IDs in multiple
+    places without regenerating them, e.g. taskId, requires, etc.
+    """
+    _cache = {}
+
+    def closure(name):
+        if name not in _cache:
+            _cache[name] = slug_id()
+        return _cache[name]
+
+    return closure
