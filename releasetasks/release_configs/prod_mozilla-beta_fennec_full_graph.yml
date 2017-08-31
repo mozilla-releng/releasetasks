@@ -3,7 +3,7 @@ platforms: {}
 release_platforms: []
 final_verify_platforms: []
 uptake_monitoring_platforms:
-  - "android-api-15"
+  - "android-api-16"
   - "android-x86"
 l10n_release_platforms: []
 partner_repacks_platforms: []
