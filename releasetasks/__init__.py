@@ -95,6 +95,8 @@ def make_tasks(public_key, signing_pvt_key, product, root_home_dir,
     dummy_task = yaml.safe_load(dummy_task_template.render(**template_vars))
     tasks = inject_dummy_tasks(tasks, dummy_task)
     tasks = add_atomic_task(tasks, (toplevel_task_id, toplevel_task))
-    taskGroupId = slug_id()
+    taskGroupId = toplevel_task_id
     tasks = inject_taskGroupId(tasks, taskGroupId)
+    # TODO: Only return taskGroupId and sorted task, as taskGroupId and
+    # toplevel_task_id are now the same ID.
     return taskGroupId, toplevel_task_id, sort_tasks(tasks)
