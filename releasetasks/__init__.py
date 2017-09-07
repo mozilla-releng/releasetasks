@@ -17,7 +17,7 @@ from releasetasks.util import (
 DEFAULT_TEMPLATE_DIR = path.join(path.dirname(__file__), "templates")
 
 
-def make_task_graph(public_key, signing_pvt_key, product, branch, root_home_dir,
+def make_task_graph(public_key, signing_pvt_key, product, root_home_dir,
                     root_template="release_graph.yml.tmpl",
                     template_dir=DEFAULT_TEMPLATE_DIR,
                     **template_kwargs):
@@ -37,7 +37,6 @@ def make_task_graph(public_key, signing_pvt_key, product, branch, root_home_dir,
     template = env.get_template(root_template)
     template_vars = {
         "product": product,
-        "branch": branch,
         "stableSlugId": stable_slug_id(),
         "chunkify": chunkify,
         "sorted": sorted,
@@ -61,12 +60,12 @@ def make_task_graph(public_key, signing_pvt_key, product, branch, root_home_dir,
     return yaml.safe_load(template.render(**template_vars))
 
 
-def make_tasks(public_key, signing_pvt_key, product, branch, root_home_dir,
+def make_tasks(public_key, signing_pvt_key, product, root_home_dir,
                root_template="release_graph.yml.tmpl",
                template_dir=DEFAULT_TEMPLATE_DIR,
                **template_kwargs):
     graph = make_task_graph(
-        public_key, signing_pvt_key, product, branch, root_home_dir,
+        public_key, signing_pvt_key, product, root_home_dir,
         root_template, template_dir, **template_kwargs)
     tasks = graph_to_tasks(graph)
     with open(signing_pvt_key) as f:
@@ -83,7 +82,6 @@ def make_tasks(public_key, signing_pvt_key, product, branch, root_home_dir,
     template = env.get_template("atomic_task.yml.tmpl")
     template_vars = {
         "product": product,
-        "branch": branch,
         "now": arrow.now(),
         "never": arrow.now().replace(years=1000),
         "sorted": sorted,
@@ -99,31 +97,6 @@ def make_tasks(public_key, signing_pvt_key, product, branch, root_home_dir,
     tasks = add_atomic_task(tasks, (toplevel_task_id, toplevel_task))
     taskGroupId = toplevel_task_id
     tasks = inject_taskGroupId(tasks, taskGroupId)
-
-    graph_2_id = make_fennec_graph_2_not_reference_graph_1(tasks, branch) \
-        if product == 'fennec' else None
-
-    return taskGroupId, sort_tasks(tasks), graph_2_id
-
-
-def make_fennec_graph_2_not_reference_graph_1(tasks, branch):
-    # Fennec has one graph in-tree and the other defined here. The in-tree tasks
-    # need to comply with Chain Of Trust. A decision task has to be defined
-    # per Chain of Trust. If the in-tree graph (graph 2) lives under graph 1,
-    # then Chain Of Trust jumps back to graph 1 and verify it's defined in-tree
-    # as well. This made Chain Of Trust fail. That's why graph 1 and 2 have to
-    # be independent.
-    # For more details, see Bug 1396517
-
-    graph_2_decision_task_name = '{} candidates_fennec'.format(branch)
-    graph_2_decision_task_id = [
-        task_id for task_id, task in tasks.iteritems()
-        if task['metadata']['name'] == graph_2_decision_task_name
-    ][0]
-    graph_2_decision_task = tasks[graph_2_decision_task_id]
-    graph_2_decision_task['taskGroupId'] = graph_2_decision_task_id
-    # We don't want to depend on anything, otherwise Chain of Trust will verify
-    # where these tasks are from.
-    graph_2_decision_task['dependencies'] = []
-
-    return graph_2_decision_task_id
+    # TODO: Only return taskGroupId and sorted task, as taskGroupId and
+    # toplevel_task_id are now the same ID.
+    return taskGroupId, toplevel_task_id, sort_tasks(tasks)

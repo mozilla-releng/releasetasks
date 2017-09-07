@@ -200,11 +200,11 @@ class TestPushToMirrorsHuman(unittest.TestCase):
                 "35.0": {"buildNumber": 1, "locales": l10n_changesets.keys()},
             },
         })
-        self.taskGroupId, self.tasks, _ = make_tasks(**test_kwargs)
+        self.taskGroupId, self.toplevel_task_id, self.tasks = make_tasks(**test_kwargs)
 
     def test_deps(self):
         for task_id, task in self.tasks.iteritems():
-            if task_id == self.taskGroupId:
+            if task_id == self.toplevel_task_id:
                 assert not task.get("dependencies")
             else:
                 assert task.get("dependencies")
