@@ -315,6 +315,8 @@
             {% if signing_class != "dep-signing" %}
             features:
                 balrogVPNProxy: true
+            onExitStatus:
+                retry: [-1]
             {% endif %}
 
 {% if push_to_candidates_enabled %}  # beetmover partials

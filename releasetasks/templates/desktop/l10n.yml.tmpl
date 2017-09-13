@@ -390,6 +390,8 @@
             {% if signing_class != "dep-signing" %}
             features:
                 balrogVPNProxy: true
+            onExitStatus:
+                retry: [-1]
             {% endif %}
 
 # repacks beetmover
