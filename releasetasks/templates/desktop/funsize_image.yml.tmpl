@@ -28,12 +28,12 @@
             onExitStatus:
                 retry: [-1, 1, 255]
             env:
-                HASH: "{{ revision }}"
+                HASH: "{{ mozharness_changeset }}"
                 PROJECT: "{{ branch }}"
                 IMAGE_NAME: funsize-update-generator
                 HG_STORE_PATH: /home/worker/checkouts/hg-store
                 CONTEXT_URL: ""
-                GECKO_HEAD_REV: "{{ revision }}"
+                GECKO_HEAD_REV: "{{ mozharness_changeset }}"
                 GECKO_BASE_REPOSITORY: "https://hg.mozilla.org/mozilla-unified"
                 GECKO_HEAD_REPOSITORY: "https://hg.mozilla.org/{{ repo_path }}"
         metadata:
@@ -87,12 +87,12 @@
             onExitStatus:
                 retry: [-1, 1, 255]
             env:
-                HASH: "{{ revision }}"
+                HASH: "{{ mozharness_changeset }}"
                 PROJECT: "{{ branch }}"
                 IMAGE_NAME: funsize-balrog-submitter
                 HG_STORE_PATH: /home/worker/checkouts/hg-store
                 CONTEXT_URL: ""
-                GECKO_HEAD_REV: "{{ revision }}"
+                GECKO_HEAD_REV: "{{ mozharness_changeset }}"
                 GECKO_BASE_REPOSITORY: "https://hg.mozilla.org/mozilla-unified"
                 GECKO_HEAD_REPOSITORY: "https://hg.mozilla.org/{{ repo_path }}"
         metadata:

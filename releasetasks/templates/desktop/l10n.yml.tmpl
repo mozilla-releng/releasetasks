@@ -155,6 +155,207 @@
 
 {% endif %}
 
+{# Repackage LZMA-compressed MARs to BZ2 if required #}
+{% if lzma_to_bz2 is defined and lzma_to_bz2 %}
+{% set recompress_basename = "{}_{}_recompress".format(platform, chunk) %}
+
+-
+    taskId: "{{ stableSlugId('{}_repackage_complete_mars'.format(recompress_basename)) }}"
+    reruns: 5
+    requires:
+        - "{{ stableSlugId('{}_artifacts_{}'.format(buildername, chunk)) }}"
+        - "{{ stableSlugId("funsize_update_generator_image") }}"
+    task:
+        created: "{{ now }}"
+        deadline: "{{ now.replace(days=4) }}"
+        expires: "{{ never }}"
+        priority: "high"
+        metadata:
+            owner: release+funsize@mozilla.com
+            source: https://github.com/mozilla/funsize
+            name: "[funsize] Recompress LZMA-compressed MARs to BZ2 ({{ platform }} {{ chunk }}/{{ platform_info["chunks"] }}"
+            description: |
+                Recompress LZMA-compressed MARs to BZ2 ({{ platform }} {{ chunk }}/{{ platform_info["chunks"] }}.
+
+        routes:
+            - tc-treeherder-stage.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
+            - tc-treeherder.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
+            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.recompress.{{ platform }}.{{ chunk }}
+            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.recompress.{{ platform }}.{{ chunk }}
+        extra:
+            {{ task_notifications(taskname="[{} {} build{}] [funsize] Recomress comlete MARs {} {}".format(product, version, buildNumber, platform, chunk), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12)}}
+            {{ common_extras(taskname='{}_repackage_complete_mars'.format(recompress_basename), locales=our_locales, platform=platform) | indent(12)}}
+            funsize:
+                completes:
+{% for locale in our_locales %}
+                    -
+                        to_mar: "https://queue.taskcluster.net/v1/task/{{ stableSlugId('{}_artifacts_{}'.format(buildername, chunk)) }}/artifacts/public/build/{{ funsize_product }}-{{ appVersion }}.{{ locale }}.{{ buildbot2ftp(platform) }}.complete.mar"
+                        locale: {{ locale }}
+{% endfor %}
+            treeherderEnv:
+                - staging
+                - production
+            treeherder:
+                symbol: {{ chunk }}-r
+                groupSymbol: Update
+                collection:
+                    opt: true
+                machine:
+                    platform: {{ get_treeherder_platform(platform) }}
+                build:
+                    platform: {{ get_treeherder_platform(platform) }}
+
+        workerType: "funsize-mar-generator"
+        provisionerId: "aws-provisioner-v1"
+
+        tags:
+            createdForUser: release+funsize@mozilla.com
+
+        payload:
+            image:
+                type: task-image
+                path: public/image.tar.zst
+                taskId: "{{ stableSlugId("funsize_update_generator_image") }}"
+            maxRunTime: 3600
+            command:
+                - /recompress.sh
+
+            env:
+                OUTPUT_FILENAME: "{{ funsize_product }}-{{ version }}.{locale}.{{ buildbot2ftp(platform) }}.bz2.complete.mar"
+                {% if moz_disable_mar_cert_verification is defined and moz_disable_mar_cert_verification %}
+                MOZ_DISABLE_MAR_CERT_VERIFICATION: {{ moz_disable_mar_cert_verification }}
+                {% endif %}
+                SIGNING_CERT: {{ signing_cert }}
+                SHA1_SIGNING_CERT: {{ signing_cert }}_sha1
+                SHA384_SIGNING_CERT: {{ signing_cert }}_sha384
+
+            artifacts:
+                "public/env":
+                    path: /home/worker/artifacts/
+                    type: directory
+                    expires: "{{ never }}"
+
+-
+    taskId: "{{ stableSlugId('{}_signing_task'.format(recompress_basename)) }}"
+    reruns: 5
+    requires:
+        - "{{ stableSlugId('{}_repackage_complete_mars'.format(recompress_basename)) }}"
+    task:
+        created: "{{ now }}"
+        deadline: "{{ now.replace(days=4) }}"
+        expires: "{{ never }}"
+        priority: "high"
+        metadata:
+            owner: release+funsize@mozilla.com
+            source: https://github.com/mozilla/funsize
+            name: "[funsize] Complete MAR signing task {{ platform }} {{ chunk }}/{{ platform_info["chunks"] }}"
+            description: |
+                This task signs MAR files and publishes signed bits.
+
+        routes:
+            - tc-treeherder-stage.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
+            - tc-treeherder.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
+            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.completes_signing.{{ platform }}.{{ chunk }}
+            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.completes_signing.{{ platform }}.{{ chunk }}
+        extra:
+            {{ task_notifications(taskname="[{} {} build{}] [funsize] Complete MAR signing task {} {}".format(product, version, buildNumber, platform, chunk), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12)}}
+            {{ common_extras(taskname='{}_signing_task'.format(recompress_basename), locales=our_locales, platform=platform) | indent(12)}}
+            treeherderEnv:
+                - staging
+                - production
+            treeherder:
+                symbol: {{ chunk }}-rs
+                groupSymbol: Update
+                collection:
+                    opt: true
+                machine:
+                    platform: {{ get_treeherder_platform(platform) }}
+                build:
+                    platform: {{ get_treeherder_platform(platform) }}
+
+        workerType: "signing-worker-v1"
+        provisionerId: "signing-provisioner-v1"
+        scopes:
+            - project:releng:signing:cert:{{ signing_class }}
+            - project:releng:signing:format:gpg
+            - project:releng:signing:format:mar
+        tags:
+            createdForUser: release+funsize@mozilla.com
+
+        payload:
+            signingManifest: "https://queue.taskcluster.net/v1/task/{{ stableSlugId('{}_repackage_complete_mars'.format(recompress_basename)) }}/artifacts/public/env/manifest.json"
+
+
+{% if push_to_candidates_enabled %}{#  beetmover recompressed completes #}
+{% set recompressed_beetmover_basename = "release-{}_{}_{}_recompressed_{}_beetmover_candidates".format(branch, product, platform, chunk) %}
+{% do artifact_completes_builders.append(recompressed_beetmover_basename) %}
+-
+    taskId: "{{ stableSlugId(recompressed_beetmover_basename) }}"
+    requires:
+        - "{{ stableSlugId('{}_signing_task'.format(recompress_basename)) }}"
+        - "{{ stableSlugId("beetmove_image") }}"
+    reruns: 5
+    task:
+        provisionerId: aws-provisioner-v1
+        workerType: gecko-3-b-linux
+        created: "{{ now }}"
+        deadline: "{{ now.replace(days=4) }}"
+        expires: "{{ never }}"
+        priority: "high"
+        retries: 5
+        routes:
+            - tc-treeherder-stage.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
+            - tc-treeherder.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
+            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.recompressed_beetmover.{{ platform }}.{{ chunk }}
+            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.recompressed_beetmove.{{ platform }}.{{ chunk }}
+        payload:
+            maxRunTime: 7200
+            # TODO - create specific image for this
+            image:
+                type: task-image
+                path: public/image.tar.zst
+                taskId: {{ stableSlugId("beetmove_image") }}
+            command:
+                - /bin/bash
+                - -c
+                - >
+                  wget -O mozharness.tar.bz2 https://hg.mozilla.org/{{ repo_path }}/archive/{{ mozharness_changeset }}.tar.bz2/testing/mozharness &&
+                  mkdir mozharness && tar xvfj mozharness.tar.bz2 -C mozharness --strip-components 3 && cd mozharness &&
+                  python scripts/release/beet_mover.py --no-refresh-antivirus --template configs/beetmover/recompressed_completes.yml.tmpl --platform {{ buildbot2ftp(platform) }} --product {{ product }} --version {{ version }} --artifact-subdir env {% for l in our_locales %}{{ "--locale {} ".format(l) }}{% endfor %}  --taskid {{ stableSlugId('{}_signing_task'.format(recompress_basename)) }} --build-num build{{ buildNumber }} --bucket {{ beetmover_candidates_bucket }}
+            env:
+                DUMMY_ENV_FOR_ENCRYPT: "fake"
+            encryptedEnv:
+                - {{ encrypt_env_var(stableSlugId(recompressed_beetmover_basename), now_ms,
+                                     now_ms + 24 * 4 * 3600 * 1000, 'AWS_ACCESS_KEY_ID',
+                                     beetmover_aws_access_key_id) }}
+                - {{ encrypt_env_var(stableSlugId(recompressed_beetmover_basename), now_ms,
+                                     now_ms + 24 * 4 * 3600 * 1000, 'AWS_SECRET_ACCESS_KEY',
+                                     beetmover_aws_secret_access_key) }}
+        metadata:
+            name: "[beetmover] {{ product }} {{ branch }} {{ platform }} {{ chunk }}/{{ platform_info["chunks"] }} recompressed complete MAR candidates"
+            description: "moves recompressed complete MAR artifacts to candidates dir"
+            owner: "release@mozilla.com"
+            source: https://github.com/mozilla/releasetasks
+
+        extra:
+            {{ task_notifications(taskname="[{} {} build{}] [beetmover] {} {} {} {} recompressed complete MAR candidates".format(product, version, buildNumber, product, branch, platform, chunk), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12)}}
+            {{ common_extras(taskname=recompressed_beetmover_basename, locales=our_locales, platform=platform) | indent(12)}}
+            treeherderEnv:
+                - staging
+                - production
+            treeherder:
+                symbol: {{ chunk }}-r
+                groupSymbol: BM
+                collection:
+                    opt: true
+                machine:
+                    platform: {{ get_treeherder_platform(platform) }}
+                build:
+                    platform: {{ get_treeherder_platform(platform) }}
+
+{% endif %}{# push_to_candidates_enabled #}
+{% endif %}{# lzma_to_bz2 #}
+
 {% if updates_enabled %}  # funsize
 {% for partial_version, partial_info in partial_updates.iteritems() %}
 {% set chunk_locales = [] %}
