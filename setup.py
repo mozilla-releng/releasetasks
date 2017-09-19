@@ -21,6 +21,7 @@ requirements = [
     "python-jose<=0.5.6",
     "redo",
     "toposort==1.5",
+    "six==1.10.0",
 ]
 test_requirements = [
     "pytest",
