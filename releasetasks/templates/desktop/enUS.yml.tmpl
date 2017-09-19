@@ -283,6 +283,11 @@
 
 {% if updates_enabled %}  # funsize
 {% for partial_version, partial_info in partial_updates.iteritems() %}
+{% if partial_version < "56.0" %}
+{% set mar_signing_format = "mar" %}
+{% else %}
+{% set mar_signing_format = "mar-sha384" %}
+{% endif %}
 {# The basename needs to be unique across all jobs in this graph, so we need to
    take into account everything about it that we can have more than one of in a
    single graph (platform, locale, partial_version, and build number). Notable

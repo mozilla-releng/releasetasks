@@ -358,6 +358,11 @@
 
 {% if updates_enabled %}  # funsize
 {% for partial_version, partial_info in partial_updates.iteritems() %}
+{% if partial_version < "56.0" %}
+{% set mar_signing_format = "mar" %}
+{% else %}
+{% set mar_signing_format = "mar-sha384" %}
+{% endif %}
 {% set chunk_locales = [] %}
 {% for l in our_locales %}
 {% if l in partial_info["locales"] %}
