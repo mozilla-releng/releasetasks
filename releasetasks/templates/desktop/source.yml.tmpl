@@ -2,6 +2,9 @@
 {% set buildername_signing = "{}_signing".format(buildername) %}
 {% set buildername_beet = "{}_beet".format(buildername) %}
 {% set buildername_beet_signing = "{}_beet".format(buildername_signing) %}
+{% set major_version = version.split('.')[0] %}
+# 52 is current ESR, 56 current release
+{% set use_old_image = major_version in ["52", "56"] %}
 {% do push_to_releases_extra_upstream_builders.append(buildername_beet) %}
 {% do push_to_releases_extra_upstream_builders.append(buildername_beet_signing) %}
 -
@@ -28,20 +31,38 @@
 
         payload:
             maxRunTime: 7200
+            {% if use_old_image %}
             image: "mozillareleases/source-builder@sha256:20ea2d9aff06740d6a35ff2f42af98c8d8b65efec9d0dea48692fbb3025d5d8c"
+            {% else %}
+            image: "mozillareleases/source-builder@sha256:755ad6b272ade340cd5bc4c333f3924db5a36b1dc4e49ff1a98b2b212f57becd"
+            {% endif %}
             cache:
+                {% if use_old_image %}
                 build-{{ branch }}-release-workspace: /home/worker/workspace
                 tooltool-cache: /home/worker/tooltool-cache
                 tc-vcs: /home/worker/.tc-vcs
+                {% else %}
+                build-{{ branch }}-release-workspace: /builds/worker/workspace
+                tooltool-cache: /builds/worker/tooltool-cache
+                tc-vcs: /builds/worker/.tc-vcs
+                {% endif %}
             artifacts:
                 public/build:
+                    {% if use_old_image %}
                     path: /home/worker/artifacts/
+                    {% else %}
+                    path: /builds/worker/artifacts/
+                    {% endif %}
                     expires: {{ now.replace(days=365) }}
                     type: directory
             command:
                 - /bin/bash
                 - -c
+                {% if use_old_image %}
                 - bin/build.sh || JOB_SCRIPT=testing/taskcluster/scripts/builder/build-linux.sh bin/build.sh
+                {% else %}
+                - JOB_SCRIPT=taskcluster/scripts/builder/build-linux.sh /builds/worker/bin/build.sh
+                {% endif %}
             env:
                 GECKO_REPOSITORY: "https://hg.mozilla.org/{{ repo_path }}"
                 GECKO_HEAD_REV: "{{ revision }}"
