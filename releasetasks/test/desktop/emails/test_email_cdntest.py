@@ -16,7 +16,7 @@ class TestEmailFinal(unittest.TestCase):
         self.task_schema = Schema({
             'task': {
                 'provisionerId': 'aws-provisioner-v1',
-                'workerType': 'gecko-decision',
+                'workerType': 'gecko-3-decision',
                 'payload': {
                     'command': ['/bin/echo', 'Dummy task to tell pulse-notify to send an email'],
                 },
