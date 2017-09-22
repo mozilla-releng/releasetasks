@@ -361,7 +361,7 @@
 {% if partial_version < "56.0" %}
 {% set mar_signing_format = "mar" %}
 {% else %}
-{% set mar_signing_format = "mar-sha384" %}
+{% set mar_signing_format = "mar_sha384" %}
 {% endif %}
 {% set chunk_locales = [] %}
 {% for l in our_locales %}

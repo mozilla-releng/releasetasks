@@ -237,7 +237,7 @@ class TestEnUSPartialsSHA384(unittest.TestCase):
                         },
                         'scopes': [
                             "project:releng:signing:cert:release-signing",
-                            "project:releng:signing:format:mar-sha384",
+                            "project:releng:signing:format:mar_sha384",
                             "project:releng:signing:format:gpg",
                         ],
                     },
