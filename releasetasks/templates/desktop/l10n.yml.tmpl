@@ -191,6 +191,10 @@
                     -
                         to_mar: "https://queue.taskcluster.net/v1/task/{{ stableSlugId('{}_artifacts_{}'.format(buildername, chunk)) }}/artifacts/public/build/{{ funsize_product }}-{{ appVersion }}.{{ locale }}.{{ buildbot2ftp(platform) }}.complete.mar"
                         locale: {{ locale }}
+                        platform: {{ platform }}
+                        branch: {{ branch }}
+                        toVersion: "{{ version }}"
+                        toBuildNumber: {{ buildNumber }}
 {% endfor %}
             treeherderEnv:
                 - staging
@@ -354,6 +358,90 @@
                     platform: {{ get_treeherder_platform(platform) }}
 
 {% endif %}{# push_to_candidates_enabled #}
+
+{% do balrog_submission_builders.append('{}_balrog_task'.format(recompress_basename)) %}
+-
+    taskId: "{{ stableSlugId('{}_balrog_task'.format(recompress_basename)) }}"
+    reruns: 5
+    requires:
+        - "{{ stableSlugId('{}_signing_task'.format(recompress_basename)) }}"
+        - "{{ stableSlugId("funsize_balrog_image") }}"
+    task:
+        created: "{{ now }}"
+        deadline: "{{ now.replace(days=4) }}"
+        expires: "{{ never }}"
+        priority: "high"
+        routes:
+            - tc-treeherder-stage.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
+            - tc-treeherder.v2.{{ branch }}.{{ revision }}.{{ pushlog_id }}
+            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.completes_balrog.{{ platform }}.{{ chunk }}
+            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.completes_balrog.{{ platform }}.{{ chunk }}
+        extra:
+            {{ task_notifications(taskname="[{} {} build{}] [funsize] Publish to Balrog {} {} recompressed complete MAR".format(product, version, buildNumber, platform, chunk), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12)}}
+            {{ common_extras(taskname='{}_balrog_task'.format(recompress_basename), locales=our_locales, platform=platform) | indent(12)}}
+            treeherderEnv:
+                - staging
+                - production
+            treeherder:
+                symbol: {{ chunk }}-r-u
+                groupSymbol: Update
+                collection:
+                    opt: true
+                machine:
+                    platform: {{ get_treeherder_platform(platform) }}
+                build:
+                    platform: {{ get_treeherder_platform(platform) }}
+
+        metadata:
+            owner: release+funsize@mozilla.com
+            source: https://github.com/mozilla/funsize
+            name: "[funsize] Publish to Balrog {{ platform }} {{ chunk }}/{{ platform_info["chunks"] }} recompressed complete MAR"
+            description: |
+                This task publishes signed complete updates to Balrog.
+
+        workerType: "funsize-balrog"
+        provisionerId: "aws-provisioner-v1"
+        {% if signing_class != "dep-signing" %}
+        scopes:
+            - docker-worker:feature:balrogVPNProxy
+        {% endif %}
+        tags:
+            createdForUser: release+funsize@mozilla.com
+
+        payload:
+            image:
+                type: task-image
+                path: public/image.tar.zst
+                taskId: "{{ stableSlugId("funsize_balrog_image") }}"
+            maxRunTime: 1800
+            command:
+                - /submit_complete.sh
+
+            artifacts:
+                "public/env":
+                    path: /home/worker/artifacts/
+                    type: directory
+                    expires: "{{ never }}"
+            env:
+                PARENT_TASK_ARTIFACTS_URL_PREFIX: "https://queue.taskcluster.net/v1/task/{{ stableSlugId('{}_signing_task'.format(recompress_basename)) }}/artifacts/public/env"
+                BALROG_API_ROOT: {{ funsize_balrog_api_root }}
+                {% if extra_balrog_submitter_params is defined %}
+                EXTRA_BALROG_SUBMITTER_PARAMS: "{{ extra_balrog_submitter_params }}"
+                {% endif %}
+                BALROG_BLOB_SUFFIX: "-bz2"
+            encryptedEnv:
+                - {{ encrypt_env_var(stableSlugId('{}_balrog_task'.format(recompress_basename)), now_ms,
+                                    now_ms + 24 * 4 * 3600 * 1000, "BALROG_USERNAME",
+                                    balrog_username) }}
+                - {{ encrypt_env_var(stableSlugId('{}_balrog_task'.format(recompress_basename)), now_ms,
+                                    now_ms + 24 * 4 * 3600 * 1000, "BALROG_PASSWORD",
+                                    balrog_password) }}
+            {% if signing_class != "dep-signing" %}
+            features:
+                balrogVPNProxy: true
+            onExitStatus:
+                retry: [-1]
+            {% endif %}
 {% endif %}{# lzma_to_bz2 #}
 
 {% if updates_enabled %}  # funsize
@@ -585,6 +673,9 @@
                 # TODO: should funsize be publishing to an s3 bucket? or will beetmover do that?
                 {% if extra_balrog_submitter_params is defined %}
                 EXTRA_BALROG_SUBMITTER_PARAMS: "{{ extra_balrog_submitter_params }}"
+                {% endif %}
+                {% if partial_version < "56.0" %}
+                BALROG_BLOB_SUFFIX: "-bz2"
                 {% endif %}
             encryptedEnv:
                 - {{ encrypt_env_var(stableSlugId('{}_{}_{}_balrog_task'.format(buildername, chunk, partial_version)), now_ms,

@@ -39,6 +39,9 @@
                 balrog_api_root: {{ balrog_api_root }}
                 platforms: {{ en_US_config["platforms"] | sort() | join(", ") }}
                 channels: {{ release_channels | sort() | join(", ") }}
+                {% if lzma_to_bz2 is defined and lzma_to_bz2 %}
+                generate_bz2_blob: true
+                {% endif %}
 
         metadata:
             name: "{{ product }} {{ branch }} updates"

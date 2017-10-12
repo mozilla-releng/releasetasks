@@ -33,6 +33,9 @@
                 revision: "{{ revision }}"
                 balrog_api_root: {{ balrog_api_root }}
                 channels: {{ publish_to_balrog_channels | sort() | join(", ") }}
+                {% if lzma_to_bz2 is defined and lzma_to_bz2 %}
+                publish_bz2_blob: true
+                {% endif %}
 
         metadata:
             name: "{{ product }} {{ branch }} publish balrog"
@@ -79,6 +82,9 @@
                 balrog_api_root: {{ balrog_api_root }}
                 channels: {{ publish_to_balrog_channels | sort() | join(", ") }}
                 schedule_at: "{{ release_eta }}"
+                {% if lzma_to_bz2 is defined and lzma_to_bz2 %}
+                publish_bz2_blob: true
+                {% endif %}
 
         metadata:
             name: "{{ product }} {{ branch }} schedule publishing in balrog"
