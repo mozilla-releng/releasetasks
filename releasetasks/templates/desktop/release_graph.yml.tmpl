@@ -229,9 +229,3 @@ tasks:
         {% endmacro %}
         {{ mark_as_shipped_tasks()|indent(4) }}
     {% endif %}
-    {% if lzma_to_bz2 is defined and lzma_to_bz2 %}
-        {% macro start_update_verify_human_decision() %}
-            {% include "start_update_verify_human_decision.yml.tmpl" %}
-        {% endmacro %}
-        {{ start_update_verify_human_decision()|indent(4) }}
-    {% endif %}

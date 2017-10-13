@@ -14,9 +14,6 @@
         {% if update_verify_requires_cdn_push is defined and update_verify_requires_cdn_push %}
         - {{  stableSlugId("release-{}-{}_uptake_monitoring".format(branch, product)) }}
         {% endif %}
-        {% if lzma_to_bz2 is defined and lzma_to_bz2 %}
-        - {{  stableSlugId("start_update_verify_human_decision") }}
-        {% endif %}
     reruns: 5
     task:
         provisionerId: buildbot-bridge
