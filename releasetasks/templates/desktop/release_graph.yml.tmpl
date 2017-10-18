@@ -46,11 +46,8 @@ scopes:
   - scheduler:*
   - project:releng:signing:format:{{ mar_signing_format }}
   - secrets:get:project/releng/snapcraft/firefox/edge   # Ubuntu Snap publication
-{# dep signing uses Balrog dev environment, which is publicly available and
-   this doesn't need to use the proxy
-#}
-{% if signing_class != "dep-signing" %}
-  - docker-worker:feature:balrogVPNProxy
+{% if balrog_vpn_proxy %}
+  - docker-worker:feature:{{ balrog_vpn_proxy }}
 {% endif %}
 
 tasks:

@@ -401,9 +401,9 @@
 
         workerType: "funsize-balrog"
         provisionerId: "aws-provisioner-v1"
-        {% if signing_class != "dep-signing" %}
+        {% if balrog_vpn_proxy %}
         scopes:
-            - docker-worker:feature:balrogVPNProxy
+            - docker-worker:feature:{{ balrog_vpn_proxy }}
         {% endif %}
         tags:
             createdForUser: release+funsize@mozilla.com
@@ -436,9 +436,9 @@
                 - {{ encrypt_env_var(stableSlugId('{}_balrog_task'.format(recompress_basename)), now_ms,
                                     now_ms + 24 * 4 * 3600 * 1000, "BALROG_PASSWORD",
                                     balrog_password) }}
-            {% if signing_class != "dep-signing" %}
+            {% if balrog_vpn_proxy %}
             features:
-                balrogVPNProxy: true
+                {{ balrog_vpn_proxy }}: true
             onExitStatus:
                 retry: [-1]
             {% endif %}
@@ -639,9 +639,9 @@
 
         workerType: "funsize-balrog"
         provisionerId: "aws-provisioner-v1"
-        {% if signing_class != "dep-signing" %}
+        {% if balrog_vpn_proxy %}
         scopes:
-            - docker-worker:feature:balrogVPNProxy
+            - docker-worker:feature:{{ balrog_vpn_proxy }}
         {% endif %}
         tags:
             createdForUser: release+funsize@mozilla.com
@@ -684,9 +684,9 @@
                 - {{ encrypt_env_var(stableSlugId('{}_{}_{}_balrog_task'.format(buildername, chunk, partial_version)), now_ms,
                                     now_ms + 24 * 4 * 3600 * 1000, "BALROG_PASSWORD",
                                     balrog_password) }}
-            {% if signing_class != "dep-signing" %}
+            {% if balrog_vpn_proxy %}
             features:
-                balrogVPNProxy: true
+                {{ balrog_vpn_proxy }}: true
             onExitStatus:
                 retry: [-1]
             {% endif %}
