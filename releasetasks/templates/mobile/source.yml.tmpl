@@ -80,7 +80,7 @@
                     platform: android-4-0-armv7-api15
                 build:
                     platform: android-4-0-armv7-api15
-            {{ task_notifications("{} source generation".format(branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
+            {{ task_notifications("{} source generation".format(branch), failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
 
 -
     taskId: "{{ stableSlugId(buildername_signing) }}"
@@ -127,7 +127,7 @@
                     platform: android-4-0-armv7-api15
                 build:
                     platform: android-4-0-armv7-api15
-            {{ task_notifications("{} source signing".format(branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
+            {{ task_notifications("{} source signing".format(branch), failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
 
 -
     taskId: "{{ stableSlugId(buildername_beet) }}"
@@ -191,7 +191,7 @@
                     platform: android-4-0-armv7-api15
                 build:
                     platform: android-4-0-armv7-api15
-            {{ task_notifications("[{} {} build{}] [beetmover] {} {} move source bundles".format(product, version, buildNumber, product, branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
+            {{ task_notifications("[{} {} build{}] [beetmover] {} {} move source bundles".format(product, version, buildNumber, product, branch), failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
 
 -
     taskId: "{{ stableSlugId(buildername_beet_signing) }}"
@@ -253,4 +253,4 @@
                     platform: android-4-0-armv7-api15
                 build:
                     platform: android-4-0-armv7-api15
-            {{ task_notifications("[beetmover] {} {} move source bundle checksums".format(product, branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
+            {{ task_notifications("[beetmover] {} {} move source bundle checksums".format(product, branch), failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
