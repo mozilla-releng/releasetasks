@@ -101,7 +101,7 @@
                     platform: linux64
                 build:
                     platform: linux64
-            {{ task_notifications("[{} {} build{}] {} source generation".format(product, version, buildNumber, branch), failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
+            {{ task_notifications("[{} {} build{}] {} source generation".format(product, version, buildNumber, branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
 
 -
     taskId: "{{ stableSlugId(buildername_signing) }}"
@@ -148,7 +148,7 @@
                     platform: linux64
                 build:
                     platform: linux64
-            {{ task_notifications("[{} {} build{}] {} source signing".format(product, version, buildNumber, branch), failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
+            {{ task_notifications("[{} {} build{}] {} source signing".format(product, version, buildNumber, branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
 
 -
     taskId: "{{ stableSlugId(buildername_beet) }}"
@@ -212,7 +212,7 @@
                     platform: linux64
                 build:
                     platform: linux64
-            {{ task_notifications("[{} {} build{}] [beetmover] {} {} move source bundles".format(product, version, buildNumber, product, branch), failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
+            {{ task_notifications("[{} {} build{}] [beetmover] {} {} move source bundles".format(product, version, buildNumber, product, branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
 
 -
     taskId: "{{ stableSlugId(buildername_beet_signing) }}"
@@ -274,4 +274,4 @@
                     platform: linux64
                 build:
                     platform: linux64
-            {{ task_notifications("[{} {} build{}] [beetmover] {} {} move source bundle checksums".format(product, version, buildNumber, product, branch), failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
+            {{ task_notifications("[{} {} build{}] [beetmover] {} {} move source bundle checksums".format(product, version, buildNumber, product, branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}

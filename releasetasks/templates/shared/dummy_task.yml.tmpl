@@ -31,4 +31,4 @@ metadata:
         dummy task
 extra:
     {{ common_extras(taskname="dummy_task", locales=["null"], platform="null") | indent(4)}}
-    {{ task_notifications("dummy task".format(product, branch), failed=["releasetasks"], exception=["releasetasks"]) | indent(4) }}
+    {{ task_notifications("dummy task".format(product, branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(4) }}

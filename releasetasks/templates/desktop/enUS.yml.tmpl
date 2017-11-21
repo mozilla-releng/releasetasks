@@ -68,7 +68,7 @@
                     platform: {{ get_treeherder_platform(platform) }}
                 build:
                     platform: {{ get_treeherder_platform(platform) }}
-            {{ task_notifications(taskname="[{} {} build{}] [beetmover] {} {} {} en_US completes candidates".format(product, version, buildNumber, product, branch, platform), failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
+            {{ task_notifications(taskname="[{} {} build{}] [beetmover] {} {} {} en_US completes candidates".format(product, version, buildNumber, product, branch, platform), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
 
 
 {% endif %}  # push_to_candidates_enabled
@@ -100,7 +100,7 @@
             - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.recompress.{{ platform }}.{{ locale }}
             - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.recompress.{{ platform }}.{{ locale }}
         extra:
-            {{ task_notifications(taskname="[{} {} build{}] [funsize] Recomress comlete MARs {} {}".format(product, version, buildNumber, platform, locale), failed=["releasetasks"], exception=["releasetasks"]) | indent(12)}}
+            {{ task_notifications(taskname="[{} {} build{}] [funsize] Recomress comlete MARs {} {}".format(product, version, buildNumber, platform, locale), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12)}}
             {{ common_extras(taskname='{}_repackage_complete_mars'.format(recompress_basename), locales=["en-US"], platform=platform) | indent(12)}}
             funsize:
                 completes:
@@ -187,7 +187,7 @@
             - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.completes_signing.{{ platform }}.{{ locale }}
             - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.completes_signing.{{ platform }}.{{ locale }}
         extra:
-            {{ task_notifications(taskname="[{} {} build{}] [funsize] Complete MAR signing task {} {}".format(product, version, buildNumber, platform, locale), failed=["releasetasks"], exception=["releasetasks"]) | indent(12)}}
+            {{ task_notifications(taskname="[{} {} build{}] [funsize] Complete MAR signing task {} {}".format(product, version, buildNumber, platform, locale), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12)}}
             {{ common_extras(taskname='{}_signing_task'.format(recompress_basename), locales=["en-US"], platform=platform) | indent(12)}}
             treeherderEnv:
                 - staging
@@ -267,7 +267,7 @@
             source: https://github.com/mozilla/releasetasks
 
         extra:
-            {{ task_notifications(taskname="[{} {} build{}] [beetmover] {} {} {} en_US recompressed complete MAR candidates".format(product, version, buildNumber, product, branch, platform), failed=["releasetasks"], exception=["releasetasks"]) | indent(12)}}
+            {{ task_notifications(taskname="[{} {} build{}] [beetmover] {} {} {} en_US recompressed complete MAR candidates".format(product, version, buildNumber, product, branch, platform), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12)}}
             {{ common_extras(taskname=recompressed_beetmover_basename, locales=["en-US"], platform=platform) | indent(12)}}
             treeherderEnv:
                 - staging
@@ -302,7 +302,7 @@
             - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.completes_balrog.{{ platform }}.{{ locale }}
             - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.completes_balrog.{{ platform }}.{{ locale }}
         extra:
-            {{ task_notifications(taskname="[{} {} build{}] [funsize] Publish to Balrog {} {} recompressed complete MAR".format(product, version, buildNumber, platform, locale), failed=["releasetasks"], exception=["releasetasks"]) | indent(12)}}
+            {{ task_notifications(taskname="[{} {} build{}] [funsize] Publish to Balrog {} {} recompressed complete MAR".format(product, version, buildNumber, platform, locale), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12)}}
             {{ common_extras(taskname='{}_balrog_task'.format(recompress_basename), locales=["en-US"], platform=platform) | indent(12)}}
             treeherderEnv:
                 - staging
@@ -409,7 +409,7 @@
             - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.partials.{{ partial_version | replace(".", "_") }}.{{ platform }}.{{ locale }}
             - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.partials.{{ partial_version | replace(".", "_") }}.{{ platform }}.{{ locale }}
         extra:
-            {{ task_notifications(taskname="[{} {} build{}] [funsize] Update generating task {} {} for {}".format(product, version, buildNumber, platform, locale, partial_version), failed=["releasetasks"], exception=["releasetasks"]) | indent(12)}}
+            {{ task_notifications(taskname="[{} {} build{}] [funsize] Update generating task {} {} for {}".format(product, version, buildNumber, platform, locale, partial_version), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12)}}
             {{ common_extras(taskname='{}_update_generator'.format(funsize_basename), locales=["en-US"], platform=platform) | indent(12)}}
             funsize:
                 partials:
@@ -504,7 +504,7 @@
             - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.partials_signing.{{ partial_version | replace(".", "_") }}.{{ platform }}.{{ locale }}
             - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.partials_signing.{{ partial_version | replace(".", "_") }}.{{ platform }}.{{ locale }}
         extra:
-            {{ task_notifications(taskname="[{} {} build{}] [funsize] MAR signing task {} {} for {}".format(product, version, buildNumber, platform, locale, partial_version), failed=["releasetasks"], exception=["releasetasks"]) | indent(12)}}
+            {{ task_notifications(taskname="[{} {} build{}] [funsize] MAR signing task {} {} for {}".format(product, version, buildNumber, platform, locale, partial_version), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12)}}
             {{ common_extras(taskname='{}_signing_task'.format(funsize_basename), locales=["en-US"], platform=platform) | indent(12)}}
             treeherderEnv:
                 - staging
@@ -549,7 +549,7 @@
             - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.partials_balrog.{{ partial_version | replace(".", "_") }}.{{ platform }}.{{ locale }}
             - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.partials_balrog.{{ partial_version | replace(".", "_") }}.{{ platform }}.{{ locale }}
         extra:
-            {{ task_notifications(taskname="[{} {} build{}] [funsize] Publish to Balrog {} {} for {}".format(product, version, buildNumber, platform, locale, partial_version), failed=["releasetasks"], exception=["releasetasks"]) | indent(12)}}
+            {{ task_notifications(taskname="[{} {} build{}] [funsize] Publish to Balrog {} {} for {}".format(product, version, buildNumber, platform, locale, partial_version), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12)}}
             {{ common_extras(taskname='{}_balrog_task'.format(funsize_basename), locales=["en-US"], platform=platform) | indent(12)}}
             treeherderEnv:
                 - staging
@@ -676,7 +676,7 @@
             source: https://github.com/mozilla/releasetasks
 
         extra:
-            {{ task_notifications(taskname="[{} {} build{}] [beetmover] {} {} {} en_US partials candidates".format(product, version, buildNumber, product, branch, platform), failed=["releasetasks"], exception=["releasetasks"]) | indent(12)}}
+            {{ task_notifications(taskname="[{} {} build{}] [beetmover] {} {} {} en_US partials candidates".format(product, version, buildNumber, product, branch, platform), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12)}}
             {{ common_extras(taskname=partial_beetmover_basename, locales=["en-US"], platform=platform) | indent(12)}}
             treeherderEnv:
                 - staging
