@@ -83,7 +83,7 @@ class TestEmailFinal(unittest.TestCase):
         })
 
         self.graph = make_task_graph(**test_kwargs)
-        self.task = get_task_by_name(self.graph, "release-foo-firefox_publish_balrog")
+        self.task = get_task_by_name(self.graph, "release-foo-firefox_schedule_publishing_in_balrog")
         self.task = get_task_by_name(self.graph, "release-foo-firefox_email_foo-cdntest")
 
     def generate_task_requires_validator(self):

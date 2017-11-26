@@ -60,7 +60,7 @@ class TestEmailFinal(unittest.TestCase):
         self.task = get_task_by_name(self.graph, "release-foo-firefox_email_foo")
 
     def generate_task_requires_validator(self):
-        requires_sorted = sorted([get_task_by_name(self.graph, "release-foo-firefox_publish_balrog")["taskId"]])
+        requires_sorted = sorted([get_task_by_name(self.graph, "release-foo-firefox_schedule_publishing_in_balrog")["taskId"]])
 
         @truth
         def validate_task_requires(task):
@@ -129,7 +129,7 @@ class TestEmailFinalTwoChannels(unittest.TestCase):
         self.task = get_task_by_name(self.graph, "release-foo-firefox_email_beta")
 
     def generate_task_requires_validator(self):
-        requires_sorted = sorted([get_task_by_name(self.graph, "release-foo-firefox_publish_balrog")["taskId"]])
+        requires_sorted = sorted([get_task_by_name(self.graph, "release-foo-firefox_schedule_publishing_in_balrog")["taskId"]])
 
         @truth
         def validate_task_requires(task):

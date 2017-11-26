@@ -1,52 +1,3 @@
-{% if not release_eta %}
-{% set buildername = "release-{}-{}_publish_balrog".format(branch, product) %}
--
-    taskId: "{{ stableSlugId(buildername) }}"
-    requires:
-        - "{{ stableSlugId('publish_release_human_decision') }}"
-    reruns: 5
-    task:
-        provisionerId: "buildbot-bridge"
-        workerType: "buildbot-bridge"
-        created: "{{ now }}"
-        deadline: "{{ now.replace(days=4) }}"
-        expires: "{{ never }}"
-        priority: "high"
-        retries: 5
-        scopes:
-            - project:releng:buildbot-bridge:builder-name:{{ buildername }}
-        routes:
-            - index.releases.v1.{{ branch }}.{{ revision }}.{{ product }}.{{ version | replace(".", "_") }}.build{{ buildNumber }}.publish_balrog
-            - index.releases.v1.{{ branch }}.latest.{{ product }}.latest.publish_balrog
-        payload:
-            buildername: "{{ buildername }}"
-            sourcestamp:
-                branch: "{{ repo_path }}"
-                revision: "{{ mozharness_changeset }}"
-            properties:
-                product: "{{ product }}"
-                version: "{{ version }}"
-                build_number: {{ buildNumber }}
-                repo_path: "{{ repo_path }}"
-                script_repo_revision: "{{ mozharness_changeset }}"
-                release_promotion: true
-                revision: "{{ revision }}"
-                balrog_api_root: {{ balrog_api_root }}
-                channels: {{ publish_to_balrog_channels | sort() | join(", ") }}
-                {% if lzma_to_bz2 is defined and lzma_to_bz2 %}
-                publish_bz2_blob: true
-                {% endif %}
-
-        metadata:
-            name: "{{ product }} {{ branch }} publish balrog"
-            description: "Release Promotion publish balrog"
-            owner: "release@mozilla.com"
-            source: https://github.com/mozilla/releasetasks
-
-        extra:
-            {{ common_extras(taskname=buildername, locales=["null"], platform="null") | indent(12)}}
-            {{ task_notifications(taskname="[{} {} build{}] {} {} publish balrog".format(product, version, buildNumber, product, branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12)}}
-{% else %}
 {% set buildername = "release-{}-{}_schedule_publishing_in_balrog".format(branch, product) %}
 -
     taskId: "{{ stableSlugId(buildername) }}"
@@ -81,7 +32,7 @@
                 revision: "{{ revision }}"
                 balrog_api_root: {{ balrog_api_root }}
                 channels: {{ publish_to_balrog_channels | sort() | join(", ") }}
-                schedule_at: "{{ release_eta }}"
+                schedule_at: {% if release_eta %}"{{ release_eta }}"{% else %}null{% endif %}
                 {% if lzma_to_bz2 is defined and lzma_to_bz2 %}
                 publish_bz2_blob: true
                 {% endif %}
@@ -95,4 +46,3 @@
         extra:
             {{ common_extras(taskname=buildername, locales=["null"], platform="null") | indent(12)}}
             {{ task_notifications(taskname="[{} {} build{}] {} {} schedule publishing in balrog".format(product, version, buildNumber, product, branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12)}}
-{% endif %}

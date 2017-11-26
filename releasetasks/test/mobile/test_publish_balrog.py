@@ -6,7 +6,7 @@ from releasetasks.test import PVT_KEY_FILE, verify
 from voluptuous import Schema, truth
 
 
-class TestPublishBalrog(unittest.TestCase):
+class TestSchedulePublishBalrogNoETA(unittest.TestCase):
     maxDiff = 30000
     graph = None
     task = None
@@ -21,6 +21,7 @@ class TestPublishBalrog(unittest.TestCase):
                     'properties': {
                         'balrog_api_root': 'https://balrog.real/api',
                         'channels': 'alpha, release-dev',
+                        'schedule_at': None,
                     }
                 }
             }
@@ -49,7 +50,7 @@ class TestPublishBalrog(unittest.TestCase):
         })
 
         self.graph = make_task_graph(**test_kwargs)
-        self.task = get_task_by_name(self.graph, "release-foo-fennec_publish_balrog")
+        self.task = get_task_by_name(self.graph, "release-foo-fennec_schedule_publishing_in_balrog")
         self.push_to_mirrors = get_task_by_name(self.graph, "release-foo-fennec_push_to_releases")
 
     def generate_task_requires_validator(self):
@@ -64,7 +65,7 @@ class TestPublishBalrog(unittest.TestCase):
     def test_common_assertions(self):
         do_common_assertions(self.graph)
 
-    def test_publish_balrog_task(self):
+    def test_schedule_publish_balrog_task(self):
         verify(self.task, self.task_schema, self.generate_task_requires_validator())
 
     def test_push_to_mirrors(self):
@@ -131,7 +132,7 @@ class TestSchedulePublishBalrog(unittest.TestCase):
     def test_common_assertions(self):
         do_common_assertions(self.graph)
 
-    def test_publish_balrog_task(self):
+    def test_schedule_publish_balrog_task(self):
         verify(self.task, self.task_schema, self.generate_task_requires_validator())
 
     def test_push_to_mirrors(self):
