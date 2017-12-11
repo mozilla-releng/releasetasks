@@ -26,8 +26,12 @@ class TestEmailFinal(unittest.TestCase):
                 'extra': {
                     'notifications': {
                         'task-completed': {
-                            'subject': 'firefox foo 42.0b2 updates are available on the foo channel now <EOM>',
-                            'message': 'firefox foo 42.0b2 updates are available on the foo channel now <EOM>',
+                            'subject': 'firefox foo 42.0b2 updates ready for sign-off on foo channel now',
+                            'message': '\n'.join([
+                                'firefox foo 42.0b2 updates ready for sign-off on foo channel now',
+                                '',
+                                'Scheduled changes can be approved at https://aus4-admin.mozilla.org/rules?product=Firefox&channel=foo',
+                            ]),
                             'ids': ['release-drivers'],
                         },
                     },
@@ -95,8 +99,12 @@ class TestEmailFinalTwoChannels(unittest.TestCase):
                 'extra': {
                     'notifications': {
                         'task-completed': {
-                            'subject': 'firefox beta 42.0b2 updates are available on the beta channel now <EOM>',
-                            'message': 'firefox beta 42.0b2 updates are available on the beta channel now <EOM>',
+                            'subject': 'firefox beta 42.0b2 updates ready for sign-off on beta channel now',
+                            'message': '\n'.join([
+                                'firefox beta 42.0b2 updates ready for sign-off on beta channel now',
+                                '',
+                                'Scheduled changes can be approved at https://aus4-admin.mozilla.org/rules?product=Firefox&channel=beta',
+                            ]),
                             'ids': ['release-drivers'],
                         },
                     },

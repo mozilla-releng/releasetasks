@@ -9,9 +9,20 @@ As defined at the top of release_graph.yml.tmpl
 
     {% set full_channel_name = "{}-{}".format(channel, update_channel) if update_channel else channel %}
     {% set buildername = "release-{}-{}_email_{}".format(branch, product, full_channel_name) %}
-    {% set message = (release_eta is defined and release_eta)
-           and "{} {} {} updates will be scheduled for {} channel on {} <EOM>".format(product, channel, version, full_channel_name, release_eta)
-            or "{} {} {} updates are available on the {} channel now <EOM>".format(product, channel, version, full_channel_name) %}
+    {% set balrog_url = "https://aus4-admin.mozilla.org/rules?product={}&channel={}".format(product|capitalize, full_channel_name) %}
+    {% if update_channel %}
+      {% set message = ["{} {} {} updates are available on the {} channel now <EOM>".format(product, channel, version, full_channel_name)] %}
+    {% else %}
+      {% if release_eta %}
+        {% set message = ["{} {} {} updates ready for sign-off on {} channel (scheduled on {})".format(product, channel, version, full_channel_name, release_eta)] %}
+      {% else %}
+        {% set message = ["{} {} {} updates ready for sign-off on {} channel now".format(product, channel, version, full_channel_name)] %}
+      {% endif %}
+      {% set message = message + [
+          "",
+          "Scheduled changes can be approved at {}".format(balrog_url),
+      ] %}
+    {% endif %}
 
 -
     taskId: "{{ stableSlugId(buildername) }}"
@@ -47,8 +58,10 @@ As defined at the top of release_graph.yml.tmpl
             {{ common_extras(taskname=buildername, locales=["null"], platform="null") | indent(12)}}
             notifications:
                 task-completed:
-                    subject: "{{ message }}"
-                    message: "{{ message }}"
+                    subject: "{{ message[0] }}"
+                    message: |- {% for line in message %}
+                            {{ line }}
+                        {%- endfor %}
                     ids:
                         - release-drivers
 {% endif %}
