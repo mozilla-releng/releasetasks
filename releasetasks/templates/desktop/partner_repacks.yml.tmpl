@@ -82,7 +82,7 @@
                 script_repo_revision: "{{ mozharness_changeset }}"
                 release_promotion: true
                 revision: "{{ mozharness_changeset }}"
-                repack_manifests_url: "https://github.com/mozilla-partners/mozilla-EME-free-manifest"
+                repack_manifests_url: "git@github.com:mozilla-partners/mozilla-EME-free-manifest"
         metadata:
             name: "{{ product }} {{ branch }} {{ platform }} EME-free repacks"
             description: "Release Promotion EME-free repacks"
@@ -132,7 +132,7 @@
                 script_repo_revision: "{{ mozharness_changeset }}"
                 release_promotion: true
                 revision: "{{ mozharness_changeset }}"
-                repack_manifests_url: "https://github.com/mozilla-partners/mozilla-sha1-manifest"
+                repack_manifests_url: "git@github.com:mozilla-partners/mozilla-sha1-manifest"
         metadata:
             name: "{{ product }} {{ branch }} {{ platform }} SHA1 repacks"
             description: "Release Promotion SHA1 repacks"

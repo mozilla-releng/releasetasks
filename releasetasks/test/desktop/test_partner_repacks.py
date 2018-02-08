@@ -43,7 +43,7 @@ class TestPartnerRepacks(unittest.TestCase):
             'task': {
                 'payload': {
                     'properties': {
-                        'repack_manifests_url': 'https://github.com/mozilla-partners/mozilla-EME-free-manifest',
+                        'repack_manifests_url': 'git@github.com:mozilla-partners/mozilla-EME-free-manifest',
                     }
                 }
             }
@@ -53,7 +53,7 @@ class TestPartnerRepacks(unittest.TestCase):
             'task': {
                 'payload': {
                     'properties': {
-                        'repack_manifests_url': 'https://github.com/mozilla-partners/mozilla-sha1-manifest',
+                        'repack_manifests_url': 'git@github.com:mozilla-partners/mozilla-sha1-manifest',
                     }
                 }
             }
