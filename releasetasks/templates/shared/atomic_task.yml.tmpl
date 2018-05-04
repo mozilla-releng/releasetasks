@@ -26,4 +26,3 @@ metadata:
 
 extra:
     {{ common_extras(taskname="atomic_submission", locales=["null"], platform="null") | indent(4)}}
-    {{ task_notifications("{} {} atomic submission task".format(product, branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(4) }}

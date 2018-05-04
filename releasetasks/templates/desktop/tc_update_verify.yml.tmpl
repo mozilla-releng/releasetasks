@@ -73,6 +73,5 @@
                     platform: linux64
                 build:
                     platform: linux64
-            {{ task_notifications("[{} {} build{}] {} {} update verification {}/{}".format(product, version, buildNumber, platform, channel, chunk, uv_totalchunks), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
 {% endfor %}
 {% endfor %}

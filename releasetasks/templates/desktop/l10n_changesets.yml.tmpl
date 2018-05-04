@@ -57,7 +57,6 @@
                 build:
                     platform: linux64
             l10n_changesets: "{{ format_l10n_changesets(l10n_changesets) }}"
-            {{ task_notifications("[{} {} build{}] {} L10N changesets".format(product, version, buildNumber, branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
 
 
 
@@ -123,4 +122,3 @@
                     platform: linux64
                 build:
                     platform: linux64
-            {{ task_notifications("[{} {} build{}] [beetmover] {} {} move L10N changesets".format(product, version, buildNumber, product, branch), completed=["releasetasks"], failed=["releasetasks"], exception=["releasetasks"]) | indent(12) }}
